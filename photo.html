@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Photo — verbandnoun.io</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #f4eee4; font-family: 'Spectral', serif; color: #2a2018; min-height: 100vh; display: flex; flex-direction: column; }
+  .back-link { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 1px; text-transform: lowercase; color: #9a8b76; text-decoration: none; transition: color .22s; }
+  .back-link:hover { color: #b9683b; }
+  .ph-cell {
+    border-radius: 3px; overflow: hidden;
+    background: repeating-linear-gradient(135deg, #ece2cf 0, #ece2cf 2px, #f4eee4 2px, #f4eee4 14px);
+    border: 1px solid #e0d4bf; aspect-ratio: 4/3;
+  }
+</style>
+</head>
+<body>
+<div style="max-width:1080px;margin:0 auto;padding:0 7vw;flex:1;display:flex;flex-direction:column;">
+
+  <!-- top bar -->
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:28px 0 0;border-bottom:1px solid #e0d4bf;padding-bottom:18px;">
+    <a href="verbandnoun.io.html" class="back-link">← verbandnoun.io</a>
+    <span style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:1px;color:#9a8b76;text-transform:uppercase;">02 · Photo</span>
+  </div>
+
+  <!-- hero -->
+  <div style="padding:72px 0 0;">
+    <h1 style="font-family:'Spectral',serif;font-weight:300;font-size:clamp(60px,12vw,150px);line-height:.88;letter-spacing:-3px;color:#2a2018;">Photo</h1>
+    <p style="font-family:'Spectral',serif;font-style:italic;font-size:19px;color:#6a5e4d;max-width:560px;line-height:1.62;margin-top:28px;">
+      Photographs from the trail and elsewhere will live here. Nothing to show just yet — this room is still being hung.
+    </p>
+  </div>
+
+  <!-- placeholder grid -->
+  <div style="margin-top:64px;display:grid;grid-template-columns:repeat(3,1fr);gap:16px;">
+    <div class="ph-cell"></div>
+    <div class="ph-cell"></div>
+    <div class="ph-cell"></div>
+    <div class="ph-cell"></div>
+    <div class="ph-cell"></div>
+    <div class="ph-cell"></div>
+  </div>
+
+  <!-- footer -->
+  <div style="margin-top:80px;padding-bottom:32px;padding-top:32px;display:flex;justify-content:space-between;align-items:baseline;border-top:1px solid #e0d4bf;">
+    <a href="verbandnoun.io.html" class="back-link">← back to index</a>
+    <span style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:2px;color:#9a8b76;">verbandnoun<span style="color:#b9683b;">.io</span></span>
+  </div>
+</div>
+</body>
+</html>

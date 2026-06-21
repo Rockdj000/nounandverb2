@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PCT 2027 — Pacific Crest Trail</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { background: #f4eee4; font-family: 'Spectral', serif; color: #2a2018; }
+
+  .rv { opacity: 0; transform: translateY(20px); transition: opacity .8s cubic-bezier(.2,.7,.2,1), transform .8s cubic-bezier(.2,.7,.2,1); }
+  .rv.in { opacity: 1; transform: none; }
+  @keyframes floaty { 0%,100% { transform: translateY(0) } 50% { transform: translateY(7px) } }
+
+  /* MAP ROWS */
+  .maprow-list { display: flex; flex-direction: column; }
+  .maprow-list:hover .maprow { opacity: .5; }
+  .maprow-list .maprow:hover { opacity: 1; }
+  .mapbar { transform: scaleY(0); transform-origin: top center; transition: transform .85s cubic-bezier(.2,.7,.2,1), width .4s, filter .4s, box-shadow .4s; }
+  .maprow:hover .mapbar { width: 16px !important; filter: brightness(1.12); box-shadow: 0 0 0 4px rgba(185,104,59,.10); }
+  .maprow { transition: opacity .35s; }
+  .mapcard { transition: transform .35s cubic-bezier(.2,.7,.2,1), box-shadow .35s, border-left-width .35s; }
+  .maprow:hover .mapcard { transform: translateX(5px); box-shadow: 0 8px 24px rgba(90,55,25,.14); border-left-width: 9px !important; }
+  .mapdetail { max-height: 0; opacity: 0; overflow: hidden; transition: max-height .55s cubic-bezier(.2,.7,.2,1), opacity .4s, margin-top .4s; margin-top: 0; }
+  .maprow:hover .mapdetail { max-height: 150px; opacity: 1; margin-top: 12px; }
+
+  /* NAV */
+  #progress-bar { position: fixed; top: 0; left: 0; right: 0; height: 3px; z-index: 60; }
+  #progress-fill { height: 100%; width: 0%; background: #b9683b; transition: width .1s linear; }
+  #site-nav { position: fixed; top: 3px; left: 0; right: 0; z-index: 50; background: rgba(244,238,228,.86); backdrop-filter: blur(10px); border-bottom: 1px solid #e0d4bf; }
+  #site-nav .inner { max-width: 1280px; margin: 0 auto; padding: 0 26px; height: 52px; display: flex; align-items: center; justify-content: space-between; gap: 18px; }
+  .navlink { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: #9a8b76; text-decoration: none; padding: 6px 10px; border-bottom: 2px solid transparent; transition: color .25s, border-color .25s; }
+  .navlink.active { color: #2a2018; border-bottom-color: #b9683b; }
+
+  /* CHAPBAR */
+  #chapbar { position: fixed; top: 55px; left: 0; right: 0; z-index: 45; background: rgba(244,238,228,.93); backdrop-filter: blur(8px); border-bottom: 1px solid #e0d4bf; transform: translateY(-120%); transition: transform .3s cubic-bezier(.2,.7,.2,1); }
+  #chapbar .inner { max-width: 1280px; margin: 0 auto; padding: 8px 26px; display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+  #chapbar-prog { height: 2px; width: 0%; transition: width .2s; }
+
+  /* MARGIN TAGS */
+  .margin-tag { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: #fff; padding: 3px 9px; border-radius: 2px; }
+
+  /* TIMELINE TABLE */
+  .tl-grid { display: grid; grid-template-columns: 1.6fr 1.2fr .8fr .6fr .9fr .8fr 1fr; min-width: 760px; }
+
+  /* ITIN ROWS */
+  .dayrow { display: flex; gap: 14px; padding: 15px 18px; border-bottom: 1px solid #e6dcc8; align-items: flex-start; border-left: 3px solid transparent; transition: opacity .25s; }
+  .check-circle { width: 19px; height: 19px; flex: none; margin-top: 1px; border-radius: 50%; border: 2px solid #cdbfa6; background: transparent; color: #fff; font-size: 11px; line-height: 16px; text-align: center; cursor: pointer; user-select: none; transition: background .2s, border-color .2s; }
+  .check-circle.done { background: var(--accent); border-color: var(--accent); }
+
+  /* SECTION STAT GRID */
+  .sec-stat-grid { display: grid; grid-template-columns: repeat(6,1fr); border-top: 1px solid #2a2018; }
+  .sec-stat-grid .cell { padding: 20px 16px 18px; border-right: 1px solid #ddd0bb; }
+  .sec-stat-grid .cell:last-child { border-right: none; }
+
+  /* PASSES */
+  .passes-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; }
+
+  /* RESUPPLY */
+  .resupply-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 14px; }
+  .resupply-ov-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 12px; }
+
+  /* FILTER CHIPS */
+  .filter-chip { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; padding: 6px 11px; border-radius: 2px; cursor: pointer; border: 1px solid #ddd0bb; background: transparent; color: #8a7c66; transition: background .2s, color .2s; }
+  .filter-chip.active { color: #fff; }
+
+  /* HERO IMG */
+  .hero-img { display: block; width: 100%; height: 460px; object-fit: cover; }
+  .sec-img { display: block; width: 100%; height: 420px; object-fit: cover; }
+
+  /* SCRUBBER */
+  input[type=range] { accent-color: #d8a76e; cursor: pointer; }
+
+  /* TAHOE */
+  .tahoe-section { background: #0f1c14; color: #e9e6dc; }
+
+  /* FOOTER */
+  .site-footer { background: #2a2018; color: #f4efe2; }
+
+  /* MOBILE */
+  @media (max-width: 700px) {
+    .sec-stat-grid { grid-template-columns: repeat(3,1fr); }
+    .resupply-ov-grid { grid-template-columns: repeat(2,1fr); }
+    .passes-grid { grid-template-columns: repeat(2,1fr); }
+    .resupply-grid { grid-template-columns: 1fr; }
+    h1 { font-size: 56px !important; }
+    .scrub-grid { grid-template-columns: repeat(2,1fr) !important; }
+  }
+</style>
+</head>
+<body>
+
+<div id="progress-bar"><div id="progress-fill"></div></div>
+
+<nav id="site-nav">
+  <div class="inner">
+    <div style="display:flex;align-items:baseline;gap:12px;">
+      <a href="verbandnoun.io.html" style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:1px;text-transform:lowercase;color:#9a8b76;text-decoration:none;">← verbandnoun.io</a>
+      <a href="#top" style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#2a2018;text-decoration:none;font-weight:700;">PCT · 2027</a>
+    </div>
+    <div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap;" id="nav-links"></div>
+  </div>
+</nav>
+
+<div id="chapbar">
+  <div class="inner">
+    <div style="display:flex;align-items:baseline;gap:10px;">
+      <span id="chapbar-roman" style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;letter-spacing:1px;color:#b9683b;"></span>
+      <span id="chapbar-name" style="font-family:'Spectral',serif;font-weight:600;font-size:15px;color:#2a2018;"></span>
+    </div>
+    <div id="chapbar-mile" style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:1px;color:#9a8b76;"></div>
+  </div>
+  <div id="chapbar-prog" style="background:#b9683b;"></div>
+</div>
+
+<div id="app"></div>
+
+<script src="pct-data.js"></script>
+<script>
+(function() {
+
+/* ─── tiny DOM helpers ─── */
+function el(tag, attrs, ...kids) {
+  const e = document.createElement(tag);
+  if (attrs) for (const [k, v] of Object.entries(attrs)) {
+    if (k === 'style' && typeof v === 'object') Object.assign(e.style, v);
+    else if (k === 'className') e.className = v;
+    else e.setAttribute(k, v);
+  }
+  for (const c of kids.flat(2)) { if (c != null) e.append(typeof c === 'string' ? document.createTextNode(c) : c); }
+  return e;
+}
+function div(cls, style, ...kids) {
+  const d = document.createElement('div');
+  if (cls) d.className = cls;
+  if (style) Object.assign(d.style, style);
+  for (const c of kids.flat(2)) { if (c != null) d.append(typeof c === 'string' ? document.createTextNode(c) : c); }
+  return d;
+}
+function span(text, style) {
+  const s = document.createElement('span');
+  if (style) Object.assign(s.style, style);
+  if (text != null) s.textContent = text;
+  return s;
+}
+function a(href, cls, style, ...kids) {
+  const e = document.createElement('a');
+  e.href = href;
+  if (cls) e.className = cls;
+  if (style) Object.assign(e.style, style);
+  for (const c of kids.flat(2)) { if (c != null) e.append(typeof c === 'string' ? document.createTextNode(c) : c); }
+  return e;
+}
+
+/* ─── state ─── */
+const state = {
+  showAll: {},
+  filter: {},
+  checked: {},
+  pinnedDay: {},
+  scrubIdx: 0
+};
+try { const c = JSON.parse(localStorage.getItem('pct_checked') || '{}'); if (c && typeof c === 'object') Object.assign(state.checked, c); } catch(e) {}
+
+function saveChecked() { try { localStorage.setItem('pct_checked', JSON.stringify(state.checked)); } catch(e) {} }
+function setState(patch) { Object.assign(state, typeof patch === 'function' ? patch(state) : patch); renderAll(); }
+
+/* ─── data helpers ─── */
+const D = window.PCT_DATA;
+
+function marginColor(m) { return m === 'Risk' ? '#b3402e' : m === 'Tight' ? '#bd7a2a' : '#5f7d66'; }
+function hexA(hex, a) {
+  const h = hex.replace('#',''), r = parseInt(h.slice(0,2),16), g = parseInt(h.slice(2,4),16), b = parseInt(h.slice(4,6),16);
+  return `rgba(${r},${g},${b},${a})`;
+}
+function marginTag(m, extra) {
+  const s = span(m, { display:'inline-block', fontFamily:"'JetBrains Mono',monospace", fontSize:'10px', letterSpacing:'1px', textTransform:'uppercase', color:'#fff', padding:'3px 9px', borderRadius:'2px', background: marginColor(m) });
+  if (extra) Object.assign(s.style, extra);
+  return s;
+}
+function elevAt(mile) {
+  const w = D.waypoints; if (!w) return 0;
+  if (mile <= w[0][0]) return w[0][1];
+  for (let i = 1; i < w.length; i++) {
+    if (mile <= w[i][0]) { const a = w[i-1], b = w[i], t = (mile - a[0]) / ((b[0]-a[0])||1); return a[1] + (b[1]-a[1]) * t; }
+  }
+  return w[w.length-1][1];
+}
+function keyFor(id, r) { return id + ':' + r.day + ':' + r.date + ':' + r.mile; }
+
+/* ─── allDays / resMiles for scrubber ─── */
+let _ad = null;
+function allDays() {
+  if (_ad) return _ad;
+  const out = [];
+  D.order.forEach(id => {
+    (D.sections[id].days || []).forEach(d => {
+      const mm = d.date.match(/(\d+)\/(\d+)/); if (!mm) return;
+      const dt = new Date(2027, (+mm[1])-1, +mm[2]);
+      out.push({ date: dt, label: dt.toLocaleString('en-US',{month:'short',day:'numeric'}), weekday: d.date.split(' ')[0], sec: id, secName: D.sectionMeta[id].name, accent: D.sectionMeta[id].accent, mile: parseFloat(d.mile), segment: d.segment, dayNum: d.day, tag: d.tag });
+    });
+  });
+  return (_ad = out);
+}
+let _rm = null;
+function resMiles() {
+  if (_rm) return _rm;
+  const out = [];
+  D.order.forEach(id => (D.sections[id].resupply||[]).forEach(s => { const mm = s.stop.match(/\((\d+)/); if (mm) out.push({ name: s.stop.replace(/\s*\(.*/,''), mile: +mm[1] }); }));
+  out.sort((a,b) => a.mile - b.mile); return (_rm = out);
+}
+function getScrub(idx) {
+  const ad = allDays(); const cur = ad[idx] || ad[0]; if (!cur) return {};
+  const finish = ad[ad.length-1].date, rm = resMiles();
+  const nxt = rm.find(r => r.mile >= cur.mile - 0.5);
+  return { date: cur.label, weekday: cur.weekday, dayNum: cur.dayNum, secName: cur.secName, accent: cur.accent,
+    mile: Math.round(cur.mile), pct: Math.round(cur.mile/2659*100),
+    toGo: Math.max(0, Math.round((finish - cur.date)/86400000)),
+    segment: cur.segment,
+    nextName: nxt ? nxt.name : 'Canada', nextIn: nxt ? Math.max(0,Math.round(nxt.mile - cur.mile)) : Math.round(2659 - cur.mile) };
+}
+
+/* ─── NAV ─── */
+const navItems = [
+  { id:'overview', href:'#sec-overview', label:'Overview' },
+  { id:'desert',   href:'#sec-desert',   label:'I · Desert' },
+  { id:'sierra',   href:'#sec-sierra',   label:'II · Sierra' },
+  { id:'norcal',   href:'#sec-norcal',   label:'III · NorCal' },
+  { id:'tahoe',    href:'#sec-tahoe',    label:'Tahoe Loop' },
+  { id:'oregon',   href:'#sec-oregon',   label:'IV · Oregon' },
+  { id:'wash',     href:'#sec-wash',     label:'V · Washington' },
+];
+const navLinks = document.getElementById('nav-links');
+navItems.forEach((n,i) => {
+  const lnk = a(n.href, 'navlink', null, n.label);
+  lnk.dataset.nav = n.id;
+  navLinks.append(lnk);
+});
+
+/* ─── HERO ─── */
+function buildHero() {
+  const wrap = div('', { id:'top', maxWidth:'1180px', margin:'0 auto', padding:'128px 7vw 0' });
+  wrap.append(
+    div('', { display:'flex', justifyContent:'space-between', alignItems:'baseline', fontFamily:"'JetBrains Mono',monospace", fontSize:'12px', letterSpacing:'3px', textTransform:'uppercase', color:'#a8714e', borderBottom:'1px solid #2a2018', paddingBottom:'14px' },
+      span('A Northbound Thru-Hike'), span('MMXXVII', { color:'#9a8b76' })
+    ),
+    div('', { fontFamily:"'Spectral',serif", fontWeight:'300', fontSize:'20px', color:'#7a5a3c', letterSpacing:'1px', marginTop:'38px' }, 'A single-season walk of the'),
+    el('h1', { style:{ fontFamily:"'Spectral',serif", fontWeight:'600', fontSize:'96px', lineHeight:'.94', letterSpacing:'-2px', margin:'6px 0 0', color:'#2a2018' } }, 'Pacific Crest Trail'),
+    div('', { fontFamily:"'Spectral',serif", fontStyle:'italic', fontSize:'26px', color:'#6a5640', marginTop:'20px' }, 'Mexico to Canada on foot: 2,659 miles in a single season.'),
+    buildHeroImg(),
+    buildStatBar(),
+    div('', { maxWidth:'680px', fontFamily:"'Spectral',serif", fontSize:'19px', lineHeight:'1.66', color:'#3a3226', marginTop:'38px' }, D.meta.blurb),
+    div('', { marginTop:'34px', display:'flex', alignItems:'center', gap:'10px', color:'#a8714e', fontFamily:"'JetBrains Mono',monospace", fontSize:'11px', letterSpacing:'2px', textTransform:'uppercase', animation:'floaty 2.4s ease-in-out infinite' },
+      span('Begin the journey'), span('↓', { fontSize:'15px' })
+    )
+  );
+  return wrap;
+}
+function buildHeroImg() {
+  const w = div('rv in', { position:'relative', marginTop:'40px', borderRadius:'3px', overflow:'hidden' });
+  const img = el('img', { src:'assets/temp-hero.png', alt:'Pacific Crest Trail', style:{ display:'block', width:'100%', height:'460px', objectFit:'cover' } });
+  const cap = div('', { position:'absolute', left:'0', bottom:'0', width:'100%', padding:'18px 24px', fontFamily:"'JetBrains Mono',monospace", fontSize:'11px', letterSpacing:'2px', textTransform:'uppercase', color:'#fff', textShadow:'0 1px 6px rgba(0,0,0,.6)', background:'linear-gradient(to top,rgba(0,0,0,.5),transparent)' }, 'the long walk north · mexico to canada');
+  w.append(img, cap); return w;
+}
+function buildStatBar() {
+  const stats = [
+    {num:'2,659',lbl:'miles'},{num:'190',lbl:'days'},{num:'5',lbl:'states'},
+    {num:'32',lbl:'zero days'},{num:'16.8',lbl:'avg mi/day'},
+    {num:'Mar 23\nSep 28',lbl:'2027',small:true}
+  ];
+  const g = div('', { display:'grid', gridTemplateColumns:'repeat(6,1fr)', marginTop:'42px', borderTop:'1px solid #2a2018', borderBottom:'1px solid #2a2018' });
+  stats.forEach((s,i) => {
+    const cell = div('', { padding:'22px 14px', borderRight: i<5 ? '1px solid #ddd0bb' : 'none' });
+    const num = div('', { fontFamily:"'Spectral',serif", fontWeight:'600', fontSize: s.small?'22px':'34px', lineHeight: s.small?'1.1':'1', marginTop: s.small?'5px':'0', whiteSpace:'pre-line' }, s.num);
+    const lbl = div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'10px', letterSpacing:'1.5px', textTransform:'uppercase', color:'#9a8b76', marginTop:'6px' }, s.lbl);
+    cell.append(num, lbl); g.append(cell);
+  });
+  return g;
+}
+
+/* ─── SCRUBBER ─── */
+function buildScrubber() {
+  const ad = allDays();
+  const card = div('rv', { maxWidth:'1000px', margin:'40px auto 0', padding:'0 7vw' });
+  const inner = div('', { background:'#2a2018', color:'#f4efe2', borderRadius:'4px', padding:'24px 28px' });
+  const hdr = div('', { display:'flex', justifyContent:'space-between', alignItems:'baseline', flexWrap:'wrap', gap:'10px' },
+    div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'11px', letterSpacing:'3px', textTransform:'uppercase', color:'#d8a76e' }, 'Follow Along'),
+    div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'11px', letterSpacing:'1px', color:'#b3a890' }, `≈ ${Math.max(0,Math.ceil((new Date(2027,2,23)-new Date())/86400000))} days until Campo · Mar 23, 2027`)
+  );
+  const sub = div('', { fontFamily:"'Spectral',serif", fontSize:'15px', color:'#cabfab', marginTop:'8px', fontStyle:'italic' }, 'Drag to walk the calendar — see where the plan puts you on any day.');
+  const slider = el('input', { type:'range', min:'0', max:String(ad.length-1), value:'0', style:{ width:'100%', margin:'20px 0 8px' } });
+
+  // Stat cells with stable IDs for in-place updates
+  const scrubGrid = div('scrub-grid', { display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:'16px', marginTop:'8px' });
+  ['scrub-date','scrub-sec','scrub-mile','scrub-togo'].forEach(id => {
+    const val = div('', { fontFamily:"'Spectral',serif", fontWeight:'600', fontSize:'24px', lineHeight:'1' });
+    val.id = id;
+    const lbl = div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'10px', letterSpacing:'1px', color:'#9a8b76', textTransform:'uppercase', marginTop:'5px' });
+    lbl.id = id + '-lbl';
+    scrubGrid.append(div('',null,val,lbl));
+  });
+
+  const foot = div('', { marginTop:'16px', borderTop:'1px solid #4a3e30', paddingTop:'13px', display:'flex', justifyContent:'space-between', gap:'16px', flexWrap:'wrap', alignItems:'baseline' });
+  const footSeg = div('', { fontFamily:"'Spectral',serif", fontSize:'15px', color:'#e6dcc8', flex:'1', minWidth:'200px' });
+  footSeg.id = 'scrub-seg';
+  const footRes = div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'10.5px', letterSpacing:'.5px', color:'#d8a76e', textTransform:'uppercase', whiteSpace:'nowrap' });
+  footRes.id = 'scrub-res';
+  foot.append(footSeg, footRes);
+
+  inner.append(hdr, sub, slider, scrubGrid, foot);
+  card.append(inner);
+
+  // Update display without touching slider
+  function updateScrubDisplay(idx) {
+    const sc = getScrub(Math.min(idx, ad.length-1));
+    document.getElementById('scrub-date').textContent = sc.date || '';
+    document.getElementById('scrub-date-lbl').textContent = `${sc.weekday || ''} · day ${sc.dayNum || ''}`;
+    const secEl = document.getElementById('scrub-sec');
+    secEl.textContent = sc.secName || '';
+    secEl.style.color = sc.accent || 'inherit';
+    document.getElementById('scrub-sec-lbl').textContent = 'section';
+    document.getElementById('scrub-mile').textContent = `mi ${sc.mile || ''}`;
+    document.getElementById('scrub-mile-lbl').textContent = `${sc.pct || 0}% of trail`;
+    document.getElementById('scrub-togo').textContent = String(sc.toGo || '');
+    document.getElementById('scrub-togo-lbl').textContent = 'days to Canada';
+    document.getElementById('scrub-seg').textContent = sc.segment || '';
+    document.getElementById('scrub-res').textContent = `Next resupply · ${sc.nextName || ''} · ${sc.nextIn || ''} mi`;
+  }
+
+  slider.addEventListener('input', e => {
+    state.scrubIdx = +e.target.value;
+    updateScrubDisplay(state.scrubIdx);
+  });
+
+  // Populate on first render
+  setTimeout(() => updateScrubDisplay(state.scrubIdx), 0);
+
+  return card;
+}
+
+/* ─── OVERVIEW MAP ROWS ─── */
+function buildOverview() {
+  const wrap = div('', { marginTop:'96px' });
+  wrap.id = 'sec-overview';
+  wrap.setAttribute('data-nav-target','overview');
+
+  const hdr = div('', { maxWidth:'1180px', margin:'0 auto', padding:'0 7vw' },
+    div('', { display:'flex', alignItems:'baseline', gap:'16px' },
+      div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'12px', letterSpacing:'4px', textTransform:'uppercase', color:'#a8714e' }, 'The Route'),
+      div('', { flex:'1', height:'1px', background:'#2a2018' })
+    ),
+    el('h2', { style:{ fontFamily:"'Spectral',serif", fontWeight:'600', fontSize:'46px', lineHeight:'1.05', letterSpacing:'-1px', margin:'18px 0 0' } }, 'Five sections, south to north'),
+    div('', { maxWidth:'680px', fontFamily:"'Spectral',serif", fontSize:'18px', lineHeight:'1.6', color:'#6a5e4d', marginTop:'14px', fontStyle:'italic' }, 'The desert breaks you in; the Sierra is the crown; NorCal is the grind; Oregon is the sprint; Washington is the gamble. Tap any segment to drop into its chapter.')
+  );
+  wrap.append(hdr, buildScrubber(), buildMapRows(), buildTrailStrip(), buildTimeline(), buildSchedule(), buildResupplyOverview());
+  return wrap;
+}
+
+function buildMapRows() {
+  const endNames = { desert:'Kennedy Mdws South', sierra:'Sonora Pass', norcal:'Oregon Border', oregon:'Cascade Locks', wash:'Manning Park' };
+  const endMiles = { desert:'702', sierra:'1,017', norcal:'1,692', oregon:'2,147', wash:'2,659' };
+  const outer = div('rv', { maxWidth:'1000px', margin:'36px auto 0', padding:'0 7vw' });
+  const list = div('maprow-list', null);
+
+  list.append(div('', { display:'flex', alignItems:'center', gap:'20px' },
+    div('', { width:'170px', textAlign:'right', flex:'none' },
+      div('', { fontFamily:"'Spectral',serif", fontWeight:'600', fontSize:'17px' }, 'Campo, CA'),
+      div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'10px', color:'#9a8b76', letterSpacing:'1px', marginTop:'2px' }, 'SOUTHERN TERMINUS · MILE 0')
+    ),
+    div('', { width:'34px', display:'flex', justifyContent:'center', flex:'none' },
+      div('', { width:'18px', height:'18px', borderRadius:'50%', background:'#2a2018', border:'3px solid #f4eee4', boxShadow:'0 0 0 1px #2a2018' })
+    ),
+    div('', { flex:'1', fontFamily:"'JetBrains Mono',monospace", fontSize:'10px', letterSpacing:'2px', color:'#9a8b76', textTransform:'uppercase' }, 'U.S. / Mexico border')
+  ));
+
+  D.order.forEach(id => {
+    const m = D.sectionMeta[id]; const barH = (40 + m.totalDays*1.7) + 'px';
+    const row = div('maprow', { display:'flex', alignItems:'stretch', gap:'20px' });
+    const bar = div('mapbar', { width:'8px', background:m.accent, height:barH });
+    const card = a('#sec-'+id, 'mapcard', { flex:'1', textDecoration:'none', color:'inherit', display:'block', padding:'14px 18px', margin:'8px 0', background:'#fffdf9', border:'1px solid #e6dcc8', borderLeft:'4px solid '+m.accent, borderRadius:'3px' });
+    const top = div('', { display:'flex', justifyContent:'space-between', alignItems:'baseline', gap:'12px', flexWrap:'wrap' });
+    const title = div('', { fontFamily:"'Spectral',serif", fontWeight:'600', fontSize:'22px' });
+    title.append(span(m.roman, { color:m.accent }), '  '+m.name);
+    top.append(title, marginTag(m.margin));
+    const meta = div('', { display:'flex', gap:'18px', flexWrap:'wrap', fontFamily:"'JetBrains Mono',monospace", fontSize:'10.5px', letterSpacing:'.5px', color:'#9a8b76', textTransform:'uppercase', marginTop:'8px' });
+    [m.months, m.miles+' mi', m.totalDays+' days', m.avg+' mi/day'].forEach(t => meta.append(span(t)));
+    const detail = div('mapdetail', null,
+      div('', { height:'1px', background:'#eadfca', marginBottom:'10px' }),
+      div('', { fontFamily:"'Spectral',serif", fontStyle:'italic', fontSize:'15px', color:'#5a5040', lineHeight:'1.45' }, m.tagline),
+      div('', { display:'flex', gap:'18px', flexWrap:'wrap', marginTop:'9px', fontFamily:"'JetBrains Mono',monospace", fontSize:'10px', letterSpacing:'.5px', color:m.accent, textTransform:'uppercase' },
+        span('→ '+endNames[id]), span('High pt · '+m.highPoint, { color:'#9a8b76' }), span('Read chapter', { color:'#9a8b76' })
+      )
+    );
+    card.append(top, meta, detail);
+    row.append(div('', { width:'170px', flex:'none' }), div('', { width:'34px', display:'flex', justifyContent:'center', flex:'none' }, bar), card);
+    list.append(row);
+    list.append(div('', { display:'flex', alignItems:'center', gap:'20px' },
+      div('', { width:'170px', textAlign:'right', flex:'none' },
+        div('', { fontFamily:"'Spectral',serif", fontWeight:'600', fontSize:'15px' }, endNames[id]),
+        div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'10px', color:'#9a8b76', letterSpacing:'1px', marginTop:'2px' }, 'MILE '+endMiles[id])
+      ),
+      div('', { width:'34px', display:'flex', justifyContent:'center', flex:'none' }, div('', { width:'13px', height:'13px', borderRadius:'50%', background:'#f4eee4', border:'2px solid #2a2018' })),
+      div('', { flex:'1' })
+    ));
+  });
+
+  list.append(div('', { display:'flex', alignItems:'center', gap:'20px', marginTop:'-6px' },
+    div('', { width:'170px', textAlign:'right', flex:'none' },
+      div('', { fontFamily:"'Spectral',serif", fontWeight:'700', fontSize:'18px', color:'#b9683b' }, 'Manning Park, BC'),
+      div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'10px', color:'#9a8b76', letterSpacing:'1px', marginTop:'2px' }, 'NORTHERN TERMINUS · FINISH')
+    ),
+    div('', { width:'34px', display:'flex', justifyContent:'center', flex:'none' }, div('', { width:'22px', height:'22px', borderRadius:'50%', background:'#b9683b', border:'3px solid #f4eee4', boxShadow:'0 0 0 1px #b9683b' })),
+    div('', { flex:'1', fontFamily:"'JetBrains Mono',monospace", fontSize:'10px', letterSpacing:'2px', color:'#9a8b76', textTransform:'uppercase' }, 'Canada · 2,659 miles done')
+  ));
+  outer.append(list); return outer;
+}
+
+/* ─── TRAIL STRIP ─── */
+function buildTrailStrip() {
+  const wrap = div('rv', { maxWidth:'1180px', margin:'64px auto 0', padding:'0 7vw' },
+    div('', { display:'flex', alignItems:'baseline', gap:'14px', marginBottom:'14px' },
+      div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'11px', letterSpacing:'3px', textTransform:'uppercase', color:'#a8714e' }, 'Elevation, End to End'),
+      div('', { flex:'1', height:'1px', background:'#ddd0bb' }),
+      div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'11px', color:'#9a8b76' }, '2,659 mi · hover to read · click to jump')
+    ),
+    div('', { background:'#fffdf9', border:'1px solid #e6dcc8', borderRadius:'3px', padding:'14px 16px', boxShadow:'0 1px 3px rgba(80,60,30,.06)' },
+      (() => { const d = div('', { id:'trailstrip', position:'relative', width:'100%', height:'240px' }); return d; })()
+    )
+  );
+  return wrap;
+}
+
+/* ─── MASTER TIMELINE ─── */
+function buildTimeline() {
+  const wrap = div('rv', { maxWidth:'1180px', margin:'64px auto 0', padding:'0 7vw' });
+  const headRow = div('', { display:'flex', alignItems:'baseline', gap:'14px', marginBottom:'18px' },
+    div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'11px', letterSpacing:'3px', textTransform:'uppercase', color:'#a8714e' }, 'Master Timeline'),
+    div('', { flex:'1', height:'1px', background:'#ddd0bb' }),
+    div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'11px', color:'#9a8b76' }, 'official mileage')
+  );
+  const ow = div('', { overflowX:'auto' });
+  const inner = div('', { minWidth:'760px' });
+  const hdr = div('tl-grid', { borderTop:'1px solid #2a2018', borderBottom:'1px solid #2a2018', fontFamily:"'JetBrains Mono',monospace", fontSize:'10px', letterSpacing:'1px', textTransform:'uppercase', color:'#9a8b76', padding:'10px 0' });
+  ['Section','Dates','Hike+Zero','Rest','Miles','Mi/day','Margin'].forEach(c => hdr.append(div('', { padding:'0 10px' }, c)));
+  inner.append(hdr);
+  D.masterTimeline.forEach(t => {
+    const row = div('tl-grid', { borderBottom:'1px solid #e6dcc8', padding:'14px 0', alignItems:'center' });
+    const sc = div('', { padding:'0 10px', display:'flex', alignItems:'center' });
+    const dot = div('', { width:'9px', height:'9px', borderRadius:'50%', background:t.accent, marginRight:'9px', flexShrink:'0' });
+    const nm = span(t.sec, { fontFamily:"'Spectral',serif", fontWeight:'600', fontSize:'16px' });
+    sc.append(dot,nm);
+    const cells = [
+      div('', { padding:'0 10px', fontFamily:"'JetBrains Mono',monospace", fontSize:'11px', color:'#6a5e4d' }, t.dates),
+      div('', { padding:'0 10px', fontFamily:"'JetBrains Mono',monospace", fontSize:'12px' }, t.hz),
+      div('', { padding:'0 10px', fontFamily:"'JetBrains Mono',monospace", fontSize:'12px', color:'#6a5e4d' }, t.rest),
+      div('', { padding:'0 10px', fontFamily:"'Spectral',serif", fontWeight:'600', fontSize:'16px' }, t.miles),
+      div('', { padding:'0 10px', fontFamily:"'JetBrains Mono',monospace", fontSize:'12px' }, t.avg),
+      div('', { padding:'0 10px' }, marginTag(t.margin)),
+    ];
+    row.append(sc, ...cells); inner.append(row);
+  });
+  const total = div('tl-grid', { borderTop:'2px solid #2a2018', padding:'14px 0', alignItems:'center', background:'#efe6d6' });
+  [
+    ['TOTAL', { padding:'0 10px', fontFamily:"'Spectral',serif", fontWeight:'700', fontSize:'16px' }],
+    ['Mar 23 – Sep 28', { padding:'0 10px', fontFamily:"'JetBrains Mono',monospace", fontSize:'11px', color:'#6a5e4d' }],
+    ['158 + 32', { padding:'0 10px', fontFamily:"'JetBrains Mono',monospace", fontSize:'12px', fontWeight:'700' }],
+    ['20%', { padding:'0 10px', fontFamily:"'JetBrains Mono',monospace", fontSize:'12px' }],
+    ['~2,659', { padding:'0 10px', fontFamily:"'Spectral',serif", fontWeight:'700', fontSize:'16px' }],
+    ['16.8', { padding:'0 10px', fontFamily:"'JetBrains Mono',monospace", fontSize:'12px' }],
+    ['190 days', { padding:'0 10px', fontFamily:"'JetBrains Mono',monospace", fontSize:'11px', color:'#6a5e4d' }],
+  ].forEach(([t,s]) => total.append(div('',s,t)));
+  inner.append(total); ow.append(inner);
+  wrap.append(headRow, ow); return wrap;
+}
+
+/* ─── SCHEDULE + LEVERS ─── */
+function buildSchedule() {
+  const sch = D.schedule;
+  const wrap = div('rv', { maxWidth:'1180px', margin:'80px auto 0', padding:'0 7vw' });
+  const grid = div('', { display:'grid', gridTemplateColumns:'1.1fr .9fr', gap:'54px', alignItems:'start' });
+  const left = div('',null,
+    div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'11px', letterSpacing:'3px', textTransform:'uppercase', color:'#a8714e' }, 'The Schedule'),
+    el('h3', { style:{ fontFamily:"'Spectral',serif", fontWeight:'600', fontSize:'34px', lineHeight:'1.08', margin:'12px 0 0' } }, sch.lead),
+    div('', { fontFamily:"'Spectral',serif", fontSize:'17px', lineHeight:'1.62', color:'#3a3226', marginTop:'16px' }, sch.body),
+    div('', { marginTop:'20px', padding:'18px 20px', background:'#f6e9df', borderLeft:'4px solid #b3402e', borderRadius:'2px' },
+      div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'10px', letterSpacing:'2px', textTransform:'uppercase', color:'#b3402e', marginBottom:'8px' }, 'The defining risk'),
+      div('', { fontFamily:"'Spectral',serif", fontSize:'16px', lineHeight:'1.58', color:'#3a3226' }, sch.risk)
+    )
+  );
+  const right = div('',null,
+    div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'11px', letterSpacing:'3px', textTransform:'uppercase', color:'#a8714e', marginBottom:'16px' }, 'Levers & Trade-offs'),
+    div('', { display:'flex', flexDirection:'column', gap:'10px' },
+      ...D.levers.map(l => {
+        const card = div('', { background:'#fffdf9', border:'1px solid #e6dcc8', borderRadius:'3px', padding:'14px 16px' });
+        if (l.chosen) { card.style.borderColor = '#d8a76e'; card.style.borderLeft = '4px solid #b9683b'; }
+        card.append(
+          div('', { display:'flex', justifyContent:'space-between', alignItems:'baseline', gap:'10px' },
+            div('', { fontFamily:"'Spectral',serif", fontWeight:'600', fontSize:'16px' }, l.lever),
+            span(l.effect, { fontFamily:"'JetBrains Mono',monospace", fontSize:'10px', letterSpacing:'.5px', color: l.chosen?'#b3402e':'#9a8b76', whiteSpace:'nowrap' })
+          ),
+          div('', { fontFamily:"'Spectral',serif", fontSize:'13.5px', lineHeight:'1.5', color:'#6a5e4d', marginTop:'6px' }, l.trade)
+        );
+        return card;
+      })
+    )
+  );
+  grid.append(left, right); wrap.append(grid); return wrap;
+}
+
+/* ─── RESUPPLY OVERVIEW ─── */
+function buildResupplyOverview() {
+  const wrap = div('rv', { maxWidth:'1180px', margin:'78px auto 0', padding:'0 7vw' });
+  wrap.append(
+    div('', { display:'flex', alignItems:'baseline', gap:'14px', marginBottom:'18px' },
+      div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'11px', letterSpacing:'3px', textTransform:'uppercase', color:'#a8714e' }, 'Resupply at a Glance'),
+      div('', { flex:'1', height:'1px', background:'#ddd0bb' }),
+      div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'11px', color:'#9a8b76' }, '~40 stops · only a handful mailed')
+    ),
+    div('resupply-ov-grid', null, ...D.resupplyOverview.map(r => {
+      const card = div('', { background:'#fffdf9', border:'1px solid #e6dcc8', borderTop:'3px solid '+r.accent, borderRadius:'2px', padding:'16px' });
+      card.append(
+        div('', { fontFamily:"'Spectral',serif", fontWeight:'600', fontSize:'17px', lineHeight:'1.15' }, r.sec),
+        div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'11px', color:r.accent, marginTop:'6px', letterSpacing:'.5px' }, r.stops+' stops'),
+        div('', { fontFamily:"'Spectral',serif", fontSize:'13px', lineHeight:'1.45', color:'#6a5e4d', marginTop:'10px' }, r.line),
+        div('', { marginTop:'10px', paddingTop:'10px', borderTop:'1px solid #eadfca', fontFamily:"'JetBrains Mono',monospace", fontSize:'9.5px', letterSpacing:'.5px', color:'#9a8b76', textTransform:'uppercase' },
+          'Longest carry', el('br'), span(r.carry, { color:'#6a5e4d' })
+        )
+      );
+      return card;
+    }))
+  );
+  return wrap;
+}
+
+/* ─── SECTION CHAPTER ─── */
+function buildSection(id) {
+  const m = D.sectionMeta[id], d = Object.assign({}, m, D.sections[id]);
+  const accent = m.accent;
+  const bgColors = { sierra:'#eef3ee', wash:'#eeeef2' };
+  const wrapBg = bgColors[id] || '#f4eee4';
+  const outer = div('', { marginTop:'40px', background:wrapBg });
+  outer.id = 'sec-'+id;
+  outer.setAttribute('data-nav-target', id);
+  outer.style.setProperty('--accent', accent);
+
+  // Chapter opener
+  const opener = div('', { position:'relative', padding:'88px 7vw 0', maxWidth:'1180px', margin:'0 auto', overflow:'hidden' });
+  const bigNum = div('', { position:'absolute', top:'30px', right:'5vw', fontFamily:"'Spectral',serif", fontWeight:'300', fontSize:'230px', lineHeight:'.7', color:hexA(accent,0.10), pointerEvents:'none', userSelect:'none', zIndex:'0' }, m.roman);
+  const opC = div('', { position:'relative', zIndex:'1' });
+  opC.append(
+    div('', { width:'54px', height:'3px', background:accent, marginBottom:'22px' }),
+    div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'12px', letterSpacing:'4px', textTransform:'uppercase', color:accent }, 'Section '+m.roman),
+    div('', { fontFamily:"'Spectral',serif", fontWeight:'600', fontSize:'64px', lineHeight:'1.02', letterSpacing:'-1px', margin:'10px 0 0', maxWidth:'760px' }, m.name),
+    div('', { fontFamily:"'Spectral',serif", fontStyle:'italic', fontSize:'23px', color:'#6a5e4d', marginTop:'14px', maxWidth:'620px' }, m.tagline),
+    div('', { display:'flex', flexWrap:'wrap', gap:'10px 26px', marginTop:'24px', fontFamily:"'JetBrains Mono',monospace", fontSize:'12px', letterSpacing:'1px', color:'#8a7c66', textTransform:'uppercase' },
+      span(m.months), span('/', { color:'#c9bca6' }), span(m.route)
+    )
+  );
+  opener.append(bigNum, opC);
+
+  // Hero photo
+  const photoWrap = div('rv', { position:'relative', maxWidth:'1180px', margin:'40px auto 0', padding:'0 7vw' });
+  const imgC = div('', { position:'relative', borderRadius:'3px', overflow:'hidden' });
+  const img = el('img', { src:'assets/temp-'+id+'.png', alt:m.name, style:{ display:'block', width:'100%', height:'420px', objectFit:'cover' } });
+  const cap = div('', { position:'absolute', left:'0', bottom:'0', padding:'16px 22px', fontFamily:"'JetBrains Mono',monospace", fontSize:'11px', letterSpacing:'2px', textTransform:'uppercase', color:'#fff', textShadow:'0 1px 6px rgba(0,0,0,.6)', background:'linear-gradient(to top,rgba(0,0,0,.45),transparent)', width:'100%' }, m.heroCaption);
+  imgC.append(img, cap); photoWrap.append(imgC);
+
+  // Stats
+  const statWrap = div('rv', { maxWidth:'1180px', margin:'0 auto', padding:'46px 7vw 0' });
+  const statG = div('sec-stat-grid', null);
+  [
+    { val:m.miles, lbl:'miles' }, { val:m.totalDays, lbl:m.hikingDays+' + '+m.zeros+' days' },
+    { val:m.avg, lbl:'avg mi/day' }, { val:m.gainDay, lbl:'ft gain/day' },
+    { val:m.highPoint, lbl:'high point', small:true },
+  ].forEach(s => {
+    const cell = div('cell', null);
+    cell.append(
+      div('', { fontFamily:"'Spectral',serif", fontWeight:'600', fontSize:s.small?'18px':'30px', lineHeight:'1', marginTop:s.small?'4px':'0' }, s.val),
+      div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'10px', letterSpacing:'1.5px', textTransform:'uppercase', color:'#9a8b76', marginTop:'6px' }, s.lbl)
+    );
+    statG.append(cell);
+  });
+  const mgCell = div('cell', null);
+  mgCell.append(
+    div('', { display:'inline-block', fontFamily:"'JetBrains Mono',monospace", fontSize:'13px', fontWeight:'700', letterSpacing:'1px', textTransform:'uppercase', color:'#fff', background:marginColor(m.margin), padding:'5px 12px', borderRadius:'2px', marginTop:'2px' }, m.margin),
+    div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'10px', letterSpacing:'1.5px', textTransform:'uppercase', color:'#9a8b76', marginTop:'8px' }, 'margin · '+m.rest+' rest')
+  );
+  statG.append(mgCell); statWrap.append(statG);
+
+  // Intro
+  const intro = div('rv', { maxWidth:'760px', margin:'0 auto', padding:'48px 7vw 0' },
+    div('', { fontFamily:"'Spectral',serif", fontSize:'21px', lineHeight:'1.66', color:'#3a3226' }, d.intro)
+  );
+
+  // Elevation chart (SVG)
+  const elevWrap = div('rv', { maxWidth:'1180px', margin:'0 auto', padding:'48px 7vw 0' });
+  elevWrap.append(
+    div('', { display:'flex', alignItems:'baseline', gap:'14px', marginBottom:'16px' },
+      div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'11px', letterSpacing:'3px', textTransform:'uppercase', color:accent }, 'Elevation Profile'),
+      div('', { flex:'1', height:'1px', background:'#ddd0bb' }),
+      div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'11px', letterSpacing:'1px', color:'#9a8b76' }, 'daily camps + resupply')
+    ),
+    div('', { background:'#fffdf9', border:'1px solid #e6dcc8', borderRadius:'3px', padding:'14px 16px 8px', boxShadow:'0 1px 3px rgba(80,60,30,.06)' },
+      (() => { const c = div('elevchart', { position:'relative', width:'100%', height:'260px' }); c.dataset.sec = id; return c; })(),
+      div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'9.5px', letterSpacing:'.5px', color:'#b3a890', textTransform:'uppercase', marginTop:'2px', textAlign:'right' }, 'interpolated from documented landmarks · hover to read · click a point to filter the days below')
+    )
+  );
+
+  // Passes (Sierra only)
+  let passesEl = null;
+  if (id === 'sierra') {
+    passesEl = div('rv', { maxWidth:'1180px', margin:'0 auto', padding:'48px 7vw 0' });
+    passesEl.append(
+      div('', { display:'flex', alignItems:'baseline', gap:'14px', marginBottom:'18px' },
+        div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'11px', letterSpacing:'3px', textTransform:'uppercase', color:accent }, 'The Eight Major Passes'),
+        div('', { flex:'1', height:'1px', background:'#ddd0bb' })
+      ),
+      div('passes-grid', null, ...D.passes.map(pp => {
+        const card = div('', { background:'#fffdf9', border:'1px solid #e6dcc8', borderTop:'3px solid #5f7d66', borderRadius:'2px', padding:'16px 16px 14px' });
+        card.append(
+          div('', { fontFamily:"'Spectral',serif", fontWeight:'600', fontSize:'20px' }, pp.name),
+          div('', { fontFamily:"'Spectral',serif", fontWeight:'600', fontSize:'26px', color:'#5f7d66', marginTop:'2px' }, pp.elev, span(' ft', { fontSize:'13px', color:'#9a8b76', fontWeight:'400' })),
+          div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'10px', letterSpacing:'1px', color:'#9a8b76', marginTop:'4px' }, 'MILE '+pp.mile),
+          div('', { fontFamily:"'Spectral',serif", fontSize:'13.5px', lineHeight:'1.45', color:'#6a5e4d', marginTop:'9px' }, pp.note)
+        );
+        return card;
+      }))
+    );
+  }
+
+  // Itinerary — dynamic, re-rendered on state change
+  const itinWrap = div('rv', { maxWidth:'1180px', margin:'0 auto', padding:'54px 7vw 0' });
+  itinWrap.dataset.itinSec = id;
+
+  // Resupply
+  const rsWrap = div('rv', { maxWidth:'1180px', margin:'0 auto', padding:'54px 7vw 0' });
+  rsWrap.append(
+    div('', { display:'flex', alignItems:'baseline', gap:'14px', marginBottom:'18px' },
+      div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'11px', letterSpacing:'3px', textTransform:'uppercase', color:accent }, 'Resupply'),
+      div('', { flex:'1', height:'1px', background:'#ddd0bb' }),
+      div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'11px', letterSpacing:'1px', color:'#9a8b76' }, 'buy · mail · carry')
+    ),
+    div('resupply-grid', null, ...(d.resupply||[]).map(rs => {
+      const isMail = (rs.buymail||'').toLowerCase().startsWith('mail');
+      const tagBg = isMail ? '#8a6d3b' : accent;
+      const card = div('', { background:'#fffdf9', border:'1px solid #e6dcc8', borderRadius:'3px', padding:'18px 20px' });
+      const meta = div('', { display:'flex', gap:'18px', marginTop:'8px', fontFamily:"'JetBrains Mono',monospace", fontSize:'10.5px', letterSpacing:'.5px', color:'#9a8b76', textTransform:'uppercase' });
+      if (rs.next && /\d/.test(rs.next)) meta.append(span(rs.next+' mi to next'));
+      if (rs.days && rs.days !== '—' && /\d/.test(rs.days)) meta.append(span(rs.days+' days'));
+      card.append(
+        div('', { display:'flex', justifyContent:'space-between', alignItems:'baseline', gap:'10px' },
+          div('', { fontFamily:"'Spectral',serif", fontWeight:'600', fontSize:'19px', lineHeight:'1.2' }, rs.stop),
+          span(rs.buymail, { fontFamily:"'JetBrains Mono',monospace", fontSize:'10px', letterSpacing:'1px', textTransform:'uppercase', color:'#fff', background:tagBg, padding:'4px 9px', borderRadius:'2px', whiteSpace:'nowrap', flex:'none' })
+        ),
+        meta,
+        div('', { fontFamily:"'Spectral',serif", fontSize:'14px', lineHeight:'1.5', color:'#6a5e4d', marginTop:'10px' }, rs.tips)
+      );
+      return card;
+    }))
+  );
+
+  // Planning notes
+  const notes = div('rv', { maxWidth:'900px', margin:'0 auto', padding:'54px 7vw 88px' });
+  notes.append(
+    div('', { display:'flex', alignItems:'baseline', gap:'14px', marginBottom:'22px' },
+      div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'11px', letterSpacing:'3px', textTransform:'uppercase', color:accent }, 'Planning Notes & Caveats'),
+      div('', { flex:'1', height:'1px', background:'#ddd0bb' })
+    ),
+    div('', { display:'flex', flexDirection:'column', gap:'18px' },
+      ...(d.notes||[]).map(nt => div('', { display:'flex', gap:'16px', alignItems:'flex-start' },
+        div('', { width:'10px', height:'10px', flex:'none', marginTop:'9px', border:'2px solid '+accent, borderRadius:'50%' }),
+        div('', { fontFamily:"'Spectral',serif", fontSize:'17px', lineHeight:'1.6', color:'#3a3226' }, nt)
+      ))
+    )
+  );
+
+  const inner = div('', { fontFamily:"'Spectral',serif", color:'#2a2018' });
+  inner.append(opener, photoWrap, statWrap, intro, elevWrap);
+  if (passesEl) inner.append(passesEl);
+  inner.append(itinWrap, rsWrap, notes);
+  outer.append(inner);
+  return outer;
+}
+
+/* ─── RENDER ITINERARY (state-dependent) ─── */
+const HI = /BORDER|HALFWAY|midpoint|halfway|Whitney|Knife|Hot Springs|McDonald|Monument 78|Northern Terminus|Terminus|Manning Park|Aqueduct|Crater Lake Rim|Timberline|Bridge of the Gods|Eagle Creek|Devils Postpile|Vasquez|Lassen|Goat Rocks|Stehekin|Whitewater|Deep Creek|Drakesbad/i;
+function isHi(r) { return r.tag !== 'hike' || r.day === '1' || HI.test((r.notes||'')+' '+(r.segment||'')); }
+
+function renderItinerary(id, container) {
+  const m = D.sectionMeta[id], d = D.sections[id];
+  const accent = m.accent, days = d.days || [];
+  const pinned = (state.pinnedDay && state.pinnedDay[id]) || null;
+  const tagFilter = (state.filter && state.filter[id]) || 'all';
+  const showAll = !!state.showAll[id];
+  const checked = state.checked || {};
+
+  const list = pinned
+    ? days.filter(r => String(r.day) === String(pinned.day))
+    : (tagFilter === 'all' ? (showAll ? days : days.filter(isHi)) : days.filter(d => d.tag === tagFilter));
+
+  const doneCount = days.filter(d => checked[keyFor(id,d)]).length;
+  const cnt = t => days.filter(d => d.tag === t).length;
+
+  // ledger hint
+  const ledgerHint = pinned
+    ? `Day ${pinned.day} · mile ${(days.find(r => String(r.day)===String(pinned.day))||{}).mile || pinned.mile} · picked from the elevation profile · tap the chip to clear`
+    : (tagFilter !== 'all'
+      ? `${list.length} ${{zero:'rest days',pass:'pass days',town:'resupply stops'}[tagFilter]} · tap the circle to mark walked`
+      : (showAll ? `All ${days.length} days · tap a circle to mark walked` : `Highlights · towns, passes & landmarks (${days.length} days)`));
+
+  container.innerHTML = '';
+  const hdRow = div('', { display:'flex', alignItems:'flex-end', justifyContent:'space-between', gap:'14px', marginBottom:'14px', flexWrap:'wrap' });
+  const hdLeft = div('',null,
+    div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'11px', letterSpacing:'3px', textTransform:'uppercase', color:accent }, 'Daily Itinerary'),
+    div('', { fontFamily:"'Spectral',serif", fontStyle:'italic', fontSize:'15px', color:'#9a8b76', marginTop:'4px' }, ledgerHint)
+  );
+  const hdRight = div('', { display:'flex', alignItems:'center', gap:'10px', flexWrap:'wrap' });
+  const doneLabel = span(`${doneCount} / ${days.length} walked`, { fontFamily:"'JetBrains Mono',monospace", fontSize:'10px', letterSpacing:'1px', textTransform:'uppercase', color:accent, background:'#fff', border:'1px solid #e6dcc8', padding:'6px 10px', borderRadius:'2px' });
+  hdRight.append(doneLabel);
+  if (!pinned && tagFilter === 'all') {
+    const toggleBtn = el('button', { style:{ fontFamily:"'JetBrains Mono',monospace", fontSize:'11px', letterSpacing:'1.5px', textTransform:'uppercase', color:accent, background:'transparent', border:'1px solid '+accent, padding:'9px 16px', borderRadius:'2px', cursor:'pointer' } }, showAll ? 'Show highlights' : `Show all ${days.length} days`);
+    toggleBtn.addEventListener('click', () => setState(st => ({ showAll: Object.assign({},st.showAll,{[id]:!st.showAll[id]}) })));
+    hdRight.append(toggleBtn);
+  }
+  hdRow.append(hdLeft, hdRight);
+
+  // Filter chips
+  const chips = div('', { display:'flex', gap:'6px', marginBottom:'16px', flexWrap:'wrap' });
+  const fdef = [{ key:'all', label:'All' },{ key:'zero', label:'Zeros' },{ key:'pass', label:'Passes' },{ key:'town', label:'Towns' }];
+  fdef.filter(f => f.key==='all'||cnt(f.key)>0).forEach(f => {
+    const active = !pinned && tagFilter === f.key;
+    const c = f.key==='all' ? days.length : cnt(f.key);
+    const chip = el('button', { className:'filter-chip'+(active?' active':''), style:{ background: active?accent:'transparent', color: active?'#fff':'#8a7c66', borderColor: active?accent:'#ddd0bb', '--accent':accent } }, `${f.label} (${c})`);
+    chip.addEventListener('click', () => setState(st => ({ filter: Object.assign({},st.filter,{[id]:f.key}), pinnedDay: Object.assign({},st.pinnedDay,{[id]:null}) })));
+    chips.append(chip);
+  });
+  if (pinned) {
+    const chip = el('button', { className:'filter-chip active', style:{ background:accent, color:'#fff', borderColor:accent } }, `Day ${pinned.day}  ✕`);
+    chip.addEventListener('click', () => setState(st => ({ pinnedDay: Object.assign({},st.pinnedDay,{[id]:null}) })));
+    chips.append(chip);
+  }
+
+  // Rows
+  const rowsEl = div('', { borderTop:'1px solid #2a2018' });
+  list.forEach(r => {
+    const isZero = r.tag==='zero', isPass = r.tag==='pass', isTown = r.tag==='town';
+    const special = isZero || isPass || isTown;
+    const k = keyFor(id, r); const isDone = !!checked[k];
+    const row = div('dayrow', { background: isZero?(m.tint||'#efe3d2'):'#fffdf9', borderLeftColor: special?accent:'transparent', opacity: isDone?'0.5':'1' });
+    row.classList.add('dayrow'); row.dataset.sec = id; row.dataset.mile = r.mile; row.dataset.tag = r.tag;
+
+    const circle = div('check-circle'+(isDone?' done':''), { '--accent':accent });
+    if (isDone) { circle.style.background = accent; circle.style.borderColor = accent; circle.textContent = '✓'; }
+    circle.addEventListener('click', () => {
+      setState(st => {
+        const c = Object.assign({},st.checked,{[k]:!st.checked[k]});
+        if (!c[k]) delete c[k];
+        saveChecked();
+        return { checked: c };
+      });
+    });
+
+    row.append(
+      circle,
+      div('', { width:'70px', flex:'none' },
+        div('', { display:'inline-block', fontFamily:"'JetBrains Mono',monospace", fontSize:'11px', fontWeight:'700', letterSpacing:'.5px', color: isZero?accent:(isPass?'#5f7d66':'#2a2018') }, isZero?'ZERO':(isPass?'PASS':'DAY '+r.day)),
+        div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'10px', color:'#a89880', marginTop:'3px' }, r.date||'')
+      ),
+      div('', { flex:'1', minWidth:'0' },
+        div('', { fontFamily:"'Spectral',serif", fontWeight:'600', fontSize:'16px', lineHeight:'1.3', color:'#2a2018' }, r.segment||''),
+        r.notes ? div('', { fontFamily:"'Spectral',serif", fontSize:'14px', lineHeight:'1.5', color:'#7a6e5b', marginTop:'3px' }, r.notes) : null
+      ),
+      div('', { width:'96px', flex:'none', textAlign:'right' },
+        div('', { fontFamily:"'Spectral',serif", fontWeight:'600', fontSize:'19px', color:'#2a2018' }, isZero?'—':(r.mi||'')),
+        div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'10px', letterSpacing:'.5px', color:'#a89880', marginTop:'3px' }, r.mile?'mi '+r.mile:'')
+      )
+    );
+    rowsEl.append(row);
+  });
+
+  container.append(hdRow, chips, rowsEl);
+}
+
+/* ─── TAHOE ─── */
+function buildTahoe() {
+  const T = D.tahoe;
+  const sec = div('tahoe-section');
+  sec.id = 'sec-tahoe'; sec.setAttribute('data-nav-target','tahoe');
+  const inner = div('', { maxWidth:'1180px', margin:'0 auto', padding:'84px 7vw' });
+  inner.append(
+    div('rv', { display:'flex', alignItems:'center', gap:'14px' },
+      div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'12px', letterSpacing:'4px', textTransform:'uppercase', color:'#9fc0a0', border:'1px dashed #4d6b50', padding:'6px 12px', borderRadius:'2px' }, 'Optional Appendix'),
+      div('', { flex:'1', height:'1px', background:'#34503a' })
+    ),
+    el('h2', { class:'rv', style:{ fontFamily:"'Spectral',serif", fontWeight:'600', fontSize:'56px', lineHeight:'1.02', letterSpacing:'-1px', margin:'24px 0 0', color:'#f4efe2' } }, 'The Tahoe Rim Loop'),
+    div('rv', { fontFamily:"'Spectral',serif", fontStyle:'italic', fontSize:'22px', color:'#bcc7b3', marginTop:'12px' }, '≈165 miles around the lake — only if you\'re ahead of schedule.'),
+    div('rv', { maxWidth:'760px', fontFamily:"'Spectral',serif", fontSize:'18px', lineHeight:'1.66', color:'#d6d2c4', marginTop:'24px' }, T.intro),
+    div('rv', { display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:'12px', marginTop:'34px' },
+      ...[{v:T.stat.added,l:T.stat.hiking},{v:T.stat.dist,l:'circuit length'},{v:T.stat.finish,l:'pushes finish to'},{v:T.stat.cost,l:'schedule cost',small:true}].map(s =>
+        div('', { border:'1px solid #34503a', borderRadius:'3px', padding:'16px' },
+          div('', { fontFamily:"'Spectral',serif", fontWeight:'600', fontSize:s.small?'18px':'26px', color:'#9fc0a0', lineHeight:s.small?'1.2':'1', marginTop:s.small?'3px':'0' }, s.v),
+          div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'10px', letterSpacing:'1px', textTransform:'uppercase', color:'#8aa28b', marginTop:'5px' }, s.l)
+        )
+      )
+    ),
+    (() => {
+      const dw = div('rv', { marginTop:'40px', borderTop:'1px solid #34503a' });
+      T.days.forEach(r => {
+        const isRest = r.label==='Rest';
+        const row = div('', { display:'flex', gap:'18px', padding:'14px 2px', borderBottom:'1px solid #25382b', alignItems:'flex-start', background:isRest?'rgba(159,192,160,.07)':'transparent' });
+        row.append(
+          div('', { width:'64px', flex:'none' }, span(isRest?'REST':r.label, { fontFamily:"'JetBrains Mono',monospace", fontSize:'11px', fontWeight:'700', letterSpacing:'.5px', color:isRest?'#c99a6a':'#9fc0a0' })),
+          div('', { flex:'1', minWidth:'0' },
+            div('', { fontFamily:"'Spectral',serif", fontWeight:'600', fontSize:'16px', color:'#f0ece0' }, r.segment),
+            r.notes ? div('', { fontFamily:"'Spectral',serif", fontSize:'13.5px', lineHeight:'1.5', color:'#b7bfae', marginTop:'3px' }, r.notes) : null
+          ),
+          div('', { width:'56px', flex:'none', textAlign:'right', fontFamily:"'Spectral',serif", fontWeight:'600', fontSize:'18px', color:'#9fc0a0' }, isRest?'—':(r.mi||''))
+        );
+        dw.append(row);
+      });
+      return dw;
+    })(),
+    div('rv', { marginTop:'34px' },
+      div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'11px', letterSpacing:'3px', textTransform:'uppercase', color:'#9fc0a0', marginBottom:'16px' }, 'Loop Logistics'),
+      div('', { display:'grid', gridTemplateColumns:'repeat(2,1fr)', gap:'14px' },
+        ...T.logistics.map(g => div('', { display:'flex', gap:'14px', alignItems:'flex-start' },
+          div('', { width:'8px', height:'8px', flex:'none', marginTop:'8px', border:'2px solid #9fc0a0', borderRadius:'50%' }),
+          div('', { fontFamily:"'Spectral',serif", fontSize:'15px', lineHeight:'1.55', color:'#d6d2c4' }, g)
+        ))
+      )
+    )
+  );
+  sec.append(inner); return sec;
+}
+
+/* ─── FINISH ─── */
+function buildFinish() {
+  const sec = div('site-footer');
+  sec.append(div('', { maxWidth:'900px', margin:'0 auto', padding:'96px 7vw', textAlign:'center' },
+    div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'12px', letterSpacing:'5px', textTransform:'uppercase', color:'#c99a6a' }, 'Monument 78 · Northern Terminus'),
+    el('h2', { style:{ fontFamily:"'Spectral',serif", fontWeight:'600', fontSize:'64px', lineHeight:'1.02', letterSpacing:'-1px', margin:'22px 0 0' } }, '2,659 miles.', el('br'), el('em', { style:{fontStyle:'italic',color:'#d8a76e'} }, 'You finished the PCT.')),
+    div('', { fontFamily:"'Spectral',serif", fontSize:'19px', lineHeight:'1.66', color:'#cabfab', margin:'24px auto 0', maxWidth:'620px' }, 'From the desert shakedown at Campo to the golden-larch North Cascades, with a full Tahoe Rim Trail loop folded in — the whole set, one season, from the Mexican border to Manning Park, British Columbia.'),
+    div('', { marginTop:'36px', padding:'20px 24px', background:'#3a2e22', border:'1px dashed #6a5640', borderRadius:'3px', maxWidth:'620px', marginLeft:'auto', marginRight:'auto', textAlign:'left' },
+      div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'10px', letterSpacing:'2px', textTransform:'uppercase', color:'#d8a76e', marginBottom:'8px' }, "Don't forget · the one piece of paper"),
+      div('', { fontFamily:"'Spectral',serif", fontSize:'16px', lineHeight:'1.58', color:'#e6dcc8' }, "You cannot legally finish at Manning Park without the Canadian PCT entry permit. Apply months ahead, back when you secure the start date — without it you turn around at Monument 78 and hike ~30 miles back to Hart's Pass.")
+    ),
+    div('', { marginTop:'44px', display:'flex', gap:'14px', justifyContent:'center', flexWrap:'wrap', fontFamily:"'JetBrains Mono',monospace", fontSize:'11px', letterSpacing:'1px', color:'#9a8b76', textTransform:'uppercase' },
+      span('Campo → Canada'), span('/', { color:'#6a5640' }), span('Mar 23 – Sep 28, 2027'), span('/', { color:'#6a5640' }), span('190 days')
+    ),
+    a('#top', '', { display:'inline-block', marginTop:'36px', fontFamily:"'JetBrains Mono',monospace", fontSize:'11px', letterSpacing:'2px', textTransform:'uppercase', color:'#d8a76e', textDecoration:'none', border:'1px solid #6a5640', padding:'11px 20px', borderRadius:'2px' }, '↑ Back to the start')
+  ));
+  return sec;
+}
+
+/* ─── ASSEMBLE DOM ─── */
+const app = document.getElementById('app');
+app.append(buildHero(), buildOverview());
+D.order.forEach(id => {
+  app.append(buildSection(id));
+  if (id === 'norcal') app.append(buildTahoe());
+});
+app.append(buildFinish());
+
+/* ─── renderAll: updates state-dependent parts ─── */
+function renderAll() {
+  // Re-render scrubber
+  const oldScrub = app.querySelector('[data-scrubber]');
+  if (oldScrub) {
+    const neo = buildScrubber(); neo.setAttribute('data-scrubber','1'); oldScrub.replaceWith(neo);
+  }
+  // Re-render all itinerary sections
+  document.querySelectorAll('[data-itin-sec]').forEach(c => renderItinerary(c.dataset.itinSec, c));
+  // Update elevation pins
+  updatePins();
+}
+
+// Mark scrubber for replacement
+const scrubberEl = app.querySelector('.rv[style*="1000px"]');
+// Better: mark the scrubber by wrapping
+const scrubberPlaceholder = app.querySelector('#app > div:nth-child(2) > .rv');
+
+/* ─── INITIAL ITIN RENDER ─── */
+document.querySelectorAll('[data-itin-sec]').forEach(c => renderItinerary(c.dataset.itinSec, c));
+
+/* ─── SVG ELEVATION CHARTS ─── */
+function buildCharts() {
+  if (!D || !D.waypoints) return;
+  document.querySelectorAll('.elevchart').forEach(box => {
+    if (box.querySelector('svg')) return; // already built
+    const id = box.dataset.sec, meta = D.sectionMeta[id]; if (!meta) return;
+    const accent = meta.accent, rng = D.mileRanges[id];
+    if (!rng) return;
+    const W = Math.max(320, box.clientWidth || 800), H = 260, padL = 48, padR = 16, padT = 22, padB = 28;
+    const days = D.sections[id].days.filter(d => d.tag !== 'zero').map(d => { const mi = parseFloat(d.mile); return { mile:mi, day:d.day, date:d.date, seg:d.segment, tag:d.tag, elev:elevAt(mi) }; });
+    if (!days.length) return;
+    const wpIn = D.waypoints.filter(p => p[0]>=rng[0] && p[0]<=rng[1]);
+    const elevs = days.map(d=>d.elev).concat(wpIn.map(p=>p[1]));
+    let eMin = Math.min(...elevs), eMax = Math.max(...elevs);
+    if (eMax - eMin < 400) { eMax += 200; eMin -= 200; }
+    const mMin = rng[0], mMax = rng[1];
+    const X = m => padL + (m-mMin)/((mMax-mMin)||1) * (W-padL-padR);
+    const Y = e => padT + (1-(e-eMin)/((eMax-eMin)||1)) * (H-padT-padB);
+    const N = 200, line = [];
+    for (let k=0;k<=N;k++) { const m=mMin+(mMax-mMin)*k/N; line.push([X(m),Y(elevAt(m))]); }
+    const linePath = 'M'+line.map(p=>p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' L');
+    const areaPath = linePath+' L'+X(mMax).toFixed(1)+' '+(H-padB)+' L'+X(mMin).toFixed(1)+' '+(H-padB)+' Z';
+    let grid=''; for (let i=0;i<=4;i++) { const e=eMin+(eMax-eMin)*i/4,y=Y(e); grid+=`<line x1="${padL}" y1="${y.toFixed(1)}" x2="${W-padR}" y2="${y.toFixed(1)}" stroke="#eadfca" stroke-width="1"/><text x="${padL-8}" y="${(y+3).toFixed(1)}" text-anchor="end" font-family="monospace" font-size="9" fill="#b3a890">${Math.round(e/100)/10}k</text>`; }
+    let xlab=''; [mMin,(mMin+mMax)/2,mMax].forEach(m => { xlab+=`<text x="${X(m).toFixed(1)}" y="${H-8}" text-anchor="middle" font-family="monospace" font-size="9" fill="#b3a890">${Math.round(m)}</text>`; });
+    const labeled = wpIn.filter(p=>p[2]).sort((a,b)=>b[1]-a[1]).slice(0,5);
+    let marks=''; labeled.forEach(p => { const x=X(p[0]),y=Y(p[1]); marks+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3" fill="${accent}"/><text x="${x.toFixed(1)}" y="${(y-8).toFixed(1)}" text-anchor="middle" font-family="Georgia,serif" font-size="11" fill="#5a5040">${p[2]}</text>`; });
+    const svgStr = `<svg width="${W}" height="${H}" style="display:block"><defs><linearGradient id="g_${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${accent}" stop-opacity="0.22"/><stop offset="1" stop-color="${accent}" stop-opacity="0.02"/></linearGradient></defs>${grid}<path d="${areaPath}" fill="url(#g_${id})"/><path d="${linePath}" fill="none" stroke="${accent}" stroke-width="2"/>${marks}${xlab}</svg>`;
+    box.innerHTML = svgStr +
+      `<div class="ec-guide" style="position:absolute;top:${padT}px;width:1px;background:${accent};opacity:0;pointer-events:none;height:${H-padT-padB}px;"></div>`+
+      `<div class="ec-dot" style="position:absolute;width:9px;height:9px;border-radius:50%;background:${accent};border:2px solid #fffdf9;opacity:0;pointer-events:none;transform:translate(-50%,-50%);z-index:4;"></div>`+
+      `<div class="ec-tip" style="position:absolute;top:4px;background:#2a2018;color:#f4efe2;font-family:monospace;font-size:10px;line-height:1.5;padding:7px 10px;border-radius:3px;opacity:0;pointer-events:none;white-space:nowrap;transform:translateX(-50%);z-index:5;"></div>`+
+      `<div class="ec-pin" style="position:absolute;width:14px;height:14px;border-radius:50%;background:#fffdf9;border:3px solid ${accent};box-shadow:0 0 0 4px ${hexA(accent,0.18)};opacity:0;pointer-events:none;transform:translate(-50%,-50%);z-index:3;"></div>`+
+      `<div class="ec-hit" style="position:absolute;left:${padL}px;top:${padT}px;width:${W-padL-padR}px;height:${H-padT-padB}px;cursor:pointer;"></div>`;
+    const guide = box.querySelector('.ec-guide'), dot = box.querySelector('.ec-dot'), tip = box.querySelector('.ec-tip'), hit = box.querySelector('.ec-hit'), pinEl = box.querySelector('.ec-pin');
+    const show = mile => {
+      let nd=days[0],best=1e9; days.forEach(d => { const dd=Math.abs(d.mile-mile); if(dd<best){best=dd;nd=d;} });
+      const gx=X(nd.mile),gy=Y(nd.elev);
+      guide.style.left=gx+'px'; guide.style.opacity='0.5';
+      dot.style.left=gx+'px'; dot.style.top=gy+'px'; dot.style.opacity='1';
+      tip.style.left=Math.max(64,Math.min(W-64,gx))+'px'; tip.style.opacity='1';
+      tip.innerHTML=`<b style="color:${accent}">DAY ${nd.day} · ${nd.date}</b><br>mile ${nd.mile} · ~${Math.round(nd.elev/10)*10} ft<br><span style="color:#b3a890">${nd.seg.replace(/</g,'&lt;')}</span>`;
+    };
+    const hide = () => { guide.style.opacity='0'; dot.style.opacity='0'; tip.style.opacity='0'; };
+    const nearestDay = mile => { let nd=days[0],best=1e9; days.forEach(d=>{const dd=Math.abs(d.mile-mile);if(dd<best){best=dd;nd=d;}}); return nd; };
+    hit.addEventListener('mousemove', e => { const r=box.getBoundingClientRect(); let px=Math.max(padL,Math.min(W-padR,e.clientX-r.left)); show(mMin+(px-padL)/((W-padL-padR)||1)*(mMax-mMin)); });
+    hit.addEventListener('mouseleave', hide);
+    hit.addEventListener('click', e => {
+      const r=box.getBoundingClientRect(); let px=Math.max(padL,Math.min(W-padR,e.clientX-r.left));
+      const nd=nearestDay(mMin+(px-padL)/((W-padL-padR)||1)*(mMax-mMin));
+      const cur=(state.pinnedDay||{})[id];
+      if (cur && String(cur.day)===String(nd.day)) { setState(st=>({pinnedDay:Object.assign({},st.pinnedDay,{[id]:null})})); }
+      else { setState(st=>({pinnedDay:Object.assign({},st.pinnedDay,{[id]:{day:nd.day,mile:nd.mile}})})); }
+    });
+    box._highlight = mile => { if (mile==null){hide();return;} show(mile); };
+    box._pin = mile => { if (mile==null){pinEl.style.opacity='0';return;} const nd=nearestDay(mile); pinEl.style.left=X(nd.mile)+'px'; pinEl.style.top=Y(nd.elev)+'px'; pinEl.style.opacity='1'; };
+    const pinned0=(state.pinnedDay||{})[id]; if (pinned0) box._pin(pinned0.mile);
+  });
+}
+
+function updatePins() {
+  const pd = state.pinnedDay || {};
+  document.querySelectorAll('.elevchart').forEach(box => {
+    if (!box._pin) return;
+    const info = pd[box.dataset.sec];
+    box._pin(info ? info.mile : null);
+  });
+}
+
+/* ─── TRAIL STRIP ─── */
+function buildStrip() {
+  if (!D || !D.waypoints) return;
+  const box = document.getElementById('trailstrip'); if (!box || box.querySelector('svg')) return;
+  const W=Math.max(360,box.clientWidth||1000), H=240, padL=44, padR=14, padT=24, padB=34;
+  const mMin=0, mMax=2658, wps=D.waypoints;
+  let eMin=Math.min(...wps.map(p=>p[1])), eMax=Math.max(...wps.map(p=>p[1]));
+  const X=m=>padL+(m-mMin)/(mMax-mMin)*(W-padL-padR);
+  const Y=e=>padT+(1-(e-eMin)/((eMax-eMin)||1))*(H-padT-padB);
+  const N=700, line=[]; for (let k=0;k<=N;k++){const m=mMin+(mMax-mMin)*k/N;line.push([m,X(m),Y(elevAt(m))]);}
+  let grid=''; for(let i=0;i<=4;i++){const e=eMin+(eMax-eMin)*i/4,y=Y(e);grid+=`<line x1="${padL}" y1="${y.toFixed(1)}" x2="${W-padR}" y2="${y.toFixed(1)}" stroke="#eadfca"/><text x="${padL-8}" y="${(y+3).toFixed(1)}" text-anchor="end" font-family="monospace" font-size="9" fill="#b3a890">${Math.round(e/1000)}k</text>`;}
+  let areas='',labels='';
+  D.order.forEach(id=>{
+    const rng=D.mileRanges[id],accent=D.sectionMeta[id].accent,meta=D.sectionMeta[id];
+    const seg=line.filter(p=>p[0]>=rng[0]&&p[0]<=rng[1]); if(!seg.length)return;
+    const ld='M'+seg.map(p=>p[1].toFixed(1)+' '+p[2].toFixed(1)).join(' L');
+    areas+=`<path d="${ld} L${X(rng[1]).toFixed(1)} ${H-padB} L${X(rng[0]).toFixed(1)} ${H-padB} Z" fill="${accent}" fill-opacity="0.16"/><path d="${ld}" fill="none" stroke="${accent}" stroke-width="1.6"/>`;
+    const x0=X(rng[0]),x1=X(rng[1]);
+    labels+=`<text x="${((x0+x1)/2).toFixed(1)}" y="${H-9}" text-anchor="middle" font-family="monospace" font-size="10" letter-spacing="1" fill="${accent}">${meta.roman}</text>`;
+    if(id!=='wash') grid+=`<line x1="${x1}" y1="${padT}" x2="${x1}" y2="${H-padB}" stroke="#ddd0bb" stroke-dasharray="3 3"/>`;
+  });
+  let marks=''; ['Forester','Baden-Powell','Sonora Pass','Cascade Locks','Knife’s Edge'].forEach(nm=>{
+    const p=wps.find(q=>q[2]===nm); if(!p)return;
+    const x=X(p[0]),y=Y(p[1]); marks+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3" fill="#2a2018"/><text x="${x.toFixed(1)}" y="${(y-8).toFixed(1)}" text-anchor="middle" font-family="Georgia,serif" font-size="11" fill="#3a3226">${p[2]}</text>`;
+  });
+  box.innerHTML=`<svg width="${W}" height="${H}" style="display:block">${grid}${areas}${marks}${labels}</svg>`+
+    `<div class="ts-guide" style="position:absolute;top:${padT}px;width:1px;background:#2a2018;opacity:0;pointer-events:none;height:${H-padT-padB}px;"></div>`+
+    `<div class="ts-tip" style="position:absolute;top:2px;background:#2a2018;color:#f4efe2;font-family:monospace;font-size:10px;padding:6px 9px;border-radius:3px;opacity:0;pointer-events:none;white-space:nowrap;transform:translateX(-50%);z-index:5;"></div>`+
+    `<div class="ts-hit" style="position:absolute;left:${padL}px;top:${padT}px;width:${W-padL-padR}px;height:${H-padT-padB}px;cursor:pointer;"></div>`;
+  const hit=box.querySelector('.ts-hit'),guide=box.querySelector('.ts-guide'),tip=box.querySelector('.ts-tip');
+  const mileAt=cx=>{const r=box.getBoundingClientRect();let px=Math.max(padL,Math.min(W-padR,cx-r.left));return{px,m:mMin+(px-padL)/((W-padL-padR))*(mMax-mMin)};};
+  hit.addEventListener('mousemove',e=>{const o=mileAt(e.clientX),el2=elevAt(o.m);guide.style.left=o.px+'px';guide.style.opacity='0.45';tip.style.left=Math.max(54,Math.min(W-54,o.px))+'px';tip.style.opacity='1';let near=null,best=1e9;wps.forEach(p=>{if(p[2]){const dd=Math.abs(p[0]-o.m);if(dd<best){best=dd;near=p;}}});tip.innerHTML='mile '+Math.round(o.m)+' · ~'+(Math.round(el2/10)*10).toLocaleString()+' ft'+(near&&best<45?'<br><span style="color:#b3a890">near '+near[2]+'</span>':'');});
+  hit.addEventListener('mouseleave',()=>{guide.style.opacity='0';tip.style.opacity='0';});
+  hit.addEventListener('click',e=>{const o=mileAt(e.clientX);let sec='desert';D.order.forEach(id=>{const rng=D.mileRanges[id];if(o.m>=rng[0]&&o.m<=rng[1])sec=id;});const t=document.getElementById('sec-'+sec);if(t)window.scrollTo({top:t.getBoundingClientRect().top+window.pageYOffset-60,behavior:'smooth'});});
+}
+
+/* ─── SCROLL / OBSERVE / NAV ─── */
+function onScroll() {
+  const el = document.getElementById('progress-fill');
+  if (el) { const h=document.documentElement.scrollHeight-window.innerHeight; el.style.width=(h>0?Math.min(100,Math.max(0,window.pageYOffset/h*100)):0)+'%'; }
+  updateChapBar();
+}
+
+function updateChapBar() {
+  const bar = document.getElementById('chapbar'); if (!bar) return;
+  if (window.pageYOffset < 40) { bar.style.transform='translateY(-120%)'; return; }
+  const mid = window.innerHeight * 0.36;
+  let act = null;
+  document.querySelectorAll('[data-nav-target]').forEach(s => { const r=s.getBoundingClientRect(); if(r.top<=mid&&r.bottom>=mid) act=s; });
+  const id = act ? act.getAttribute('data-nav-target') : null;
+  const chapters = {desert:1,sierra:1,norcal:1,oregon:1,wash:1,tahoe:1};
+  if (!id || !chapters[id]) { bar.style.transform='translateY(-120%)'; return; }
+  const roman=document.getElementById('chapbar-roman'),name=document.getElementById('chapbar-name'),mileEl=document.getElementById('chapbar-mile'),prog=document.getElementById('chapbar-prog');
+  if (id==='tahoe') {
+    roman.textContent='TRT'; roman.style.color='#5f7d66'; name.textContent='Tahoe Rim Loop';
+    mileEl.textContent='optional · +165 mi'; prog.style.background='#5f7d66'; prog.style.width='100%';
+  } else {
+    const m=D.sectionMeta[id], rng=D.mileRanges && D.mileRanges[id];
+    if (!rng) { bar.style.transform='translateY(-120%)'; return; }
+    const r=act.getBoundingClientRect(), p=Math.min(1,Math.max(0,(mid-r.top)/(r.height||1)));
+    roman.textContent=m.roman; roman.style.color=m.accent; name.textContent=m.name;
+    mileEl.textContent='mile '+Math.round(rng[0]+p*(rng[1]-rng[0]))+' / '+rng[1];
+    prog.style.background=m.accent; prog.style.width=(p*100).toFixed(1)+'%';
+  }
+  bar.style.transform='translateY(0)';
+}
+
+const revObs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); revObs.unobserve(e.target); } });
+}, { rootMargin:'0px 0px -8% 0px', threshold:0.08 });
+
+function observeReveals() {
+  document.querySelectorAll('.rv:not([data-obs])').forEach(el => {
+    el.setAttribute('data-obs','1');
+    if (el.getBoundingClientRect().top < window.innerHeight) el.classList.add('in');
+    else revObs.observe(el);
+  });
+}
+
+const navObs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      const id = e.target.getAttribute('data-nav-target');
+      document.querySelectorAll('[data-nav]').forEach(a => {
+        a.classList.toggle('active', a.dataset.nav === id);
+      });
+    }
+  });
+}, { rootMargin:'-45% 0px -50% 0px' });
+document.querySelectorAll('[data-nav-target]').forEach(s => navObs.observe(s));
+
+// Row ↔ chart hover linking
+document.addEventListener('mouseover', e => {
+  const row = e.target.closest && e.target.closest('.dayrow'); if (!row) return;
+  const sec = row.dataset.sec, mile = parseFloat(row.dataset.mile);
+  const box = document.querySelector(`.elevchart[data-sec="${sec}"]`);
+  if (box && box._highlight && !isNaN(mile)) box._highlight(mile);
+});
+document.addEventListener('mouseout', e => {
+  const row = e.target.closest && e.target.closest('.dayrow'); if (!row) return;
+  const box = document.querySelector(`.elevchart[data-sec="${row.dataset.sec}"]`);
+  if (box && box._highlight) box._highlight(null);
+});
+
+// Animated map bars
+function drawSpine() {
+  const list = document.querySelector('.maprow-list'); if (!list) return;
+  const bars = list.querySelectorAll('.mapbar'); if (!bars.length) return;
+  const fire = () => bars.forEach((b,i) => { b.style.transitionDelay=(i*0.1)+'s'; b.style.transform='scaleY(1)'; });
+  if (list.getBoundingClientRect().top < window.innerHeight*0.92) { fire(); return; }
+  if (!this._spineObs) {
+    const spObs = new IntersectionObserver(es => { es.forEach(e => { if(e.isIntersecting){fire();spObs.disconnect();} }); }, { threshold:0.15 });
+    spObs.observe(list);
+  }
+}
+
+window.addEventListener('scroll', onScroll, { passive:true });
+window.addEventListener('resize', () => {
+  clearTimeout(window._rz);
+  window._rz = setTimeout(() => {
+    document.querySelectorAll('.elevchart').forEach(b => { b.innerHTML=''; });
+    const ts=document.getElementById('trailstrip'); if(ts) ts.innerHTML='';
+    buildCharts(); buildStrip();
+  }, 180);
+}, { passive:true });
+
+onScroll(); observeReveals(); buildCharts(); buildStrip(); drawSpine();
+[120,600,1400,2800].forEach(t => setTimeout(() => { observeReveals(); buildCharts(); buildStrip(); drawSpine(); onScroll(); }, t));
+
+})();
+</script>
+</body>
+</html>
