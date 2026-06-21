@@ -14,9 +14,13 @@
   .back-link:hover { color: #b9683b; }
   .ph-cell {
     border-radius: 3px; overflow: hidden;
-    background: repeating-linear-gradient(135deg, #ece2cf 0, #ece2cf 2px, #f4eee4 2px, #f4eee4 14px);
     border: 1px solid #e0d4bf; aspect-ratio: 4/3;
   }
+  .ph-cell img {
+    width: 100%; height: 100%; object-fit: cover; display: block;
+    transition: transform .4s cubic-bezier(.2,.7,.2,1);
+  }
+  .ph-cell:hover img { transform: scale(1.03); }
 </style>
 </head>
 <body>
@@ -32,18 +36,17 @@
   <div style="padding:72px 0 0;">
     <h1 style="font-family:'Spectral',serif;font-weight:300;font-size:clamp(60px,12vw,150px);line-height:.88;letter-spacing:-3px;color:#2a2018;">Photo</h1>
     <p style="font-family:'Spectral',serif;font-style:italic;font-size:19px;color:#6a5e4d;max-width:560px;line-height:1.62;margin-top:28px;">
-      Photographs from the trail and elsewhere will live here. Nothing to show just yet — this room is still being hung.
+      Photographs from the trail and elsewhere.
     </p>
   </div>
 
-  <!-- placeholder grid -->
+  <!-- photo grid -->
   <div style="margin-top:64px;display:grid;grid-template-columns:repeat(3,1fr);gap:16px;">
-    <div class="ph-cell"></div>
-    <div class="ph-cell"></div>
-    <div class="ph-cell"></div>
-    <div class="ph-cell"></div>
-    <div class="ph-cell"></div>
-    <div class="ph-cell"></div>
+    <div class="ph-cell"><img src="assets/DSC02280.jpg" alt=""></div>
+    <div class="ph-cell"><img src="assets/DSC02275.jpg" alt=""></div>
+    <div class="ph-cell"><img src="assets/DSC02028.jpg" alt=""></div>
+    <div class="ph-cell"><img src="assets/DSC01698.jpg" alt=""></div>
+    <div class="ph-cell"><img src="assets/DSC01191.jpg" alt=""></div>
   </div>
 
   <!-- footer -->
