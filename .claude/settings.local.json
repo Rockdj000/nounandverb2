@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//Users/jeff/Downloads/**)",
+      "Bash(unzip -l \"Pacific Crest Trail plan-handoff.zip\")",
+      "Bash(unzip -o \"Pacific Crest Trail plan-handoff.zip\" -d /tmp/pct-handoff)",
+      "Bash(cp \"/tmp/pct-handoff/pacific-crest-trail-plan/project/pct-data.js\" \"/Users/jeff/Projects/PCT Website/pct-data.js\")",
+      "Bash(cp /tmp/pct-handoff/pacific-crest-trail-plan/project/assets/*.png \"/Users/jeff/Projects/PCT Website/assets/\")",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(find /tmp/pct-handoff2/pacific-crest-trail-plan/project -maxdepth 2 -type f | sort)",
+      "Bash(cp \"/tmp/pct-handoff2/pacific-crest-trail-plan/project/pct-data.js\" \"/Users/jeff/Projects/PCT Website/pct-data.js\" *)"
+    ]
+  }
+}
