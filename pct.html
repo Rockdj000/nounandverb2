@@ -428,7 +428,7 @@ function buildTrailStrip() {
       div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'11px', color:'#9a8b76' }, '2,659 mi · hover to read · click to jump')
     ),
     div('', { background:'#fffdf9', border:'1px solid #e6dcc8', borderRadius:'3px', padding:'14px 16px', boxShadow:'0 1px 3px rgba(80,60,30,.06)' },
-      (() => { const d = div('', { id:'trailstrip', position:'relative', width:'100%', height:'240px' }); return d; })()
+      (() => { const d = div('', { position:'relative', width:'100%', height:'240px' }); d.id = 'trailstrip'; return d; })()
     )
   );
   return wrap;
