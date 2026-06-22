@@ -4,131 +4,142 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Invoice · verbandnoun.io</title>
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#b9683b">
+<link rel="apple-touch-icon" href="/icon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-<!-- jsPDF + autotable (UMD globals: window.jspdf) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <style>
+  :root {
+    --bg:#f4eee4; --surface:#fbf7ef; --text:#2a2018; --muted:#9a8b76; --soft:#7a6e5b;
+    --accent:#b9683b; --accent-d:#a3582f; --line:#e0d4bf; --strong:#2a2018;
+    --field:#fbf7ef; --field-bd:#d8cab2; --hover:#efe6d4;
+    --bill:#e3ecdd; --bill-t:#5a7344; --non:#ece4d6; --non-t:#9a8b76;
+    --sent:#e6e0ef; --sent-t:#6a5a8a; --warn-bg:#faf0e2; --warn-bd:#e6c79a; --warn-t:#7a5a2f;
+    --danger:#a8453b;
+  }
+  html[data-theme="dark"] {
+    --bg:#211c16; --surface:#2b2520; --text:#f0e8da; --muted:#a2937e; --soft:#c2b6a2;
+    --accent:#cf7d4e; --accent-d:#b96d40; --line:#3a322a; --strong:#6a5c49;
+    --field:#322b23; --field-bd:#4a4036; --hover:#332c24;
+    --bill:#2e3a28; --bill-t:#9cb583; --non:#3a322a; --non-t:#a2937e;
+    --sent:#332e40; --sent-t:#b3a6cf; --warn-bg:#3a2f1d; --warn-bd:#6a542f; --warn-t:#e0c79a;
+    --danger:#d6685c;
+  }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: #f4eee4; font-family: 'Spectral', serif; color: #2a2018; min-height: 100vh; display: flex; flex-direction: column; }
-
-  .back-link { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 1px; text-transform: lowercase; color: #9a8b76; text-decoration: none; transition: color .22s; }
-  .back-link:hover { color: #b9683b; }
-
+  body { background-color: var(--bg); font-family: 'Spectral', serif; color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
+  a { color: inherit; }
+  .back-link { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 1px; text-transform: lowercase; color: var(--muted); text-decoration: none; transition: color .22s; }
+  .back-link:hover { color: var(--accent); }
   .mono { font-family: 'JetBrains Mono', monospace; }
-  .label { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: #9a8b76; }
+  .label { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); }
+  .topbar { display:flex; align-items:center; justify-content:space-between; gap:14px; padding:24px clamp(20px,7vw,84px) 16px; border-bottom:1px solid var(--line); }
+  .icon-btn { background:none; border:1px solid var(--field-bd); color:var(--muted); border-radius:4px; padding:5px 10px; cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.5px; transition:color .2s, border-color .2s; }
+  .icon-btn:hover { color:var(--accent); border-color:var(--accent); }
 
-  .wrap { max-width: 1100px; width: 100%; margin: 0 auto; padding: clamp(20px,5vw,52px) clamp(20px,7vw,84px); flex: 1; }
+  .wrap { max-width: 1120px; width: 100%; margin: 0 auto; padding: clamp(20px,5vw,52px) clamp(20px,7vw,84px); flex: 1; }
 
-  /* tabs */
-  .tabs { display: flex; gap: 4px; flex-wrap: wrap; border-bottom: 1px solid #2a2018; margin-bottom: 28px; }
-  .tab { font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; color: #9a8b76; background: none; border: none; padding: 12px 16px; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color .2s, border-color .2s; }
-  .tab:hover { color: #2a2018; }
-  .tab.active { color: #b9683b; border-bottom-color: #b9683b; }
+  .tabs { display: flex; gap: 2px; flex-wrap: nowrap; overflow-x:auto; border-bottom: 1px solid var(--strong); margin-bottom: 28px; scrollbar-width:none; }
+  .tabs::-webkit-scrollbar { display:none; }
+  .tab { font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:1px; text-transform:uppercase; color:var(--muted); background:none; border:none; padding:12px 15px; cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1px; white-space:nowrap; transition:color .2s, border-color .2s; }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
 
-  /* forms */
   .field { display: flex; flex-direction: column; gap: 5px; }
-  .field > .label { margin-bottom: 1px; }
   input, select, textarea {
-    font-family: 'Spectral', serif; font-size: 15px; color: #2a2018;
-    background: #fbf7ef; border: 1px solid #d8cab2; border-radius: 3px;
-    padding: 9px 11px; width: 100%; transition: border-color .2s;
+    font-family:'Spectral',serif; font-size:15px; color:var(--text);
+    background:var(--field); border:1px solid var(--field-bd); border-radius:3px;
+    padding:9px 11px; width:100%; transition:border-color .2s;
   }
-  input:focus, select:focus, textarea:focus { outline: none; border-color: #b9683b; }
+  input:focus, select:focus, textarea:focus { outline:none; border-color:var(--accent); }
   textarea { resize: vertical; min-height: 64px; }
-  .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px,1fr)); gap: 14px; align-items: end; }
+  input[type=checkbox] { width:auto; accent-color: var(--accent); }
+  .form-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:14px; align-items:end; }
 
-  .btn {
-    font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 1px; text-transform: uppercase;
-    background: #b9683b; color: #fbf7ef; border: 1px solid #b9683b; border-radius: 3px;
-    padding: 10px 18px; cursor: pointer; transition: background .2s, color .2s, transform .2s;
-  }
-  .btn:hover { background: #a3582f; transform: translateY(-1px); }
-  .btn.ghost { background: none; color: #2a2018; border-color: #d8cab2; }
-  .btn.ghost:hover { background: #efe6d4; color: #b9683b; transform: none; }
-  .btn.danger { background: none; color: #a8453b; border-color: transparent; padding: 6px 8px; }
-  .btn.danger:hover { color: #fff; background: #a8453b; transform: none; }
-  .btn.sm { padding: 6px 12px; font-size: 11px; }
-  .btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+  .btn { font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:1px; text-transform:uppercase; background:var(--accent); color:#fbf7ef; border:1px solid var(--accent); border-radius:3px; padding:10px 18px; cursor:pointer; transition:background .2s, transform .2s; }
+  .btn:hover { background: var(--accent-d); transform: translateY(-1px); }
+  .btn.ghost { background:none; color:var(--text); border-color:var(--field-bd); }
+  .btn.ghost:hover { background:var(--hover); color:var(--accent); transform:none; }
+  .btn.danger { background:none; color:var(--danger); border-color:transparent; padding:6px 8px; }
+  .btn.danger:hover { color:#fff; background:var(--danger); transform:none; }
+  .btn.sm { padding:6px 12px; font-size:11px; }
+  .btn:disabled { opacity:.5; cursor:not-allowed; transform:none; }
 
-  /* tables */
+  .tbl-scroll { overflow-x:auto; -webkit-overflow-scrolling:touch; }
   table { width: 100%; border-collapse: collapse; font-size: 14px; }
-  th { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: #9a8b76; text-align: left; padding: 10px 10px; border-bottom: 1px solid #2a2018; font-weight: 500; }
-  td { padding: 11px 10px; border-bottom: 1px solid #e0d4bf; vertical-align: top; }
-  tr:hover td { background: #efe6d4; }
-  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
-  .pill { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 1px; text-transform: uppercase; padding: 3px 8px; border-radius: 10px; display: inline-block; }
-  .pill.bill { background: #e3ecdd; color: #5a7344; }
-  .pill.nonbill { background: #ece4d6; color: #9a8b76; }
-  .pill.draft { background: #ece4d6; color: #9a8b76; }
-  .pill.sent { background: #e6e0ef; color: #6a5a8a; }
-  .pill.paid { background: #e3ecdd; color: #5a7344; }
+  th { font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); text-align:left; padding:10px; border-bottom:1px solid var(--strong); font-weight:500; white-space:nowrap; }
+  td { padding:11px 10px; border-bottom:1px solid var(--line); vertical-align:top; }
+  tr:hover td { background: var(--hover); }
+  td.num, th.num { text-align:right; font-variant-numeric:tabular-nums; }
+  .pill { font-family:'JetBrains Mono',monospace; font-size:9.5px; letter-spacing:1px; text-transform:uppercase; padding:3px 8px; border-radius:10px; display:inline-block; white-space:nowrap; }
+  .pill.bill,.pill.paid { background:var(--bill); color:var(--bill-t); }
+  .pill.nonbill,.pill.draft { background:var(--non); color:var(--non-t); }
+  .pill.sent,.pill.partial { background:var(--sent); color:var(--sent-t); }
+  .pill.overdue,.pill.unpaid { background:#f4d9d4; color:#a8453b; }
 
-  .section-title { font-family: 'Spectral', serif; font-weight: 600; font-size: clamp(22px,3vw,30px); letter-spacing: -.5px; margin-bottom: 4px; }
-  .section-sub { font-family: 'Spectral', serif; font-style: italic; color: #7a6e5b; font-size: 16px; margin-bottom: 24px; }
-  .card { background: #fbf7ef; border: 1px solid #e0d4bf; border-radius: 4px; padding: 22px; margin-bottom: 26px; }
-  .empty { color: #9a8b76; font-style: italic; padding: 24px 0; }
-  .toggle-row { display: flex; align-items: center; gap: 8px; }
-  .toggle-row input { width: auto; }
-  .totals { display: flex; flex-direction: column; gap: 6px; align-items: flex-end; margin-top: 16px; font-variant-numeric: tabular-nums; }
-  .totals .grand { font-weight: 600; font-size: 20px; color: #b9683b; }
-  .row-actions { display: flex; gap: 6px; justify-content: flex-end; }
-  .toolbar { display: flex; gap: 12px; flex-wrap: wrap; align-items: end; margin-bottom: 18px; }
-  .toast { position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%); background: #2a2018; color: #f4eee4; font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: .5px; padding: 12px 20px; border-radius: 4px; opacity: 0; pointer-events: none; transition: opacity .25s, transform .25s; z-index: 200; }
-  .toast.show { opacity: 1; transform: translateX(-50%) translateY(-4px); }
-  .toast.err { background: #8a3530; }
+  .section-title { font-family:'Spectral',serif; font-weight:600; font-size:clamp(22px,3vw,30px); letter-spacing:-.5px; margin-bottom:4px; }
+  .section-sub { font-family:'Spectral',serif; font-style:italic; color:var(--soft); font-size:16px; margin-bottom:24px; }
+  .card { background:var(--surface); border:1px solid var(--line); border-radius:4px; padding:22px; margin-bottom:26px; }
+  .empty { color:var(--muted); font-style:italic; padding:24px 0; }
+  .toggle-row { display:flex; align-items:center; gap:8px; }
+  .totals { display:flex; flex-direction:column; gap:6px; align-items:flex-end; margin-top:16px; font-variant-numeric:tabular-nums; }
+  .totals .grand { font-weight:600; font-size:20px; color:var(--accent); }
+  .row-actions { display:flex; gap:6px; justify-content:flex-end; flex-wrap:wrap; }
+  .toolbar { display:flex; gap:12px; flex-wrap:wrap; align-items:end; margin-bottom:18px; }
+  .toast { position:fixed; bottom:22px; left:50%; transform:translateX(-50%); background:var(--strong); color:var(--bg); font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:.5px; padding:12px 20px; border-radius:4px; opacity:0; pointer-events:none; transition:opacity .25s, transform .25s; z-index:200; }
+  .toast.show { opacity:1; transform:translateX(-50%) translateY(-4px); }
+  .toast.err { background:#8a3530; color:#fff; }
 
-  /* auth gate */
-  .gate { max-width: 420px; margin: 8vh auto; text-align: center; }
-  .gate h1 { font-family: 'Spectral', serif; font-weight: 600; font-size: 40px; letter-spacing: -1px; margin-bottom: 10px; }
-  .gate p { color: #7a6e5b; margin-bottom: 26px; }
-  .gate .field { text-align: left; margin-bottom: 16px; }
-  .banner { background: #faf0e2; border: 1px solid #e6c79a; border-radius: 4px; padding: 16px 18px; margin-bottom: 24px; font-size: 14px; color: #7a5a2f; }
-  .banner code { font-family: 'JetBrains Mono', monospace; font-size: 12.5px; background: #efe0c8; padding: 1px 5px; border-radius: 3px; }
-  @media (max-width: 640px) {
-    th.hide-sm, td.hide-sm { display: none; }
-  }
+  .kpis { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:14px; margin-bottom:26px; }
+  .kpi { background:var(--surface); border:1px solid var(--line); border-radius:4px; padding:18px; }
+  .kpi .v { font-size:28px; font-weight:600; letter-spacing:-.5px; font-variant-numeric:tabular-nums; margin-top:6px; }
+  .kpi.accent .v { color:var(--accent); }
+  .chart-card { background:var(--surface); border:1px solid var(--line); border-radius:4px; padding:20px; margin-bottom:26px; }
+  .timer-box { display:flex; align-items:center; gap:14px; flex-wrap:wrap; background:var(--surface); border:1px solid var(--line); border-radius:4px; padding:14px 18px; margin-bottom:20px; }
+  .timer-clock { font-family:'JetBrains Mono',monospace; font-size:24px; font-variant-numeric:tabular-nums; letter-spacing:1px; }
+
+  .gate { max-width:420px; margin:8vh auto; text-align:center; }
+  .gate h1 { font-family:'Spectral',serif; font-weight:600; font-size:40px; letter-spacing:-1px; margin-bottom:10px; }
+  .gate p { color:var(--soft); margin-bottom:26px; }
+  .gate .field { text-align:left; margin-bottom:16px; }
+  .banner { background:var(--warn-bg); border:1px solid var(--warn-bd); border-radius:4px; padding:16px 18px; margin-bottom:24px; font-size:14px; color:var(--warn-t); }
+  .banner code { font-family:'JetBrains Mono',monospace; font-size:12.5px; background:rgba(0,0,0,.07); padding:1px 5px; border-radius:3px; }
+  @media (max-width:640px){ th.hide-sm, td.hide-sm { display:none; } }
 </style>
 </head>
 <body>
-<div style="display:flex;flex-direction:column;min-height:100vh;">
-
-  <!-- top bar -->
-  <div style="display:flex;align-items:center;justify-content:space-between;padding:24px clamp(20px,7vw,84px) 16px;border-bottom:1px solid #e0d4bf;">
+  <div class="topbar">
     <a href="index.html" class="back-link">← verbandnoun.io</a>
-    <span class="mono" style="font-size:11px;letter-spacing:1px;color:#9a8b76;text-transform:uppercase;">04 · Invoice</span>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <button id="theme-btn" class="icon-btn" title="Toggle dark mode">◐</button>
+      <span class="mono" style="font-size:11px;letter-spacing:1px;color:var(--muted);text-transform:uppercase;">04 · Invoice</span>
+    </div>
   </div>
 
   <div id="app" class="wrap"></div>
 
-  <!-- footer -->
-  <div style="display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;padding:22px clamp(20px,7vw,84px);border-top:1px solid #e0d4bf;font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:1.5px;text-transform:uppercase;color:#9a8b76;">
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;padding:22px clamp(20px,7vw,84px);border-top:1px solid var(--line);font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);">
     <span>verbandnoun.io</span>
     <span id="user-bar"></span>
   </div>
-</div>
 <div id="toast" class="toast"></div>
+<datalist id="desc-list"></datalist>
 
 <script type="module">
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-/* =========================================================================
-   CONFIG — paste your Supabase project credentials here.
-   Dashboard → Project Settings → API.  The anon key is safe to ship publicly;
-   Row-Level Security keeps every row private to its owner.
-   ========================================================================= */
+/* ===== CONFIG (your Supabase project) ===================================== */
 const SUPABASE_URL  = 'https://rstrkigjfeuagklnauep.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJzdHJraWdqZmV1YWdrbG5hdWVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxMDgxMjAsImV4cCI6MjA5NzY4NDEyMH0.9G-oT12P79lcD5XcNsvezJY6XeDMRbBFZLNtGOAkJUU';
-
 const configured = SUPABASE_URL.startsWith('http') && !SUPABASE_ANON.startsWith('YOUR_');
 const sb = configured ? createClient(SUPABASE_URL, SUPABASE_ANON) : null;
 
-/* ---------------------------------------------------------------- helpers */
+/* ===== helpers ============================================================ */
 const app = document.getElementById('app');
 const $ = (id) => document.getElementById(id);
-
 function el(tag, attrs = {}, ...kids) {
   const n = document.createElement(tag);
   for (const [k, v] of Object.entries(attrs || {})) {
@@ -142,709 +153,882 @@ function el(tag, attrs = {}, ...kids) {
   }
   for (const kid of kids.flat()) {
     if (kid == null || kid === false) continue;
-    n.appendChild(typeof kid === 'string' || typeof kid === 'number' ? document.createTextNode(String(kid)) : kid);
+    n.appendChild(typeof kid === 'object' ? kid : document.createTextNode(String(kid)));
   }
   return n;
 }
 const div = (a, ...k) => el('div', a, ...k);
+const field = (lbl, node) => div({ class: 'field' }, el('span', { class: 'label' }, lbl), node);
 
 let toastTimer;
 function toast(msg, isErr = false) {
-  const t = $('toast');
-  t.textContent = msg;
+  const t = $('toast'); t.textContent = msg;
   t.className = 'toast show' + (isErr ? ' err' : '');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => (t.className = 'toast'), 3200);
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => (t.className = 'toast'), 3200);
 }
-function fail(label, error) { console.error(label, error); toast(label + ': ' + (error?.message || error), true); }
+function fail(label, e) { console.error(label, e); toast(label + ': ' + (e?.message || e), true); }
 
 const today = () => new Date().toISOString().slice(0, 10);
-function fmtMoney(n, ccy = 'USD') {
-  const v = Number(n) || 0;
-  try { return new Intl.NumberFormat(undefined, { style: 'currency', currency: ccy }).format(v); }
-  catch { return ccy + ' ' + v.toFixed(2); }
+const monthKey = (d) => (d || '').slice(0, 7);
+function addToDate(dateStr, cadence) {
+  const d = new Date(dateStr + 'T00:00:00');
+  if (cadence === 'weekly') d.setDate(d.getDate() + 7);
+  else if (cadence === 'quarterly') d.setMonth(d.getMonth() + 3);
+  else d.setMonth(d.getMonth() + 1);
+  return d.toISOString().slice(0, 10);
 }
-function fmtDate(d) { return d ? d : ''; }
+function fmtMoney(n, code) {
+  const v = Number(n) || 0; const c = code || ccy();
+  try { return new Intl.NumberFormat(undefined, { style: 'currency', currency: c }).format(v); }
+  catch { return c + ' ' + v.toFixed(2); }
+}
+const num = (x) => Number(x) || 0;
 
-/* ---------------------------------------------------------------- state */
+/* ===== state ============================================================== */
 const state = {
-  session: null,
-  tab: 'time',
-  settings: null,
-  clients: [],
-  time: [],
-  expenses: [],
-  invoices: [],
-  editing: null,          // {kind, id} currently inline-editing
-  filterClient: '',
-  invoiceDraft: null,     // {client_id, from, to, issue, due, taxRate, notes, items:[{...,include}]}
+  session: null, tab: 'dashboard', settings: null,
+  clients: [], projects: [], time: [], expenses: [], invoices: [], payments: [], recurring: [],
+  editing: null,                 // {kind, id}
+  filterClient: '', search: '', dateFrom: '', dateTo: '',
+  invFilter: 'all',              // all | invoice | estimate | unpaid | overdue
+  invoiceDraft: null,
+  timer: null,                   // {startMs, clientId, projectId, desc}
 };
-
-const clientName = (id) => state.clients.find(c => c.id === id)?.name || '—';
 const clientById = (id) => state.clients.find(c => c.id === id);
+const clientName = (id) => clientById(id)?.name || '—';
+const projectById = (id) => state.projects.find(p => p.id === id);
+const projectName = (id) => projectById(id)?.name || '';
 const ccy = () => state.settings?.currency || 'USD';
+const clientCcy = (id) => clientById(id)?.currency || ccy();
+const paidFor = (invId) => state.payments.filter(p => p.invoice_id === invId).reduce((s, p) => s + num(p.amount), 0);
+function invStatus(inv) {
+  if (inv.doc_type === 'estimate') return inv.status || 'draft';
+  const bal = num(inv.total) - paidFor(inv.id);
+  if (bal <= 0.005 && num(inv.total) > 0) return 'paid';
+  if (paidFor(inv.id) > 0) return 'partial';
+  if (inv.due_date && inv.due_date < today()) return 'overdue';
+  return 'unpaid';
+}
 
-/* =========================================================================
-   AUTH
-   ========================================================================= */
+/* ===== theme ============================================================== */
+function applyTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  localStorage.setItem('inv-theme', t);
+}
+$('theme-btn').addEventListener('click', () =>
+  applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'));
+applyTheme(localStorage.getItem('inv-theme') || 'light');
+
+/* ===== auth =============================================================== */
 async function initAuth() {
-  if (!configured) { renderConfigGate(); return; }
+  if (!configured) return renderConfigGate();
   const { data } = await sb.auth.getSession();
   state.session = data.session;
-  sb.auth.onAuthStateChange((_e, session) => {
-    state.session = session;
-    if (session) loadAll();
-    else renderApp();
-  });
-  if (state.session) await loadAll();
-  else renderApp();
+  sb.auth.onAuthStateChange((_e, s) => { state.session = s; s ? loadAll() : renderApp(); });
+  state.session ? await loadAll() : renderApp();
 }
-
 async function signIn(email) {
-  const { error } = await sb.auth.signInWithOtp({
-    email,
-    options: { emailRedirectTo: window.location.href.split('#')[0] },
-  });
+  const { error } = await sb.auth.signInWithOtp({ email, options: { emailRedirectTo: location.href.split('#')[0] } });
   if (error) return fail('Sign-in failed', error);
   toast('Magic link sent — check your email.');
 }
-async function signOut() { await sb.auth.signOut(); state.session = null; renderApp(); }
+const signOut = async () => { await sb.auth.signOut(); state.session = null; renderApp(); };
 
-/* =========================================================================
-   DATA LOADING
-   ========================================================================= */
+/* ===== data =============================================================== */
 async function loadAll() {
   if (!state.session) return renderApp();
   try {
     await ensureSettings();
-    const [c, t, e, i] = await Promise.all([
-      sb.from('clients').select('*').order('name'),
-      sb.from('time_entries').select('*').order('entry_date', { ascending: false }),
-      sb.from('expenses').select('*').order('entry_date', { ascending: false }),
-      sb.from('invoices').select('*').order('issue_date', { ascending: false }),
+    const q = (t, ...o) => { let r = sb.from(t).select('*'); o.forEach(([c, a]) => r = r.order(c, a)); return r; };
+    const [c, p, t, e, i, pay, rec] = await Promise.all([
+      q('clients', ['name', {}]),
+      q('projects', ['name', {}]),
+      q('time_entries', ['entry_date', { ascending: false }]),
+      q('expenses', ['entry_date', { ascending: false }]),
+      q('invoices', ['issue_date', { ascending: false }]),
+      q('payments', ['paid_date', { ascending: false }]),
+      q('recurring_templates', ['name', {}]),
     ]);
-    for (const r of [c, t, e, i]) if (r.error) throw r.error;
-    state.clients = c.data; state.time = t.data; state.expenses = e.data; state.invoices = i.data;
+    for (const r of [c, p, t, e, i, pay, rec]) if (r.error) throw r.error;
+    state.clients = c.data; state.projects = p.data; state.time = t.data;
+    state.expenses = e.data; state.invoices = i.data; state.payments = pay.data; state.recurring = rec.data;
+    buildDescList();
     renderApp();
   } catch (err) { fail('Load failed', err); }
 }
-
 async function ensureSettings() {
   const uid = state.session.user.id;
   let { data, error } = await sb.from('settings').select('*').eq('user_id', uid).maybeSingle();
   if (error) throw error;
-  if (!data) {
-    const ins = await sb.from('settings').insert({ user_id: uid }).select().single();
-    if (ins.error) throw ins.error;
-    data = ins.data;
-  }
+  if (!data) { const r = await sb.from('settings').insert({ user_id: uid }).select().single(); if (r.error) throw r.error; data = r.data; }
   state.settings = data;
 }
+function buildDescList() {
+  const set = new Set();
+  state.time.forEach(t => t.description && set.add(t.description));
+  state.expenses.forEach(x => x.description && set.add(x.description));
+  const dl = $('desc-list'); dl.innerHTML = '';
+  [...set].slice(0, 200).forEach(d => dl.appendChild(el('option', { value: d })));
+}
+// generic table helpers
+async function del(table, id, msg = 'Deleted') {
+  const { error } = await sb.from(table).delete().eq('id', id);
+  if (error) return fail('Delete failed', error);
+  toast(msg); loadAll();
+}
+async function update(table, id, patch, msg = 'Saved') {
+  const { error } = await sb.from(table).update(patch).eq('id', id);
+  if (error) return fail('Update failed', error);
+  toast(msg); state.editing = null; loadAll();
+}
+async function insert(table, row, msg = 'Added') {
+  const { error } = await sb.from(table).insert(row);
+  if (error) return fail('Add failed', error);
+  toast(msg); loadAll();
+}
 
-/* =========================================================================
-   RENDER ROOT
-   ========================================================================= */
+/* ===== root render ======================================================== */
 function renderApp() {
-  app.innerHTML = '';
-  $('user-bar').textContent = '';
+  app.innerHTML = ''; $('user-bar').textContent = '';
   if (!configured) return renderConfigGate();
   if (!state.session) return renderSignInGate();
-
-  // signed in
   const ub = $('user-bar');
-  ub.textContent = '';
-  ub.appendChild(el('span', { style: { cursor: 'pointer' }, onclick: signOut },
-    state.session.user.email + ' · sign out'));
+  ub.appendChild(el('span', { style: { cursor: 'pointer' }, onclick: signOut }, state.session.user.email + ' · sign out'));
 
-  const tabs = [
-    ['time', 'Time'], ['expenses', 'Expenses'], ['clients', 'Clients'],
-    ['invoices', 'Invoices'], ['settings', 'Settings'],
-  ];
-  const tabBar = div({ class: 'tabs' },
-    tabs.map(([id, lbl]) => el('button', {
-      class: 'tab' + (state.tab === id ? ' active' : ''),
-      onclick: () => { state.tab = id; state.editing = null; renderApp(); },
-    }, lbl)));
-  app.appendChild(tabBar);
+  const tabs = [['dashboard', 'Dashboard'], ['time', 'Time'], ['expenses', 'Expenses'],
+    ['clients', 'Clients'], ['projects', 'Projects'], ['invoices', 'Invoices'],
+    ['reports', 'Reports'], ['settings', 'Settings']];
+  app.appendChild(div({ class: 'tabs' }, tabs.map(([id, lbl]) =>
+    el('button', { class: 'tab' + (state.tab === id ? ' active' : ''),
+      onclick: () => { state.tab = id; state.editing = null; renderApp(); } }, lbl))));
 
   const body = div({ id: 'tab-body' });
   app.appendChild(body);
-  ({
-    time: renderTime, expenses: renderExpenses, clients: renderClients,
-    invoices: renderInvoices, settings: renderSettings,
+  ({ dashboard: renderDashboard, time: renderTime, expenses: renderExpenses, clients: renderClients,
+    projects: renderProjects, invoices: renderInvoices, reports: renderReports, settings: renderSettings
   })[state.tab](body);
 }
 
 function renderConfigGate() {
   app.innerHTML = '';
-  app.appendChild(div({ class: 'gate' },
-    el('h1', {}, 'Almost there'),
+  app.appendChild(div({ class: 'gate' }, el('h1', {}, 'Almost there'),
     el('p', {}, 'This tracker needs a Supabase backend before it can run.'),
     div({ class: 'banner', style: { textAlign: 'left' } },
       div({}, '1. Create a free project at ', el('strong', {}, 'supabase.com'), '.'),
-      div({ style: { marginTop: '8px' } }, '2. In the SQL editor, run ', el('code', {}, 'supabase-schema.sql'), ' from this repo.'),
-      div({ style: { marginTop: '8px' } }, '3. Enable Email auth (Authentication → Providers).'),
-      div({ style: { marginTop: '8px' } }, '4. Paste your project ', el('code', {}, 'URL'), ' and ', el('code', {}, 'anon key'), ' into the CONFIG block at the top of ', el('code', {}, 'invoice.html'), '.'),
-    )));
+      div({ style: { marginTop: '8px' } }, '2. Run ', el('code', {}, 'supabase-schema.sql'), ' then ', el('code', {}, 'supabase-schema-v2.sql'), ' in the SQL editor.'),
+      div({ style: { marginTop: '8px' } }, '3. Enable Email auth.'),
+      div({ style: { marginTop: '8px' } }, '4. Paste your ', el('code', {}, 'URL'), ' + ', el('code', {}, 'anon key'), ' into the CONFIG block of ', el('code', {}, 'invoice.html'), '.'))));
 }
-
 function renderSignInGate() {
   app.innerHTML = '';
   const email = el('input', { type: 'email', placeholder: 'you@example.com', autocomplete: 'email' });
-  app.appendChild(div({ class: 'gate' },
-    el('h1', {}, 'Sign in'),
+  const go = () => { if (email.value.trim()) signIn(email.value.trim()); };
+  app.appendChild(div({ class: 'gate' }, el('h1', {}, 'Sign in'),
     el('p', {}, 'Enter your email and we’ll send a one-click magic link.'),
-    div({ class: 'field' }, el('span', { class: 'label' }, 'Email'), email),
-    el('button', {
-      class: 'btn', style: { width: '100%' },
-      onclick: () => { if (email.value.trim()) signIn(email.value.trim()); },
-    }, 'Send magic link'),
-  ));
-  email.addEventListener('keydown', e => { if (e.key === 'Enter' && email.value.trim()) signIn(email.value.trim()); });
+    field('Email', email),
+    el('button', { class: 'btn', style: { width: '100%' }, onclick: go }, 'Send magic link')));
+  email.addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
 }
 
-/* =========================================================================
-   CLIENTS
-   ========================================================================= */
+/* ===== shared selects ===================================================== */
 function clientSelect(value, onchange, opts = {}) {
   const s = el('select', { onchange: e => onchange(e.target.value) });
-  if (opts.includeAll) s.appendChild(el('option', { value: '' }, 'All clients'));
-  else s.appendChild(el('option', { value: '' }, '— select client —'));
-  for (const c of state.clients) {
-    const o = el('option', { value: c.id }, c.name);
-    if (c.id === value) o.selected = true;
-    s.appendChild(o);
-  }
+  s.appendChild(el('option', { value: '' }, opts.includeAll ? 'All clients' : '— client —'));
+  for (const c of state.clients) { const o = el('option', { value: c.id }, c.name); if (c.id === value) o.selected = true; s.appendChild(o); }
+  return s;
+}
+function projectSelect(clientId, value, onchange) {
+  const s = el('select', { onchange: e => onchange(e.target.value) });
+  s.appendChild(el('option', { value: '' }, '— no project —'));
+  state.projects.filter(p => !p.archived && (!clientId || p.client_id === clientId))
+    .forEach(p => { const o = el('option', { value: p.id }, p.name); if (p.id === value) o.selected = true; s.appendChild(o); });
   return s;
 }
 
-function renderClients(root) {
-  root.appendChild(el('div', { class: 'section-title' }, 'Clients'));
-  root.appendChild(el('div', { class: 'section-sub' }, 'People and companies you bill, each with a default hourly rate.'));
+/* ===== DASHBOARD ========================================================== */
+function renderDashboard(root) {
+  root.appendChild(el('div', { class: 'section-title' }, 'Dashboard'));
+  root.appendChild(el('div', { class: 'section-sub' }, 'Your practice at a glance.'));
 
-  // add form
-  const f = { name: '', email: '', address: '', default_rate: '', notes: '' };
-  const nameI = el('input', { placeholder: 'Acme Co.', oninput: e => f.name = e.target.value });
-  const emailI = el('input', { type: 'email', placeholder: 'billing@acme.co', oninput: e => f.email = e.target.value });
-  const rateI = el('input', { type: 'number', step: '0.01', placeholder: '150', oninput: e => f.default_rate = e.target.value });
-  const addrI = el('textarea', { placeholder: 'Street, city, country', oninput: e => f.address = e.target.value });
-  root.appendChild(div({ class: 'card' },
-    div({ class: 'form-grid' },
-      div({ class: 'field' }, el('span', { class: 'label' }, 'Name'), nameI),
-      div({ class: 'field' }, el('span', { class: 'label' }, 'Email'), emailI),
-      div({ class: 'field' }, el('span', { class: 'label' }, 'Default rate (' + ccy() + '/hr)'), rateI),
-    ),
-    div({ class: 'field', style: { marginTop: '14px' } }, el('span', { class: 'label' }, 'Address'), addrI),
-    div({ style: { marginTop: '16px' } }, el('button', {
-      class: 'btn',
-      onclick: async () => {
-        if (!f.name.trim()) return toast('Name is required', true);
-        const { error } = await sb.from('clients').insert({
-          name: f.name.trim(), email: f.email, address: f.address,
-          default_rate: Number(f.default_rate) || 0, currency: ccy(),
-        });
-        if (error) return fail('Add client failed', error);
-        toast('Client added'); loadAll();
-      },
-    }, 'Add client')),
-  ));
+  const realInv = state.invoices.filter(i => i.doc_type !== 'estimate');
+  let outstanding = 0;
+  realInv.forEach(i => { const bal = num(i.total) - paidFor(i.id); if (bal > 0) outstanding += bal; });
+  const thisMonth = monthKey(today());
+  const paidThisMonth = state.payments.filter(p => monthKey(p.paid_date) === thisMonth).reduce((s, p) => s + num(p.amount), 0);
+  const unbilled = state.time.filter(t => t.billable && !t.invoice_id).reduce((s, t) => s + num(t.hours) * num(t.rate), 0)
+    + state.expenses.filter(x => x.billable && !x.invoice_id).reduce((s, x) => s + num(x.amount), 0);
+  // hours this week
+  const weekAgo = new Date(Date.now() - 6 * 864e5).toISOString().slice(0, 10);
+  const hoursWeek = state.time.filter(t => t.entry_date >= weekAgo).reduce((s, t) => s + num(t.hours), 0);
 
-  if (!state.clients.length) { root.appendChild(div({ class: 'empty' }, 'No clients yet.')); return; }
-  const rows = state.clients.map(c => el('tr', {},
-    el('td', {}, c.name),
-    el('td', { class: 'hide-sm' }, c.email || '—'),
-    el('td', { class: 'num' }, fmtMoney(c.default_rate, c.currency || ccy()) + '/hr'),
-    el('td', { class: 'hide-sm' }, c.address || '—'),
-    el('td', {}, div({ class: 'row-actions' }, el('button', {
-      class: 'btn danger sm',
-      onclick: async () => {
-        if (!confirm('Delete client "' + c.name + '"? Time/expense entries keep their data but lose the link.')) return;
-        const { error } = await sb.from('clients').delete().eq('id', c.id);
-        if (error) return fail('Delete failed', error);
-        toast('Client deleted'); loadAll();
-      },
-    }, 'Delete'))),
-  ));
-  root.appendChild(el('table', {},
-    el('thead', {}, el('tr', {},
-      el('th', {}, 'Name'), el('th', { class: 'hide-sm' }, 'Email'),
-      el('th', { class: 'num' }, 'Rate'), el('th', { class: 'hide-sm' }, 'Address'), el('th', {}, ''))),
-    el('tbody', {}, rows)));
+  root.appendChild(div({ class: 'kpis' },
+    kpi('Outstanding', fmtMoney(outstanding), true),
+    kpi('Paid this month', fmtMoney(paidThisMonth)),
+    kpi('Unbilled value', fmtMoney(unbilled)),
+    kpi('Hours, last 7 days', hoursWeek.toFixed(2))));
+
+  // income last 6 months (from payments)
+  const months = [];
+  const base = new Date(today() + 'T00:00:00'); base.setDate(1);
+  for (let i = 5; i >= 0; i--) { const d = new Date(base); d.setMonth(d.getMonth() - i); months.push(d.toISOString().slice(0, 7)); }
+  const incomeByMonth = months.map(m => ({ label: m.slice(5), value: state.payments.filter(p => monthKey(p.paid_date) === m).reduce((s, p) => s + num(p.amount), 0) }));
+  root.appendChild(div({ class: 'chart-card' }, el('div', { class: 'label', style: { marginBottom: '12px' } }, 'Income · last 6 months'), barChart(incomeByMonth)));
+
+  // overdue
+  const overdue = realInv.filter(i => invStatus(i) === 'overdue');
+  root.appendChild(el('div', { class: 'label', style: { margin: '6px 0 10px' } }, 'Overdue invoices'));
+  if (!overdue.length) root.appendChild(div({ class: 'empty' }, 'Nothing overdue. 🎉'));
+  else root.appendChild(tblScroll(el('table', {}, el('thead', {}, el('tr', {},
+    el('th', {}, 'Number'), el('th', {}, 'Client'), el('th', {}, 'Due'), el('th', { class: 'num' }, 'Balance'))),
+    el('tbody', {}, overdue.map(i => el('tr', {},
+      el('td', { class: 'mono' }, i.invoice_number), el('td', {}, clientName(i.client_id)),
+      el('td', { class: 'mono' }, i.due_date || '—'),
+      el('td', { class: 'num' }, fmtMoney(num(i.total) - paidFor(i.id), i.currency))))))));
+}
+function kpi(label, value, accent) { return div({ class: 'kpi' + (accent ? ' accent' : '') }, el('div', { class: 'label' }, label), el('div', { class: 'v' }, value)); }
+function tblScroll(table) { return div({ class: 'tbl-scroll' }, table); }
+
+function barChart(items) {
+  const W = 600, H = 160, pad = 24, bw = (W - pad * 2) / items.length;
+  const max = Math.max(1, ...items.map(i => i.value));
+  const svg = el('div', { html: '' });
+  let bars = '';
+  items.forEach((it, i) => {
+    const h = (it.value / max) * (H - pad * 2);
+    const x = pad + i * bw, y = H - pad - h;
+    bars += `<rect x="${x + bw * 0.15}" y="${y}" width="${bw * 0.7}" height="${h}" rx="2" fill="var(--accent)"/>`;
+    bars += `<text x="${x + bw / 2}" y="${H - pad + 14}" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="var(--muted)">${it.label}</text>`;
+    if (it.value) bars += `<text x="${x + bw / 2}" y="${y - 5}" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="var(--soft)">${Math.round(it.value)}</text>`;
+  });
+  svg.innerHTML = `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block">${bars}</svg>`;
+  return svg;
 }
 
-/* =========================================================================
-   TIME ENTRIES
-   ========================================================================= */
+/* ===== TIME =============================================================== */
 function renderTime(root) {
   root.appendChild(el('div', { class: 'section-title' }, 'Time'));
-  root.appendChild(el('div', { class: 'section-sub' }, 'Log billable and non-billable hours. Rate auto-fills from the client.'));
+  root.appendChild(el('div', { class: 'section-sub' }, 'Log hours, or run the live timer. Rate auto-fills from the project or client.'));
+  if (!state.clients.length) root.appendChild(div({ class: 'banner' }, 'Add a client first (Clients tab).'));
 
-  if (!state.clients.length) {
-    root.appendChild(div({ class: 'banner' }, 'Add a client first (Clients tab) so entries can be attributed and billed.'));
-  }
+  renderTimer(root);
 
-  const f = { client_id: '', entry_date: today(), description: '', hours: '', rate: '', billable: true };
-  const rateI = el('input', { type: 'number', step: '0.01', placeholder: '150', value: '', oninput: e => f.rate = e.target.value });
-  const cSel = clientSelect('', v => {
-    f.client_id = v;
-    const c = clientById(v);
-    if (c && !f.rate) { f.rate = String(c.default_rate || ''); rateI.value = f.rate; }
-  });
+  const f = { client_id: '', project_id: '', entry_date: today(), description: '', hours: '', rate: '', billable: true };
+  const rateI = el('input', { type: 'number', step: '0.01', placeholder: '150', oninput: e => f.rate = e.target.value });
+  const projWrap = div({});
+  const buildProj = () => { projWrap.innerHTML = ''; projWrap.appendChild(projectSelect(f.client_id, f.project_id, v => { f.project_id = v; const p = projectById(v); if (p?.rate) { f.rate = String(p.rate); rateI.value = f.rate; } })); };
+  const cSel = clientSelect('', v => { f.client_id = v; f.project_id = ''; buildProj(); const c = clientById(v); if (c && !f.rate) { f.rate = String(c.default_rate || ''); rateI.value = f.rate; } });
+  buildProj();
   const dateI = el('input', { type: 'date', value: f.entry_date, oninput: e => f.entry_date = e.target.value });
-  const descI = el('input', { placeholder: 'What did you work on?', oninput: e => f.description = e.target.value });
+  const descI = el('input', { placeholder: 'What did you work on?', list: 'desc-list', oninput: e => f.description = e.target.value });
   const hoursI = el('input', { type: 'number', step: '0.25', placeholder: '2.5', oninput: e => f.hours = e.target.value });
   const billI = el('input', { type: 'checkbox', checked: true, onchange: e => f.billable = e.target.checked });
+  window._timeForm = { hoursI, descI, cSel, set: (h, d) => { f.hours = h; hoursI.value = h; if (d) { f.description = d; descI.value = d; } } };
 
   root.appendChild(div({ class: 'card' },
-    div({ class: 'form-grid' },
-      div({ class: 'field' }, el('span', { class: 'label' }, 'Date'), dateI),
-      div({ class: 'field' }, el('span', { class: 'label' }, 'Client'), cSel),
-      div({ class: 'field' }, el('span', { class: 'label' }, 'Hours'), hoursI),
-      div({ class: 'field' }, el('span', { class: 'label' }, 'Rate (' + ccy() + '/hr)'), rateI),
-    ),
+    div({ class: 'form-grid' }, field('Date', dateI), field('Client', cSel), field('Project', projWrap),
+      field('Hours', hoursI), field('Rate (' + ccy() + '/hr)', rateI)),
     div({ class: 'field', style: { marginTop: '14px' } }, el('span', { class: 'label' }, 'Description'), descI),
     div({ style: { marginTop: '16px', display: 'flex', gap: '18px', alignItems: 'center', flexWrap: 'wrap' } },
       div({ class: 'toggle-row' }, billI, el('span', {}, 'Billable')),
-      el('button', {
-        class: 'btn',
-        onclick: async () => {
-          if (!f.hours || Number(f.hours) <= 0) return toast('Enter hours', true);
-          const { error } = await sb.from('time_entries').insert({
-            client_id: f.client_id || null, entry_date: f.entry_date,
-            description: f.description, hours: Number(f.hours),
-            rate: Number(f.rate) || 0, billable: f.billable,
-          });
-          if (error) return fail('Add entry failed', error);
-          toast('Time logged'); loadAll();
-        },
-      }, 'Log time'),
-    ),
-  ));
+      el('button', { class: 'btn', onclick: () => {
+        if (!num(f.hours)) return toast('Enter hours', true);
+        insert('time_entries', { client_id: f.client_id || null, project_id: f.project_id || null, entry_date: f.entry_date, description: f.description, hours: num(f.hours), rate: num(f.rate), billable: f.billable }, 'Time logged');
+      } }, 'Log time'))));
 
-  // filter
-  root.appendChild(div({ class: 'toolbar' },
-    div({ class: 'field' }, el('span', { class: 'label' }, 'Filter by client'),
-      clientSelect(state.filterClient, v => { state.filterClient = v; renderApp(); }, { includeAll: true }))));
-
-  let list = state.time;
-  if (state.filterClient) list = list.filter(t => t.client_id === state.filterClient);
-  if (!list.length) { root.appendChild(div({ class: 'empty' }, 'No time entries yet.')); return; }
+  filterBar(root);
+  let list = applyFilters(state.time);
+  if (!list.length) { root.appendChild(div({ class: 'empty' }, 'No time entries.')); return; }
 
   let billHrs = 0, nonHrs = 0, billAmt = 0;
   const rows = list.map(t => {
-    if (t.billable) { billHrs += Number(t.hours); billAmt += Number(t.hours) * Number(t.rate); }
-    else nonHrs += Number(t.hours);
-    const billed = !!t.invoice_id;
+    if (t.billable) { billHrs += num(t.hours); billAmt += num(t.hours) * num(t.rate); } else nonHrs += num(t.hours);
+    if (state.editing?.kind === 'time' && state.editing.id === t.id) return timeEditRow(t);
     return el('tr', {},
-      el('td', { class: 'mono', style: { fontSize: '13px' } }, fmtDate(t.entry_date)),
-      el('td', {}, clientName(t.client_id)),
+      el('td', { class: 'mono', style: { fontSize: '13px' } }, t.entry_date),
+      el('td', {}, clientName(t.client_id) + (t.project_id ? ' · ' + projectName(t.project_id) : '')),
       el('td', {}, t.description || '—'),
-      el('td', { class: 'num' }, Number(t.hours).toString()),
-      el('td', { class: 'num hide-sm' }, fmtMoney(t.rate, ccy())),
+      el('td', { class: 'num' }, String(t.hours)),
+      el('td', { class: 'num hide-sm' }, fmtMoney(t.rate)),
       el('td', {}, el('span', { class: 'pill ' + (t.billable ? 'bill' : 'nonbill') }, t.billable ? 'billable' : 'non-bill')),
-      el('td', { class: 'num' }, t.billable ? fmtMoney(Number(t.hours) * Number(t.rate), ccy()) : '—'),
-      el('td', {}, billed
-        ? el('span', { class: 'label', title: 'Billed on an invoice' }, 'billed')
-        : div({ class: 'row-actions' }, el('button', {
-            class: 'btn danger sm',
-            onclick: async () => {
-              const { error } = await sb.from('time_entries').delete().eq('id', t.id);
-              if (error) return fail('Delete failed', error);
-              toast('Deleted'); loadAll();
-            },
-          }, 'Delete'))),
-    );
+      el('td', { class: 'num' }, t.billable ? fmtMoney(num(t.hours) * num(t.rate)) : '—'),
+      el('td', {}, t.invoice_id ? el('span', { class: 'label' }, 'billed') : div({ class: 'row-actions' },
+        el('button', { class: 'btn ghost sm', onclick: () => { state.editing = { kind: 'time', id: t.id }; renderApp(); } }, 'Edit'),
+        el('button', { class: 'btn ghost sm', title: 'Duplicate into form', onclick: () => { window._timeForm.set(String(t.hours), t.description); window.scrollTo({ top: 0, behavior: 'smooth' }); } }, 'Dup'),
+        el('button', { class: 'btn danger sm', onclick: () => del('time_entries', t.id) }, 'Del'))));
   });
-  root.appendChild(el('table', {},
-    el('thead', {}, el('tr', {},
-      el('th', {}, 'Date'), el('th', {}, 'Client'), el('th', {}, 'Description'),
-      el('th', { class: 'num' }, 'Hrs'), el('th', { class: 'num hide-sm' }, 'Rate'),
-      el('th', {}, 'Type'), el('th', { class: 'num' }, 'Amount'), el('th', {}, ''))),
-    el('tbody', {}, rows)));
+  root.appendChild(tblScroll(el('table', {}, el('thead', {}, el('tr', {},
+    el('th', {}, 'Date'), el('th', {}, 'Client / project'), el('th', {}, 'Description'), el('th', { class: 'num' }, 'Hrs'),
+    el('th', { class: 'num hide-sm' }, 'Rate'), el('th', {}, 'Type'), el('th', { class: 'num' }, 'Amount'), el('th', {}, ''))),
+    el('tbody', {}, rows))));
   root.appendChild(div({ class: 'totals' },
-    div({}, 'Billable: ' + billHrs + ' hrs · ' + fmtMoney(billAmt, ccy())),
-    div({ style: { color: '#9a8b76' } }, 'Non-billable: ' + nonHrs + ' hrs')));
+    div({}, 'Billable: ' + billHrs.toFixed(2) + ' hrs · ' + fmtMoney(billAmt)),
+    div({ style: { color: 'var(--muted)' } }, 'Non-billable: ' + nonHrs.toFixed(2) + ' hrs')));
+}
+function timeEditRow(t) {
+  const e = { ...t };
+  const i = (k, attrs) => el('input', { ...attrs, value: e[k] ?? '', oninput: ev => e[k] = ev.target.value });
+  return el('tr', {},
+    el('td', {}, i('entry_date', { type: 'date' })),
+    el('td', {}, clientName(t.client_id)),
+    el('td', {}, i('description', { list: 'desc-list' })),
+    el('td', {}, i('hours', { type: 'number', step: '0.25' })),
+    el('td', { class: 'hide-sm' }, i('rate', { type: 'number', step: '0.01' })),
+    el('td', {}, (() => { const c = el('input', { type: 'checkbox', checked: e.billable, onchange: ev => e.billable = ev.target.checked }); return c; })()),
+    el('td', {}, ''),
+    el('td', {}, div({ class: 'row-actions' },
+      el('button', { class: 'btn sm', onclick: () => update('time_entries', t.id, { entry_date: e.entry_date, description: e.description, hours: num(e.hours), rate: num(e.rate), billable: e.billable }) }, 'Save'),
+      el('button', { class: 'btn ghost sm', onclick: () => { state.editing = null; renderApp(); } }, 'Cancel'))));
 }
 
-/* =========================================================================
-   EXPENSES
-   ========================================================================= */
+function renderTimer(root) {
+  const box = div({ class: 'timer-box' });
+  const clock = el('span', { class: 'timer-clock' }, '00:00:00');
+  const fmt = (ms) => { const s = Math.floor(ms / 1000); return [s / 3600, (s % 3600) / 60, s % 60].map(x => String(Math.floor(x)).padStart(2, '0')).join(':'); };
+  let iv;
+  const tick = () => { if (state.timer) clock.textContent = fmt(Date.now() - state.timer.startMs); };
+  if (state.timer) { tick(); iv = setInterval(tick, 1000); }
+  const startBtn = el('button', { class: 'btn sm', onclick: () => {
+    state.timer = { startMs: Date.now() }; localStorage.setItem('inv-timer', JSON.stringify(state.timer)); renderApp();
+  } }, '▶ Start timer');
+  const stopBtn = el('button', { class: 'btn sm', onclick: () => {
+    const hrs = (Date.now() - state.timer.startMs) / 3600000; clearInterval(iv);
+    state.timer = null; localStorage.removeItem('inv-timer');
+    if (window._timeForm) window._timeForm.set(hrs.toFixed(2));
+    toast('Timer stopped · ' + hrs.toFixed(2) + ' hrs ready to log'); renderApp();
+  } }, '■ Stop & fill');
+  box.appendChild(el('span', { class: 'label' }, 'Live timer'));
+  box.appendChild(clock);
+  box.appendChild(state.timer ? stopBtn : startBtn);
+  root.appendChild(box);
+}
+
+/* ===== EXPENSES =========================================================== */
 function renderExpenses(root) {
   root.appendChild(el('div', { class: 'section-title' }, 'Expenses'));
-  root.appendChild(el('div', { class: 'section-sub' }, 'Track reimbursable and internal costs.'));
+  root.appendChild(el('div', { class: 'section-sub' }, 'Reimbursable and internal costs, including mileage.'));
 
-  const f = { client_id: '', entry_date: today(), description: '', amount: '', billable: true };
-  const cSel = clientSelect('', v => f.client_id = v);
-  const dateI = el('input', { type: 'date', value: f.entry_date, oninput: e => f.entry_date = e.target.value });
-  const descI = el('input', { placeholder: 'Flight, software, materials…', oninput: e => f.description = e.target.value });
+  const f = { client_id: '', project_id: '', entry_date: today(), description: '', amount: '', category: '', miles: '', billable: true };
   const amtI = el('input', { type: 'number', step: '0.01', placeholder: '120.00', oninput: e => f.amount = e.target.value });
+  const milesI = el('input', { type: 'number', step: '0.1', placeholder: 'miles', oninput: e => {
+    f.miles = e.target.value; const r = num(state.settings?.mileage_rate);
+    if (e.target.value) { f.amount = (num(e.target.value) * r).toFixed(2); amtI.value = f.amount; if (!f.category) { f.category = 'Mileage'; catI.value = 'Mileage'; } } } });
+  const projWrap = div({});
+  const buildProj = () => { projWrap.innerHTML = ''; projWrap.appendChild(projectSelect(f.client_id, f.project_id, v => f.project_id = v)); };
+  const cSel = clientSelect('', v => { f.client_id = v; f.project_id = ''; buildProj(); }); buildProj();
+  const dateI = el('input', { type: 'date', value: f.entry_date, oninput: e => f.entry_date = e.target.value });
+  const descI = el('input', { placeholder: 'Flight, software, materials…', list: 'desc-list', oninput: e => f.description = e.target.value });
+  const catI = el('input', { placeholder: 'Travel, Software…', oninput: e => f.category = e.target.value });
   const billI = el('input', { type: 'checkbox', checked: true, onchange: e => f.billable = e.target.checked });
 
   root.appendChild(div({ class: 'card' },
-    div({ class: 'form-grid' },
-      div({ class: 'field' }, el('span', { class: 'label' }, 'Date'), dateI),
-      div({ class: 'field' }, el('span', { class: 'label' }, 'Client'), cSel),
-      div({ class: 'field' }, el('span', { class: 'label' }, 'Amount (' + ccy() + ')'), amtI),
-    ),
+    div({ class: 'form-grid' }, field('Date', dateI), field('Client', cSel), field('Project', projWrap),
+      field('Category', catI), field('Mileage (× ' + (state.settings?.mileage_rate ?? 0) + ')', milesI), field('Amount (' + ccy() + ')', amtI)),
     div({ class: 'field', style: { marginTop: '14px' } }, el('span', { class: 'label' }, 'Description'), descI),
     div({ style: { marginTop: '16px', display: 'flex', gap: '18px', alignItems: 'center', flexWrap: 'wrap' } },
       div({ class: 'toggle-row' }, billI, el('span', {}, 'Billable to client')),
-      el('button', {
-        class: 'btn',
-        onclick: async () => {
-          if (!f.amount || Number(f.amount) <= 0) return toast('Enter an amount', true);
-          const { error } = await sb.from('expenses').insert({
-            client_id: f.client_id || null, entry_date: f.entry_date,
-            description: f.description, amount: Number(f.amount), billable: f.billable,
-          });
-          if (error) return fail('Add expense failed', error);
-          toast('Expense added'); loadAll();
-        },
-      }, 'Add expense'),
-    ),
-  ));
+      el('button', { class: 'btn', onclick: () => {
+        if (!num(f.amount)) return toast('Enter an amount', true);
+        insert('expenses', { client_id: f.client_id || null, project_id: f.project_id || null, entry_date: f.entry_date, description: f.description, amount: num(f.amount), category: f.category, miles: f.miles ? num(f.miles) : null, billable: f.billable }, 'Expense added');
+      } }, 'Add expense'))));
 
-  root.appendChild(div({ class: 'toolbar' },
-    div({ class: 'field' }, el('span', { class: 'label' }, 'Filter by client'),
-      clientSelect(state.filterClient, v => { state.filterClient = v; renderApp(); }, { includeAll: true }))));
-
-  let list = state.expenses;
-  if (state.filterClient) list = list.filter(x => x.client_id === state.filterClient);
-  if (!list.length) { root.appendChild(div({ class: 'empty' }, 'No expenses yet.')); return; }
-
+  filterBar(root);
+  let list = applyFilters(state.expenses);
+  if (!list.length) { root.appendChild(div({ class: 'empty' }, 'No expenses.')); return; }
   let billAmt = 0, nonAmt = 0;
   const rows = list.map(x => {
-    if (x.billable) billAmt += Number(x.amount); else nonAmt += Number(x.amount);
-    const billed = !!x.invoice_id;
+    if (x.billable) billAmt += num(x.amount); else nonAmt += num(x.amount);
+    if (state.editing?.kind === 'exp' && state.editing.id === x.id) return expEditRow(x);
     return el('tr', {},
-      el('td', { class: 'mono', style: { fontSize: '13px' } }, fmtDate(x.entry_date)),
+      el('td', { class: 'mono', style: { fontSize: '13px' } }, x.entry_date),
       el('td', {}, clientName(x.client_id)),
-      el('td', {}, x.description || '—'),
+      el('td', {}, (x.category ? '[' + x.category + '] ' : '') + (x.description || '—')),
       el('td', {}, el('span', { class: 'pill ' + (x.billable ? 'bill' : 'nonbill') }, x.billable ? 'billable' : 'internal')),
-      el('td', { class: 'num' }, fmtMoney(x.amount, ccy())),
-      el('td', {}, billed
-        ? el('span', { class: 'label' }, 'billed')
-        : div({ class: 'row-actions' }, el('button', {
-            class: 'btn danger sm',
-            onclick: async () => {
-              const { error } = await sb.from('expenses').delete().eq('id', x.id);
-              if (error) return fail('Delete failed', error);
-              toast('Deleted'); loadAll();
-            },
-          }, 'Delete'))),
-    );
+      el('td', { class: 'num' }, fmtMoney(x.amount)),
+      el('td', {}, x.invoice_id ? el('span', { class: 'label' }, 'billed') : div({ class: 'row-actions' },
+        el('button', { class: 'btn ghost sm', onclick: () => { state.editing = { kind: 'exp', id: x.id }; renderApp(); } }, 'Edit'),
+        el('button', { class: 'btn danger sm', onclick: () => del('expenses', x.id) }, 'Del'))));
   });
-  root.appendChild(el('table', {},
-    el('thead', {}, el('tr', {},
-      el('th', {}, 'Date'), el('th', {}, 'Client'), el('th', {}, 'Description'),
-      el('th', {}, 'Type'), el('th', { class: 'num' }, 'Amount'), el('th', {}, ''))),
-    el('tbody', {}, rows)));
-  root.appendChild(div({ class: 'totals' },
-    div({}, 'Billable: ' + fmtMoney(billAmt, ccy())),
-    div({ style: { color: '#9a8b76' } }, 'Internal: ' + fmtMoney(nonAmt, ccy()))));
+  root.appendChild(tblScroll(el('table', {}, el('thead', {}, el('tr', {},
+    el('th', {}, 'Date'), el('th', {}, 'Client'), el('th', {}, 'Description'), el('th', {}, 'Type'),
+    el('th', { class: 'num' }, 'Amount'), el('th', {}, ''))), el('tbody', {}, rows))));
+  root.appendChild(div({ class: 'totals' }, div({}, 'Billable: ' + fmtMoney(billAmt)),
+    div({ style: { color: 'var(--muted)' } }, 'Internal: ' + fmtMoney(nonAmt))));
+}
+function expEditRow(x) {
+  const e = { ...x };
+  const i = (k, attrs) => el('input', { ...attrs, value: e[k] ?? '', oninput: ev => e[k] = ev.target.value });
+  return el('tr', {},
+    el('td', {}, i('entry_date', { type: 'date' })), el('td', {}, clientName(x.client_id)),
+    el('td', {}, i('description', { list: 'desc-list' })),
+    el('td', {}, (() => el('input', { type: 'checkbox', checked: e.billable, onchange: ev => e.billable = ev.target.checked }))()),
+    el('td', {}, i('amount', { type: 'number', step: '0.01' })),
+    el('td', {}, div({ class: 'row-actions' },
+      el('button', { class: 'btn sm', onclick: () => update('expenses', x.id, { entry_date: e.entry_date, description: e.description, amount: num(e.amount), billable: e.billable }) }, 'Save'),
+      el('button', { class: 'btn ghost sm', onclick: () => { state.editing = null; renderApp(); } }, 'Cancel'))));
 }
 
-/* =========================================================================
-   INVOICES
-   ========================================================================= */
-function renderInvoices(root) {
-  root.appendChild(el('div', { class: 'section-title' }, 'Invoices'));
-  root.appendChild(el('div', { class: 'section-sub' }, 'Build an invoice from un-billed billable time and expenses, then export a PDF.'));
+/* ===== filters (shared by time + expenses) ================================ */
+function filterBar(root) {
+  const search = el('input', { placeholder: 'Search description…', value: state.search, oninput: e => { state.search = e.target.value; rerenderBody(); } });
+  const from = el('input', { type: 'date', value: state.dateFrom, oninput: e => { state.dateFrom = e.target.value; rerenderBody(); } });
+  const to = el('input', { type: 'date', value: state.dateTo, oninput: e => { state.dateTo = e.target.value; rerenderBody(); } });
+  root.appendChild(div({ class: 'toolbar' },
+    field('Client', clientSelect(state.filterClient, v => { state.filterClient = v; rerenderBody(); }, { includeAll: true })),
+    field('Search', search), field('From', from), field('To', to),
+    el('button', { class: 'btn ghost sm', style: { alignSelf: 'end' }, onclick: () => { state.filterClient = state.search = state.dateFrom = state.dateTo = ''; rerenderBody(); } }, 'Clear')));
+}
+function applyFilters(list) {
+  return list.filter(r => (!state.filterClient || r.client_id === state.filterClient)
+    && (!state.search || (r.description || '').toLowerCase().includes(state.search.toLowerCase()))
+    && (!state.dateFrom || r.entry_date >= state.dateFrom) && (!state.dateTo || r.entry_date <= state.dateTo));
+}
+function rerenderBody() { renderApp(); }
 
+/* ===== CLIENTS ============================================================ */
+function renderClients(root) {
+  root.appendChild(el('div', { class: 'section-title' }, 'Clients'));
+  root.appendChild(el('div', { class: 'section-sub' }, 'Each client carries its own default rate and currency.'));
+  const f = { name: '', email: '', address: '', default_rate: '', currency: ccy(), notes: '' };
+  const I = (k, attrs) => el('input', { ...attrs, oninput: e => f[k] = e.target.value });
+  root.appendChild(div({ class: 'card' },
+    div({ class: 'form-grid' }, field('Name', I('name', { placeholder: 'Acme Co.' })),
+      field('Email', I('email', { type: 'email' })), field('Default rate', I('default_rate', { type: 'number', step: '0.01' })),
+      field('Currency', I('currency', { value: ccy() }))),
+    div({ class: 'field', style: { marginTop: '14px' } }, el('span', { class: 'label' }, 'Address'), el('textarea', { oninput: e => f.address = e.target.value })),
+    div({ style: { marginTop: '16px' } }, el('button', { class: 'btn', onclick: () => {
+      if (!f.name.trim()) return toast('Name required', true);
+      insert('clients', { name: f.name.trim(), email: f.email, address: f.address, default_rate: num(f.default_rate), currency: (f.currency || ccy()).toUpperCase() }, 'Client added');
+    } }, 'Add client'))));
+  if (!state.clients.length) return root.appendChild(div({ class: 'empty' }, 'No clients yet.'));
+  const rows = state.clients.map(c => {
+    if (state.editing?.kind === 'client' && state.editing.id === c.id) {
+      const e = { ...c }; const I2 = (k, a) => el('input', { ...a, value: e[k] ?? '', oninput: ev => e[k] = ev.target.value });
+      return el('tr', {}, el('td', {}, I2('name', {})), el('td', { class: 'hide-sm' }, I2('email', {})),
+        el('td', {}, I2('default_rate', { type: 'number', step: '0.01' })), el('td', { class: 'hide-sm' }, I2('currency', {})),
+        el('td', {}, div({ class: 'row-actions' },
+          el('button', { class: 'btn sm', onclick: () => update('clients', c.id, { name: e.name, email: e.email, default_rate: num(e.default_rate), currency: (e.currency || 'USD').toUpperCase() }) }, 'Save'),
+          el('button', { class: 'btn ghost sm', onclick: () => { state.editing = null; renderApp(); } }, 'Cancel'))));
+    }
+    return el('tr', {}, el('td', {}, c.name), el('td', { class: 'hide-sm' }, c.email || '—'),
+      el('td', { class: 'num' }, fmtMoney(c.default_rate, c.currency) + '/hr'), el('td', { class: 'hide-sm' }, c.currency || ccy()),
+      el('td', {}, div({ class: 'row-actions' },
+        el('button', { class: 'btn ghost sm', onclick: () => { state.editing = { kind: 'client', id: c.id }; renderApp(); } }, 'Edit'),
+        el('button', { class: 'btn danger sm', onclick: () => { if (confirm('Delete ' + c.name + '?')) del('clients', c.id); } }, 'Del'))));
+  });
+  root.appendChild(tblScroll(el('table', {}, el('thead', {}, el('tr', {},
+    el('th', {}, 'Name'), el('th', { class: 'hide-sm' }, 'Email'), el('th', { class: 'num' }, 'Rate'),
+    el('th', { class: 'hide-sm' }, 'Ccy'), el('th', {}, ''))), el('tbody', {}, rows))));
+}
+
+/* ===== PROJECTS =========================================================== */
+function renderProjects(root) {
+  root.appendChild(el('div', { class: 'section-title' }, 'Projects'));
+  root.appendChild(el('div', { class: 'section-sub' }, 'Group work under a client. An optional project rate overrides the client default.'));
+  if (!state.clients.length) return root.appendChild(div({ class: 'banner' }, 'Add a client first.'));
+  const f = { client_id: '', name: '', rate: '' };
+  const cSel = clientSelect('', v => f.client_id = v);
+  root.appendChild(div({ class: 'card' }, div({ class: 'form-grid' },
+    field('Client', cSel), field('Project name', el('input', { placeholder: 'Website redesign', oninput: e => f.name = e.target.value })),
+    field('Rate (optional)', el('input', { type: 'number', step: '0.01', oninput: e => f.rate = e.target.value }))),
+    div({ style: { marginTop: '16px' } }, el('button', { class: 'btn', onclick: () => {
+      if (!f.client_id) return toast('Pick a client', true); if (!f.name.trim()) return toast('Name required', true);
+      insert('projects', { client_id: f.client_id, name: f.name.trim(), rate: f.rate ? num(f.rate) : null }, 'Project added');
+    } }, 'Add project'))));
+  if (!state.projects.length) return root.appendChild(div({ class: 'empty' }, 'No projects yet.'));
+  const rows = state.projects.map(p => el('tr', { style: p.archived ? { opacity: .5 } : {} },
+    el('td', {}, p.name), el('td', {}, clientName(p.client_id)),
+    el('td', { class: 'num' }, p.rate ? fmtMoney(p.rate, clientCcy(p.client_id)) + '/hr' : '—'),
+    el('td', {}, p.archived ? el('span', { class: 'label' }, 'archived') : ''),
+    el('td', {}, div({ class: 'row-actions' },
+      el('button', { class: 'btn ghost sm', onclick: () => update('projects', p.id, { archived: !p.archived }, p.archived ? 'Reactivated' : 'Archived') }, p.archived ? 'Reactivate' : 'Archive'),
+      el('button', { class: 'btn danger sm', onclick: () => { if (confirm('Delete project ' + p.name + '?')) del('projects', p.id); } }, 'Del')))));
+  root.appendChild(tblScroll(el('table', {}, el('thead', {}, el('tr', {},
+    el('th', {}, 'Project'), el('th', {}, 'Client'), el('th', { class: 'num' }, 'Rate'), el('th', {}, ''), el('th', {}, ''))),
+    el('tbody', {}, rows))));
+}
+
+/* ===== INVOICES & ESTIMATES =============================================== */
+function renderInvoices(root) {
+  root.appendChild(el('div', { class: 'section-title' }, 'Invoices & estimates'));
+  root.appendChild(el('div', { class: 'section-sub' }, 'Build from un-billed billable items; record payments; export PDFs.'));
   if (state.invoiceDraft) return renderInvoiceBuilder(root);
 
-  // new-invoice trigger
-  root.appendChild(div({ style: { marginBottom: '24px' } },
-    el('button', {
-      class: 'btn',
-      onclick: () => {
-        if (!state.clients.length) return toast('Add a client first', true);
-        state.invoiceDraft = {
-          client_id: '', from: '', to: today(),
-          issue: today(), due: '', taxRate: Number(state.settings?.tax_rate) || 0,
-          notes: state.settings?.payment_terms || '', items: null,
-        };
-        renderApp();
-      },
-    }, '+ New invoice')));
+  root.appendChild(div({ style: { display: 'flex', gap: '10px', marginBottom: '22px', flexWrap: 'wrap' } },
+    el('button', { class: 'btn', onclick: () => startDraft('invoice') }, '+ New invoice'),
+    el('button', { class: 'btn ghost', onclick: () => startDraft('estimate') }, '+ New estimate')));
 
-  if (!state.invoices.length) { root.appendChild(div({ class: 'empty' }, 'No invoices yet.')); return; }
-  const rows = state.invoices.map(inv => el('tr', {},
-    el('td', { class: 'mono' }, inv.invoice_number),
-    el('td', {}, clientName(inv.client_id)),
-    el('td', { class: 'mono hide-sm', style: { fontSize: '13px' } }, fmtDate(inv.issue_date)),
-    el('td', {}, statusSelect(inv)),
-    el('td', { class: 'num' }, fmtMoney(inv.total, ccy())),
-    el('td', {}, div({ class: 'row-actions' },
-      el('button', { class: 'btn ghost sm', onclick: () => downloadPdf(inv) }, 'PDF'),
-      el('button', {
-        class: 'btn danger sm',
-        onclick: async () => {
-          if (!confirm('Delete invoice ' + inv.invoice_number + '? Its time/expense entries become un-billed and can be re-invoiced.')) return;
-          await sb.from('time_entries').update({ invoice_id: null }).eq('invoice_id', inv.id);
-          await sb.from('expenses').update({ invoice_id: null }).eq('invoice_id', inv.id);
-          const { error } = await sb.from('invoices').delete().eq('id', inv.id);
-          if (error) return fail('Delete failed', error);
-          toast('Invoice deleted'); loadAll();
-        },
-      }, 'Delete'))),
-  ));
-  root.appendChild(el('table', {},
-    el('thead', {}, el('tr', {},
-      el('th', {}, 'Number'), el('th', {}, 'Client'), el('th', { class: 'hide-sm' }, 'Issued'),
-      el('th', {}, 'Status'), el('th', { class: 'num' }, 'Total'), el('th', {}, ''))),
-    el('tbody', {}, rows)));
+  renderRecurring(root);
+
+  // filter chips
+  const chips = [['all', 'All'], ['invoice', 'Invoices'], ['estimate', 'Estimates'], ['unpaid', 'Unpaid'], ['overdue', 'Overdue']];
+  root.appendChild(div({ class: 'toolbar' }, chips.map(([k, l]) =>
+    el('button', { class: 'btn sm ' + (state.invFilter === k ? '' : 'ghost'), onclick: () => { state.invFilter = k; renderApp(); } }, l))));
+
+  let list = state.invoices.slice();
+  if (state.invFilter === 'invoice' || state.invFilter === 'estimate') list = list.filter(i => (i.doc_type || 'invoice') === state.invFilter);
+  else if (state.invFilter === 'unpaid') list = list.filter(i => i.doc_type !== 'estimate' && invStatus(i) !== 'paid');
+  else if (state.invFilter === 'overdue') list = list.filter(i => invStatus(i) === 'overdue');
+  if (!list.length) return root.appendChild(div({ class: 'empty' }, 'Nothing here yet.'));
+
+  const rows = list.map(inv => {
+    const st = invStatus(inv); const bal = num(inv.total) - paidFor(inv.id);
+    return el('tr', {},
+      el('td', { class: 'mono' }, inv.invoice_number), el('td', {}, clientName(inv.client_id)),
+      el('td', { class: 'mono hide-sm', style: { fontSize: '13px' } }, inv.issue_date),
+      el('td', {}, el('span', { class: 'pill ' + st }, st)),
+      el('td', { class: 'num' }, fmtMoney(inv.total, inv.currency)),
+      el('td', { class: 'num hide-sm' }, inv.doc_type === 'estimate' ? '—' : fmtMoney(bal, inv.currency)),
+      el('td', {}, div({ class: 'row-actions' },
+        el('button', { class: 'btn ghost sm', onclick: () => downloadPdf(inv) }, 'PDF'),
+        inv.doc_type === 'estimate'
+          ? el('button', { class: 'btn ghost sm', onclick: () => convertEstimate(inv) }, '→ Invoice')
+          : el('button', { class: 'btn ghost sm', onclick: () => recordPayment(inv) }, 'Pay'),
+        el('button', { class: 'btn danger sm', onclick: () => deleteInvoice(inv) }, 'Del'))));
+  });
+  root.appendChild(tblScroll(el('table', {}, el('thead', {}, el('tr', {},
+    el('th', {}, 'Number'), el('th', {}, 'Client'), el('th', { class: 'hide-sm' }, 'Issued'), el('th', {}, 'Status'),
+    el('th', { class: 'num' }, 'Total'), el('th', { class: 'num hide-sm' }, 'Balance'), el('th', {}, ''))),
+    el('tbody', {}, rows))));
 }
 
-function statusSelect(inv) {
-  const s = el('select', {
-    style: { width: 'auto', padding: '5px 8px', fontSize: '12px' },
-    onchange: async e => {
-      const { error } = await sb.from('invoices').update({ status: e.target.value }).eq('id', inv.id);
-      if (error) return fail('Update failed', error);
-      inv.status = e.target.value; toast('Status updated');
-    },
-  });
-  for (const st of ['draft', 'sent', 'paid']) {
-    const o = el('option', { value: st }, st);
-    if (inv.status === st) o.selected = true;
-    s.appendChild(o);
-  }
-  return s;
+function startDraft(docType) {
+  if (!state.clients.length) return toast('Add a client first', true);
+  state.invoiceDraft = { docType, client_id: '', from: '', to: today(), issue: today(), due: '',
+    taxRate: num(state.settings?.tax_rate), tax2Rate: num(state.settings?.tax2_rate), discount: 0, discountPct: true,
+    notes: state.settings?.payment_terms || '', items: null, manual: [] };
+  renderApp();
+}
+
+async function recordPayment(inv) {
+  const bal = num(inv.total) - paidFor(inv.id);
+  const amt = prompt('Payment amount for ' + inv.invoice_number + ' (balance ' + fmtMoney(bal, inv.currency) + '):', bal.toFixed(2));
+  if (amt == null) return;
+  if (!num(amt)) return toast('Invalid amount', true);
+  await insert('payments', { invoice_id: inv.id, amount: num(amt), paid_date: today() }, 'Payment recorded');
+}
+async function convertEstimate(est) {
+  if (!confirm('Create an invoice from estimate ' + est.invoice_number + '?')) return;
+  try {
+    const number = (state.settings.invoice_prefix || '') + (state.settings.invoice_next || 1);
+    const r = await sb.from('invoices').insert({ client_id: est.client_id, invoice_number: number, doc_type: 'invoice',
+      issue_date: today(), due_date: null, currency: est.currency, tax_rate: est.tax_rate, tax2_rate: est.tax2_rate,
+      discount: est.discount, discount_is_pct: est.discount_is_pct, notes: est.notes, line_items: est.line_items,
+      subtotal: est.subtotal, tax: est.tax, total: est.total }).select().single();
+    if (r.error) throw r.error;
+    await sb.from('settings').update({ invoice_next: (state.settings.invoice_next || 1) + 1 }).eq('user_id', state.session.user.id);
+    toast('Invoice ' + number + ' created'); loadAll();
+  } catch (e) { fail('Convert failed', e); }
+}
+async function deleteInvoice(inv) {
+  if (!confirm('Delete ' + inv.invoice_number + '? Its entries become un-billed.')) return;
+  await sb.from('time_entries').update({ invoice_id: null }).eq('invoice_id', inv.id);
+  await sb.from('expenses').update({ invoice_id: null }).eq('invoice_id', inv.id);
+  await del('invoices', inv.id, 'Invoice deleted');
 }
 
 function renderInvoiceBuilder(root) {
   const d = state.invoiceDraft;
+  const code = d.client_id ? clientCcy(d.client_id) : ccy();
   root.appendChild(el('button', { class: 'btn ghost sm', style: { marginBottom: '18px' }, onclick: () => { state.invoiceDraft = null; renderApp(); } }, '← Cancel'));
+  root.appendChild(el('div', { class: 'section-title', style: { fontSize: '22px' } }, d.docType === 'estimate' ? 'New estimate' : 'New invoice'));
 
   const cSel = clientSelect(d.client_id, v => { d.client_id = v; d.items = null; renderApp(); });
-  const fromI = el('input', { type: 'date', value: d.from, oninput: e => d.from = e.target.value });
-  const toI = el('input', { type: 'date', value: d.to, oninput: e => d.to = e.target.value });
-  const issueI = el('input', { type: 'date', value: d.issue, oninput: e => d.issue = e.target.value });
-  const dueI = el('input', { type: 'date', value: d.due, oninput: e => d.due = e.target.value });
-  const taxI = el('input', { type: 'number', step: '0.01', value: d.taxRate, oninput: e => { d.taxRate = Number(e.target.value) || 0; if (d.items) renderApp(); } });
-
-  root.appendChild(div({ class: 'card' },
-    div({ class: 'form-grid' },
-      div({ class: 'field' }, el('span', { class: 'label' }, 'Client'), cSel),
-      div({ class: 'field' }, el('span', { class: 'label' }, 'From (optional)'), fromI),
-      div({ class: 'field' }, el('span', { class: 'label' }, 'To'), toI),
-      div({ class: 'field' }, el('span', { class: 'label' }, 'Issue date'), issueI),
-      div({ class: 'field' }, el('span', { class: 'label' }, 'Due date'), dueI),
-      div({ class: 'field' }, el('span', { class: 'label' }, 'Tax %'), taxI),
-    ),
-    div({ style: { marginTop: '16px' } }, el('button', {
-      class: 'btn', onclick: () => { if (!d.client_id) return toast('Pick a client', true); loadDraftItems(); },
-    }, 'Load billable items'))));
+  const inp = (k, attrs) => el('input', { ...attrs, value: d[k], oninput: e => { d[k] = attrs.type === 'number' ? num(e.target.value) : e.target.value; if (d.items) renderApp(); } });
+  root.appendChild(div({ class: 'card' }, div({ class: 'form-grid' },
+    field('Client', cSel), field('From (optional)', el('input', { type: 'date', value: d.from, oninput: e => d.from = e.target.value })),
+    field('To', el('input', { type: 'date', value: d.to, oninput: e => d.to = e.target.value })),
+    field('Issue date', el('input', { type: 'date', value: d.issue, oninput: e => d.issue = e.target.value })),
+    field('Due date', el('input', { type: 'date', value: d.due, oninput: e => d.due = e.target.value }))),
+    div({ style: { marginTop: '16px' } }, el('button', { class: 'btn', onclick: () => d.client_id ? loadDraftItems() : toast('Pick a client', true) }, 'Load billable items'))));
 
   if (!d.items) return;
-  if (!d.items.length) { root.appendChild(div({ class: 'empty' }, 'No un-billed billable items for this client in that range.')); return; }
-
-  const rows = d.items.map((it, idx) => el('tr', {},
-    el('td', {}, el('input', { type: 'checkbox', checked: it.include, style: { width: 'auto' }, onchange: e => { it.include = e.target.checked; refreshTotals(); } })),
-    el('td', { class: 'mono', style: { fontSize: '13px' } }, it.date),
-    el('td', {}, el('span', { class: 'label' }, it.type)),
-    el('td', {}, it.description || '—'),
-    el('td', { class: 'num' }, it.type === 'time' ? it.qty : '—'),
-    el('td', { class: 'num' }, it.type === 'time' ? fmtMoney(it.rate, ccy()) : '—'),
-    el('td', { class: 'num' }, fmtMoney(it.amount, ccy())),
-  ));
-  root.appendChild(el('table', {},
-    el('thead', {}, el('tr', {},
-      el('th', {}, ''), el('th', {}, 'Date'), el('th', {}, 'Kind'), el('th', {}, 'Description'),
-      el('th', { class: 'num' }, 'Hrs'), el('th', { class: 'num' }, 'Rate'), el('th', { class: 'num' }, 'Amount'))),
-    el('tbody', {}, rows)));
 
   const totalsBox = div({ id: 'draft-totals' });
+  const rows = d.items.map(it => el('tr', {},
+    el('td', {}, el('input', { type: 'checkbox', checked: it.include, onchange: e => { it.include = e.target.checked; refresh(); } })),
+    el('td', { class: 'mono', style: { fontSize: '13px' } }, it.date), el('td', {}, el('span', { class: 'label' }, it.type)),
+    el('td', {}, it.description || '—'), el('td', { class: 'num' }, it.type === 'time' ? it.qty : '—'),
+    el('td', { class: 'num' }, it.type === 'time' ? fmtMoney(it.rate, code) : '—'), el('td', { class: 'num' }, fmtMoney(it.amount, code))));
+  // manual lines
+  d.manual.forEach((m, idx) => rows.push(el('tr', {},
+    el('td', {}, '✎'), el('td', { class: 'mono', style: { fontSize: '13px' } }, d.issue), el('td', {}, el('span', { class: 'label' }, 'manual')),
+    el('td', {}, el('input', { value: m.description, placeholder: 'e.g. Late fee', oninput: e => m.description = e.target.value })),
+    el('td', {}, ''), el('td', {}, ''),
+    el('td', { class: 'num' }, el('input', { type: 'number', step: '0.01', value: m.amount, style: { maxWidth: '110px', marginLeft: 'auto' }, oninput: e => { m.amount = num(e.target.value); refresh(); } })))));
+
+  root.appendChild(tblScroll(el('table', {}, el('thead', {}, el('tr', {},
+    el('th', {}, ''), el('th', {}, 'Date'), el('th', {}, 'Kind'), el('th', {}, 'Description'),
+    el('th', { class: 'num' }, 'Hrs'), el('th', { class: 'num' }, 'Rate'), el('th', { class: 'num' }, 'Amount'))),
+    el('tbody', {}, rows))));
+  root.appendChild(el('button', { class: 'btn ghost sm', style: { marginTop: '10px' }, onclick: () => { d.manual.push({ description: '', amount: 0 }); renderApp(); } }, '+ Add manual line'));
+
+  // adjustments
+  root.appendChild(div({ class: 'card', style: { marginTop: '20px' } }, div({ class: 'form-grid' },
+    field('Discount', el('input', { type: 'number', step: '0.01', value: d.discount, oninput: e => { d.discount = num(e.target.value); refresh(); } })),
+    field('Discount type', (() => { const s = el('select', { onchange: e => { d.discountPct = e.target.value === 'pct'; refresh(); } }); s.appendChild(el('option', { value: 'pct', selected: d.discountPct }, 'percent %')); s.appendChild(el('option', { value: 'flat', selected: !d.discountPct }, 'flat ' + code)); return s; })()),
+    field((state.settings?.tax_name || 'Tax') + ' %', el('input', { type: 'number', step: '0.01', value: d.taxRate, oninput: e => { d.taxRate = num(e.target.value); refresh(); } })),
+    field((state.settings?.tax2_name || 'Tax 2') + ' %', el('input', { type: 'number', step: '0.01', value: d.tax2Rate, oninput: e => { d.tax2Rate = num(e.target.value); refresh(); } })))));
+
   root.appendChild(totalsBox);
-  refreshTotals();
+  root.appendChild(div({ class: 'field', style: { marginTop: '20px', maxWidth: '520px' } }, el('span', { class: 'label' }, 'Notes / terms'), el('textarea', { oninput: e => d.notes = e.target.value }, d.notes)));
+  root.appendChild(div({ style: { marginTop: '18px', display: 'flex', gap: '10px', flexWrap: 'wrap' } },
+    el('button', { class: 'btn', onclick: saveInvoice }, 'Save & download PDF'),
+    d.docType === 'invoice' && el('button', { class: 'btn ghost', onclick: saveRecurringTemplate }, 'Save as recurring template')));
+  refresh();
 
-  root.appendChild(div({ class: 'field', style: { marginTop: '20px', maxWidth: '520px' } },
-    el('span', { class: 'label' }, 'Notes / payment terms'),
-    el('textarea', { oninput: e => d.notes = e.target.value }, d.notes)));
-
-  root.appendChild(div({ style: { marginTop: '18px' } },
-    el('button', { class: 'btn', onclick: saveInvoice }, 'Save invoice & download PDF')));
-
-  function refreshTotals() {
-    const sel = d.items.filter(i => i.include);
-    const subtotal = sel.reduce((s, i) => s + i.amount, 0);
-    const tax = subtotal * d.taxRate / 100;
-    d._subtotal = subtotal; d._tax = tax; d._total = subtotal + tax;
+  function refresh() {
+    const chosen = d.items.filter(i => i.include).concat(d.manual.filter(m => num(m.amount)).map(m => ({ type: 'manual', date: d.issue, description: m.description, qty: 1, rate: num(m.amount), amount: num(m.amount) })));
+    const gross = chosen.reduce((s, i) => s + i.amount, 0);
+    const disc = d.discountPct ? gross * d.discount / 100 : d.discount;
+    const taxable = gross - disc;
+    const tax = taxable * (d.taxRate + d.tax2Rate) / 100;
+    d._chosen = chosen; d._subtotal = gross; d._discount = disc; d._tax = taxable * d.taxRate / 100; d._tax2 = taxable * d.tax2Rate / 100; d._total = taxable + tax;
     totalsBox.innerHTML = '';
-    totalsBox.appendChild(div({ class: 'totals' },
-      div({}, 'Subtotal: ' + fmtMoney(subtotal, ccy())),
-      div({}, 'Tax (' + d.taxRate + '%): ' + fmtMoney(tax, ccy())),
-      div({ class: 'grand' }, 'Total: ' + fmtMoney(subtotal + tax, ccy()))));
+    const rowsT = [['Subtotal', fmtMoney(gross, code)]];
+    if (disc) rowsT.push(['Discount', '− ' + fmtMoney(disc, code)]);
+    if (d.taxRate) rowsT.push([(state.settings?.tax_name || 'Tax') + ' (' + d.taxRate + '%)', fmtMoney(d._tax, code)]);
+    if (d.tax2Rate) rowsT.push([(state.settings?.tax2_name || 'Tax 2') + ' (' + d.tax2Rate + '%)', fmtMoney(d._tax2, code)]);
+    totalsBox.appendChild(div({ class: 'totals' }, rowsT.map(([l, v]) => div({}, l + ': ' + v)), div({ class: 'grand' }, 'Total: ' + fmtMoney(d._total, code))));
   }
 }
 
 async function loadDraftItems() {
   const d = state.invoiceDraft;
   try {
-    let tq = sb.from('time_entries').select('*').eq('client_id', d.client_id).eq('billable', true).is('invoice_id', null);
-    let eq2 = sb.from('expenses').select('*').eq('client_id', d.client_id).eq('billable', true).is('invoice_id', null);
-    if (d.from) { tq = tq.gte('entry_date', d.from); eq2 = eq2.gte('entry_date', d.from); }
-    if (d.to) { tq = tq.lte('entry_date', d.to); eq2 = eq2.lte('entry_date', d.to); }
-    const [t, e] = await Promise.all([tq, eq2]);
+    const range = (q) => { if (d.from) q = q.gte('entry_date', d.from); if (d.to) q = q.lte('entry_date', d.to); return q; };
+    const [t, e] = await Promise.all([
+      range(sb.from('time_entries').select('*').eq('client_id', d.client_id).eq('billable', true).is('invoice_id', null)),
+      range(sb.from('expenses').select('*').eq('client_id', d.client_id).eq('billable', true).is('invoice_id', null)),
+    ]);
     if (t.error) throw t.error; if (e.error) throw e.error;
-    const items = [
-      ...t.data.map(r => ({ include: true, src: 'time_entries', id: r.id, type: 'time', date: r.entry_date, description: r.description, qty: Number(r.hours), rate: Number(r.rate), amount: Number(r.hours) * Number(r.rate) })),
-      ...e.data.map(r => ({ include: true, src: 'expenses', id: r.id, type: 'expense', date: r.entry_date, description: r.description, qty: 1, rate: Number(r.amount), amount: Number(r.amount) })),
+    d.items = [
+      ...t.data.map(r => ({ include: true, src: 'time_entries', id: r.id, type: 'time', date: r.entry_date, description: r.description, qty: num(r.hours), rate: num(r.rate), amount: num(r.hours) * num(r.rate) })),
+      ...e.data.map(r => ({ include: true, src: 'expenses', id: r.id, type: 'expense', date: r.entry_date, description: r.description, qty: 1, rate: num(r.amount), amount: num(r.amount) })),
     ].sort((a, b) => a.date.localeCompare(b.date));
-    d.items = items;
     renderApp();
   } catch (err) { fail('Load items failed', err); }
 }
 
 async function saveInvoice() {
   const d = state.invoiceDraft;
-  const sel = d.items.filter(i => i.include);
-  if (!sel.length) return toast('Select at least one item', true);
+  if (!d._chosen.length) return toast('Select at least one item', true);
+  const est = d.docType === 'estimate';
   try {
-    const number = (state.settings.invoice_prefix || '') + (state.settings.invoice_next || 1);
-    const lineItems = sel.map(({ include, src, id, ...keep }) => keep);
-    const ins = await sb.from('invoices').insert({
-      client_id: d.client_id, invoice_number: number,
-      issue_date: d.issue, due_date: d.due || null, tax_rate: d.taxRate,
-      notes: d.notes, line_items: lineItems,
-      subtotal: d._subtotal, tax: d._tax, total: d._total,
-    }).select().single();
-    if (ins.error) throw ins.error;
-    const invId = ins.data.id;
-
-    const timeIds = sel.filter(i => i.src === 'time_entries').map(i => i.id);
-    const expIds = sel.filter(i => i.src === 'expenses').map(i => i.id);
-    if (timeIds.length) { const r = await sb.from('time_entries').update({ invoice_id: invId }).in('id', timeIds); if (r.error) throw r.error; }
-    if (expIds.length) { const r = await sb.from('expenses').update({ invoice_id: invId }).in('id', expIds); if (r.error) throw r.error; }
-
-    const upd = await sb.from('settings').update({ invoice_next: (state.settings.invoice_next || 1) + 1 }).eq('user_id', state.session.user.id);
-    if (upd.error) throw upd.error;
-
-    toast('Invoice ' + number + ' saved');
-    downloadPdf(ins.data);
-    state.invoiceDraft = null;
-    state.tab = 'invoices';
-    await loadAll();
+    const prefix = est ? (state.settings.estimate_prefix || 'EST-') : (state.settings.invoice_prefix || '');
+    const nextField = est ? 'estimate_next' : 'invoice_next';
+    const number = prefix + (state.settings[nextField] || 1);
+    const lineItems = d._chosen.map(({ include, src, id, ...keep }) => keep);
+    const r = await sb.from('invoices').insert({ client_id: d.client_id, invoice_number: number, doc_type: d.docType,
+      issue_date: d.issue, due_date: d.due || null, currency: clientCcy(d.client_id), tax_rate: d.taxRate, tax2_rate: d.tax2Rate,
+      discount: d.discount, discount_is_pct: d.discountPct, notes: d.notes, line_items: lineItems,
+      subtotal: d._subtotal, tax: d._tax + d._tax2, total: d._total }).select().single();
+    if (r.error) throw r.error;
+    const invId = r.data.id;
+    const tIds = d._chosen.filter(i => i.src === 'time_entries').map(i => i.id);
+    const eIds = d._chosen.filter(i => i.src === 'expenses').map(i => i.id);
+    if (tIds.length) { const u = await sb.from('time_entries').update({ invoice_id: invId }).in('id', tIds); if (u.error) throw u.error; }
+    if (eIds.length) { const u = await sb.from('expenses').update({ invoice_id: invId }).in('id', eIds); if (u.error) throw u.error; }
+    await sb.from('settings').update({ [nextField]: (state.settings[nextField] || 1) + 1 }).eq('user_id', state.session.user.id);
+    toast(number + ' saved'); downloadPdf(r.data);
+    state.invoiceDraft = null; state.tab = 'invoices'; loadAll();
   } catch (err) { fail('Save failed', err); }
 }
 
-/* =========================================================================
-   PDF
-   ========================================================================= */
-function downloadPdf(inv) {
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF({ unit: 'pt', format: 'letter' });
-  const s = state.settings || {};
-  const client = clientById(inv.client_id) || {};
-  const M = 48;
-  let y = 56;
+/* ===== recurring templates ================================================ */
+function renderRecurring(root) {
+  if (!state.recurring.length) return;
+  root.appendChild(el('div', { class: 'label', style: { margin: '4px 0 10px' } }, 'Recurring templates'));
+  const rows = state.recurring.map(r => el('tr', {},
+    el('td', {}, r.name || '(untitled)'), el('td', {}, clientName(r.client_id)), el('td', {}, r.cadence),
+    el('td', {}, r.last_generated || 'never'),
+    el('td', {}, div({ class: 'row-actions' },
+      el('button', { class: 'btn sm', onclick: () => generateFromTemplate(r) }, 'Generate now'),
+      el('button', { class: 'btn danger sm', onclick: () => del('recurring_templates', r.id) }, 'Del')))));
+  root.appendChild(tblScroll(el('table', {}, el('thead', {}, el('tr', {},
+    el('th', {}, 'Name'), el('th', {}, 'Client'), el('th', {}, 'Cadence'), el('th', {}, 'Last generated'), el('th', {}, ''))),
+    el('tbody', {}, rows))));
+  root.appendChild(el('div', { style: { height: '24px' } }));
+}
+async function saveRecurringTemplate() {
+  const d = state.invoiceDraft;
+  if (!d._chosen?.length) return toast('Load items first', true);
+  const name = prompt('Template name:', 'Monthly retainer · ' + clientName(d.client_id));
+  if (name == null) return;
+  const cadence = (prompt('Cadence (weekly / monthly / quarterly):', 'monthly') || 'monthly').toLowerCase();
+  await insert('recurring_templates', { client_id: d.client_id, name, cadence,
+    line_items: d._chosen.map(({ include, src, id, ...k }) => k), tax_rate: d.taxRate, notes: d.notes }, 'Template saved');
+}
+async function generateFromTemplate(r) {
+  try {
+    const items = r.line_items || [];
+    const subtotal = items.reduce((s, i) => s + num(i.amount), 0);
+    const tax = subtotal * num(r.tax_rate) / 100;
+    const number = (state.settings.invoice_prefix || '') + (state.settings.invoice_next || 1);
+    const ins = await sb.from('invoices').insert({ client_id: r.client_id, invoice_number: number, doc_type: 'invoice',
+      issue_date: today(), currency: clientCcy(r.client_id), tax_rate: num(r.tax_rate), notes: r.notes,
+      line_items: items, subtotal, tax, total: subtotal + tax }).select().single();
+    if (ins.error) throw ins.error;
+    await sb.from('settings').update({ invoice_next: (state.settings.invoice_next || 1) + 1 }).eq('user_id', state.session.user.id);
+    await sb.from('recurring_templates').update({ last_generated: today() }).eq('id', r.id);
+    toast('Generated ' + number); downloadPdf(ins.data); loadAll();
+  } catch (e) { fail('Generate failed', e); }
+}
 
-  doc.setFont('helvetica', 'bold'); doc.setFontSize(22);
-  doc.text(s.business_name || 'Invoice', M, y);
+/* ===== PDF ================================================================ */
+async function loadLogo(url) {
+  try {
+    const res = await fetch(url); const blob = await res.blob();
+    return await new Promise(r => { const fr = new FileReader(); fr.onload = () => r(fr.result); fr.readAsDataURL(blob); });
+  } catch { return null; }
+}
+async function downloadPdf(inv) {
+  const { jsPDF } = window.jspdf; const doc = new jsPDF({ unit: 'pt', format: 'letter' });
+  const s = state.settings || {}; const client = clientById(inv.client_id) || {}; const code = inv.currency || ccy();
+  const M = 48; let y = 56;
+  if (s.logo_url) { const data = await loadLogo(s.logo_url); if (data) { try { doc.addImage(data, 'PNG', M, y - 16, 90, 90); } catch {} } }
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(22); doc.text(s.business_name || 'Invoice', s.logo_url ? M + 104 : M, y);
   doc.setFont('helvetica', 'normal'); doc.setFontSize(9.5); doc.setTextColor(120);
-  let by = y + 18;
-  for (const line of [s.business_email, ...(s.address || '').split('\n')].filter(Boolean)) { doc.text(line, M, by); by += 13; }
-
-  // invoice meta (right)
+  let by = y + 18; for (const line of [s.business_email, ...(s.address || '').split('\n')].filter(Boolean)) { doc.text(line, s.logo_url ? M + 104 : M, by); by += 13; }
   doc.setTextColor(40); doc.setFont('helvetica', 'bold'); doc.setFontSize(16);
-  doc.text('INVOICE', 565, y, { align: 'right' });
+  doc.text((inv.doc_type === 'estimate' ? 'ESTIMATE' : 'INVOICE'), 565, y, { align: 'right' });
   doc.setFont('helvetica', 'normal'); doc.setFontSize(10); doc.setTextColor(90);
   doc.text('No. ' + inv.invoice_number, 565, y + 18, { align: 'right' });
   doc.text('Issued: ' + (inv.issue_date || ''), 565, y + 33, { align: 'right' });
   if (inv.due_date) doc.text('Due: ' + inv.due_date, 565, y + 48, { align: 'right' });
-
-  // bill to
   y = Math.max(by, y + 64) + 14;
   doc.setTextColor(150); doc.setFontSize(8.5); doc.text('BILL TO', M, y);
-  doc.setTextColor(40); doc.setFontSize(11); doc.setFont('helvetica', 'bold');
-  doc.text(client.name || '—', M, y + 15);
+  doc.setTextColor(40); doc.setFontSize(11); doc.setFont('helvetica', 'bold'); doc.text(client.name || '—', M, y + 15);
   doc.setFont('helvetica', 'normal'); doc.setFontSize(9.5); doc.setTextColor(120);
-  let cy = y + 30;
-  for (const line of [client.email, ...(client.address || '').split('\n')].filter(Boolean)) { doc.text(line, M, cy); cy += 13; }
-
-  // line items table
+  let cy = y + 30; for (const line of [client.email, ...(client.address || '').split('\n')].filter(Boolean)) { doc.text(line, M, cy); cy += 13; }
   const items = inv.line_items || [];
-  doc.autoTable({
-    startY: cy + 16,
-    margin: { left: M, right: M },
+  doc.autoTable({ startY: cy + 16, margin: { left: M, right: M },
     head: [['Date', 'Description', 'Hrs', 'Rate', 'Amount']],
-    body: items.map(it => [
-      it.date,
-      (it.type === 'expense' ? '[expense] ' : '') + (it.description || ''),
-      it.type === 'time' ? String(it.qty) : '',
-      it.type === 'time' ? fmtMoney(it.rate, ccy()) : '',
-      fmtMoney(it.amount, ccy()),
-    ]),
+    body: items.map(it => [it.date, (it.type === 'expense' ? '[expense] ' : it.type === 'manual' ? '' : '') + (it.description || ''),
+      it.type === 'time' ? String(it.qty) : '', it.type === 'time' ? fmtMoney(it.rate, code) : '', fmtMoney(it.amount, code)]),
     styles: { font: 'helvetica', fontSize: 9.5, cellPadding: 6, textColor: 40 },
     headStyles: { fillColor: [42, 32, 24], textColor: 244, fontSize: 8.5 },
     columnStyles: { 0: { cellWidth: 70 }, 2: { halign: 'right', cellWidth: 50 }, 3: { halign: 'right', cellWidth: 70 }, 4: { halign: 'right', cellWidth: 80 } },
-    alternateRowStyles: { fillColor: [248, 244, 236] },
-  });
-
+    alternateRowStyles: { fillColor: [248, 244, 236] } });
   let ty = doc.lastAutoTable.finalY + 16;
-  const rightCol = (label, val, bold) => {
-    doc.setFont('helvetica', bold ? 'bold' : 'normal');
-    doc.setFontSize(bold ? 12 : 10);
-    doc.setTextColor(bold ? 185 : 90, bold ? 104 : 90, bold ? 59 : 90);
-    doc.text(label, 430, ty, { align: 'right' });
-    doc.text(val, 565, ty, { align: 'right' });
-    ty += bold ? 20 : 16;
-  };
-  rightCol('Subtotal', fmtMoney(inv.subtotal, ccy()));
-  rightCol('Tax (' + inv.tax_rate + '%)', fmtMoney(inv.tax, ccy()));
-  rightCol('Total', fmtMoney(inv.total, ccy()), true);
-
-  if (inv.notes) {
-    doc.setFont('helvetica', 'normal'); doc.setFontSize(9.5); doc.setTextColor(120);
-    doc.text(doc.splitTextToSize(inv.notes, 360), M, ty + 6);
-  }
-
-  doc.save('invoice-' + inv.invoice_number + '.pdf');
+  const line = (label, val, bold) => { doc.setFont('helvetica', bold ? 'bold' : 'normal'); doc.setFontSize(bold ? 12 : 10);
+    doc.setTextColor(bold ? 185 : 90, bold ? 104 : 90, bold ? 59 : 90); doc.text(label, 430, ty, { align: 'right' }); doc.text(val, 565, ty, { align: 'right' }); ty += bold ? 20 : 16; };
+  line('Subtotal', fmtMoney(inv.subtotal, code));
+  if (num(inv.discount)) line('Discount', '− ' + fmtMoney(inv.discount_is_pct ? num(inv.subtotal) * num(inv.discount) / 100 : inv.discount, code));
+  if (num(inv.tax)) line((s.tax_name || 'Tax'), fmtMoney(inv.tax, code));
+  line('Total', fmtMoney(inv.total, code), true);
+  const paid = paidFor(inv.id);
+  if (paid) { line('Paid', '− ' + fmtMoney(paid, code)); line('Balance due', fmtMoney(num(inv.total) - paid, code), true); }
+  if (inv.notes) { doc.setFont('helvetica', 'normal'); doc.setFontSize(9.5); doc.setTextColor(120); doc.text(doc.splitTextToSize(inv.notes, 360), M, ty + 6); }
+  doc.save((inv.doc_type === 'estimate' ? 'estimate-' : 'invoice-') + inv.invoice_number + '.pdf');
 }
 
-/* =========================================================================
-   SETTINGS
-   ========================================================================= */
+/* ===== REPORTS ============================================================ */
+function renderReports(root) {
+  root.appendChild(el('div', { class: 'section-title' }, 'Reports'));
+  root.appendChild(el('div', { class: 'section-sub' }, 'Income, utilization, year-end totals, and exports.'));
+
+  // income by client
+  const byClient = {};
+  state.payments.forEach(p => { const inv = state.invoices.find(i => i.id === p.invoice_id); const cid = inv?.client_id; const key = clientName(cid); byClient[key] = (byClient[key] || 0) + num(p.amount); });
+  root.appendChild(el('div', { class: 'label', style: { margin: '6px 0 10px' } }, 'Income by client (received)'));
+  const ic = Object.entries(byClient).sort((a, b) => b[1] - a[1]);
+  root.appendChild(ic.length ? tblScroll(el('table', {}, el('tbody', {}, ic.map(([k, v]) => el('tr', {}, el('td', {}, k), el('td', { class: 'num' }, fmtMoney(v))))))) : div({ class: 'empty' }, 'No payments recorded yet.'));
+
+  // utilization
+  const bill = state.time.filter(t => t.billable).reduce((s, t) => s + num(t.hours), 0);
+  const non = state.time.filter(t => !t.billable).reduce((s, t) => s + num(t.hours), 0);
+  const tot = bill + non;
+  root.appendChild(div({ class: 'kpis', style: { marginTop: '24px' } },
+    kpi('Billable hours', bill.toFixed(1)), kpi('Non-billable hours', non.toFixed(1)),
+    kpi('Utilization', tot ? Math.round(bill / tot * 100) + '%' : '—', true)));
+
+  // year-end
+  const yr = today().slice(0, 4);
+  const billedThisYear = state.invoices.filter(i => i.doc_type !== 'estimate' && i.issue_date >= yr + '-01-01').reduce((s, i) => s + num(i.total), 0);
+  const receivedThisYear = state.payments.filter(p => p.paid_date >= yr + '-01-01').reduce((s, p) => s + num(p.amount), 0);
+  const expThisYear = state.expenses.filter(x => x.entry_date >= yr + '-01-01').reduce((s, x) => s + num(x.amount), 0);
+  root.appendChild(el('div', { class: 'label', style: { margin: '24px 0 10px' } }, yr + ' summary'));
+  root.appendChild(div({ class: 'kpis' }, kpi('Invoiced', fmtMoney(billedThisYear)), kpi('Received', fmtMoney(receivedThisYear)), kpi('Expenses', fmtMoney(expThisYear))));
+
+  // exports
+  root.appendChild(el('div', { class: 'label', style: { margin: '28px 0 12px' } }, 'Export & backup'));
+  root.appendChild(div({ style: { display: 'flex', gap: '10px', flexWrap: 'wrap' } },
+    el('button', { class: 'btn ghost sm', onclick: exportTimeCSV }, 'Time → CSV'),
+    el('button', { class: 'btn ghost sm', onclick: exportExpensesCSV }, 'Expenses → CSV'),
+    el('button', { class: 'btn ghost sm', onclick: exportInvoicesCSV }, 'Invoices → CSV'),
+    el('button', { class: 'btn ghost sm', onclick: backupJSON }, 'Full backup (JSON)'),
+    (() => { const inp = el('input', { type: 'file', accept: '.json', style: { display: 'none' }, onchange: e => restoreJSON(e.target.files[0]) });
+      const b = el('button', { class: 'btn ghost sm', onclick: () => inp.click() }, 'Restore from JSON'); return div({ style: { display: 'inline' } }, b, inp); })()));
+}
+function downloadFile(name, content, type) {
+  const url = URL.createObjectURL(new Blob([content], { type })); const a = el('a', { href: url, download: name }); document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+}
+function toCSV(rows) { return rows.map(r => r.map(c => { const s = c == null ? '' : String(c); return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; }).join(',')).join('\n'); }
+function exportTimeCSV() { downloadFile('time.csv', toCSV([['Date', 'Client', 'Project', 'Description', 'Hours', 'Rate', 'Billable', 'Amount'], ...state.time.map(t => [t.entry_date, clientName(t.client_id), projectName(t.project_id), t.description, t.hours, t.rate, t.billable, num(t.hours) * num(t.rate)])]), 'text/csv'); }
+function exportExpensesCSV() { downloadFile('expenses.csv', toCSV([['Date', 'Client', 'Category', 'Description', 'Amount', 'Billable'], ...state.expenses.map(x => [x.entry_date, clientName(x.client_id), x.category, x.description, x.amount, x.billable])]), 'text/csv'); }
+function exportInvoicesCSV() { downloadFile('invoices.csv', toCSV([['Number', 'Type', 'Client', 'Issued', 'Due', 'Status', 'Total', 'Paid', 'Balance', 'Currency'], ...state.invoices.map(i => [i.invoice_number, i.doc_type, clientName(i.client_id), i.issue_date, i.due_date, invStatus(i), i.total, paidFor(i.id), num(i.total) - paidFor(i.id), i.currency])]), 'text/csv'); }
+function backupJSON() { downloadFile('invoice-backup-' + today() + '.json', JSON.stringify({ version: 2, exported: today(), settings: state.settings, clients: state.clients, projects: state.projects, time: state.time, expenses: state.expenses, invoices: state.invoices, payments: state.payments, recurring: state.recurring }, null, 2), 'application/json'); }
+async function restoreJSON(file) {
+  if (!file) return;
+  if (!confirm('Restore will ADD the records from this file as new rows (existing data is kept). Continue?')) return;
+  try {
+    const data = JSON.parse(await file.text()); const map = {};
+    const reinsert = async (table, rows, fixFks) => { for (const row of rows || []) { const { id, user_id, created_at, ...rest } = row; if (fixFks) fixFks(rest); const r = await sb.from(table).insert(rest).select('id').single(); if (!r.error) map[id] = r.data.id; } };
+    await reinsert('clients', data.clients);
+    await reinsert('projects', data.projects, x => { if (x.client_id) x.client_id = map[x.client_id] || null; });
+    await reinsert('invoices', data.invoices, x => { if (x.client_id) x.client_id = map[x.client_id] || null; });
+    await reinsert('time_entries', data.time, x => { x.client_id = map[x.client_id] || null; x.project_id = map[x.project_id] || null; x.invoice_id = map[x.invoice_id] || null; });
+    await reinsert('expenses', data.expenses, x => { x.client_id = map[x.client_id] || null; x.project_id = map[x.project_id] || null; x.invoice_id = map[x.invoice_id] || null; });
+    await reinsert('payments', data.payments, x => { x.invoice_id = map[x.invoice_id] || null; });
+    toast('Restore complete'); loadAll();
+  } catch (e) { fail('Restore failed', e); }
+}
+
+/* ===== SETTINGS =========================================================== */
 function renderSettings(root) {
   root.appendChild(el('div', { class: 'section-title' }, 'Settings'));
-  root.appendChild(el('div', { class: 'section-sub' }, 'Your business details — these appear on every invoice PDF.'));
+  root.appendChild(el('div', { class: 'section-sub' }, 'Business details and invoice defaults — shown on every PDF.'));
   const s = { ...state.settings };
-
-  const bind = (key, attrs) => {
-    const node = el(attrs.tag || 'input', { ...attrs, tag: undefined, value: undefined, oninput: e => s[key] = e.target.value });
-    if ((attrs.tag || 'input') === 'textarea') node.value = state.settings[key] || '';
-    else node.value = state.settings[key] ?? '';
-    return node;
-  };
-
-  root.appendChild(div({ class: 'card' },
-    div({ class: 'form-grid' },
-      div({ class: 'field' }, el('span', { class: 'label' }, 'Business name'), bind('business_name', {})),
-      div({ class: 'field' }, el('span', { class: 'label' }, 'Business email'), bind('business_email', { type: 'email' })),
-      div({ class: 'field' }, el('span', { class: 'label' }, 'Currency (ISO)'), bind('currency', { placeholder: 'USD' })),
-      div({ class: 'field' }, el('span', { class: 'label' }, 'Default tax %'), bind('tax_rate', { type: 'number', step: '0.01' })),
-      div({ class: 'field' }, el('span', { class: 'label' }, 'Invoice prefix'), bind('invoice_prefix', { placeholder: 'INV-' })),
-      div({ class: 'field' }, el('span', { class: 'label' }, 'Next invoice #'), bind('invoice_next', { type: 'number', step: '1' })),
-    ),
+  const bind = (key, attrs = {}) => { const tag = attrs.tag || 'input'; const node = el(tag, { ...attrs, tag: undefined, oninput: e => s[key] = e.target.value }); node.value = state.settings[key] ?? ''; return node; };
+  const saveBtn = el('button', { class: 'btn', onclick: async () => {
+    const { error } = await sb.from('settings').update({
+      business_name: s.business_name, business_email: s.business_email, address: s.address, payment_terms: s.payment_terms,
+      currency: (s.currency || 'USD').toUpperCase(), logo_url: s.logo_url, tax_name: s.tax_name, tax_rate: num(s.tax_rate),
+      tax2_name: s.tax2_name, tax2_rate: num(s.tax2_rate), mileage_rate: num(s.mileage_rate),
+      invoice_prefix: s.invoice_prefix, invoice_next: parseInt(s.invoice_next) || 1,
+      estimate_prefix: s.estimate_prefix, estimate_next: parseInt(s.estimate_next) || 1,
+    }).eq('user_id', state.session.user.id);
+    if (error) return fail('Save failed', error);
+    toast('Settings saved'); loadAll();
+  } }, 'Save settings');
+  root.appendChild(div({ class: 'card' }, div({ class: 'form-grid' },
+    field('Business name', bind('business_name')), field('Business email', bind('business_email', { type: 'email' })),
+    field('Currency (ISO)', bind('currency', { placeholder: 'USD' })), field('Logo URL', bind('logo_url', { placeholder: 'https://…/logo.png' })),
+    field('Tax name', bind('tax_name', { placeholder: 'Tax / VAT / GST' })), field('Tax %', bind('tax_rate', { type: 'number', step: '0.01' })),
+    field('Tax 2 name', bind('tax2_name')), field('Tax 2 %', bind('tax2_rate', { type: 'number', step: '0.01' })),
+    field('Mileage rate', bind('mileage_rate', { type: 'number', step: '0.01' })),
+    field('Invoice prefix', bind('invoice_prefix')), field('Next invoice #', bind('invoice_next', { type: 'number' })),
+    field('Estimate prefix', bind('estimate_prefix')), field('Next estimate #', bind('estimate_next', { type: 'number' }))),
     div({ class: 'field', style: { marginTop: '14px' } }, el('span', { class: 'label' }, 'Address'), bind('address', { tag: 'textarea' })),
-    div({ class: 'field', style: { marginTop: '14px' } }, el('span', { class: 'label' }, 'Default payment terms / invoice notes'), bind('payment_terms', { tag: 'textarea' })),
-    div({ style: { marginTop: '16px' } }, el('button', {
-      class: 'btn',
-      onclick: async () => {
-        const { error } = await sb.from('settings').update({
-          business_name: s.business_name, business_email: s.business_email,
-          address: s.address, payment_terms: s.payment_terms,
-          currency: (s.currency || 'USD').toUpperCase(), tax_rate: Number(s.tax_rate) || 0,
-          invoice_prefix: s.invoice_prefix, invoice_next: parseInt(s.invoice_next) || 1,
-        }).eq('user_id', state.session.user.id);
-        if (error) return fail('Save failed', error);
-        toast('Settings saved'); loadAll();
-      },
-    }, 'Save settings'))));
+    div({ class: 'field', style: { marginTop: '14px' } }, el('span', { class: 'label' }, 'Default payment terms / notes'), bind('payment_terms', { tag: 'textarea' })),
+    div({ style: { marginTop: '16px' } }, saveBtn)));
 }
 
-/* ---------------------------------------------------------------- boot */
+/* ===== keyboard shortcuts ================================================= */
+const tabOrder = ['dashboard', 'time', 'expenses', 'clients', 'projects', 'invoices', 'reports', 'settings'];
+document.addEventListener('keydown', (e) => {
+  if (!state.session || e.metaKey || e.ctrlKey || e.altKey) return;
+  const tag = (e.target.tagName || '').toLowerCase();
+  if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
+  if (e.key >= '1' && e.key <= '8') { state.tab = tabOrder[+e.key - 1]; state.editing = null; renderApp(); }
+  else if (e.key === 'n' && state.tab === 'invoices' && !state.invoiceDraft) startDraft('invoice');
+});
+
+/* ===== boot =============================================================== */
+try { const saved = localStorage.getItem('inv-timer'); if (saved) state.timer = JSON.parse(saved); } catch {}
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  navigator.serviceWorker.register('/sw.js').catch(() => {});
+}
 initAuth();
 </script>
 </body>

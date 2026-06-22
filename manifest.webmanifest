@@ -1,0 +1,13 @@
+{
+  "name": "Invoice · verbandnoun.io",
+  "short_name": "Invoice",
+  "description": "Consulting time, expense and invoice tracker.",
+  "start_url": "/invoice.html",
+  "scope": "/invoice.html",
+  "display": "standalone",
+  "background_color": "#f4eee4",
+  "theme_color": "#b9683b",
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
