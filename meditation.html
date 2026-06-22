@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Meditation · verbandnoun.io</title>
+<meta name="theme-color" content="#2E3C24">
+<link rel="icon" href="/icon.svg">
+<link rel="apple-touch-icon" href="/icon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Hanken+Grotesk:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#EFEBE6; --surface:#F6F3ED; --text:#283420; --muted:#8a8578; --soft:#6f6a5d;
+    --accent:#2E3C24; --accent-d:#1d2718; --on-accent:#EFEBE6; --line:#e2dcd4; --strong:#2E3C24;
+    --field:#FFFFFF; --field-bd:#cfc8ba; --hover:#ece7dd;
+    --coral:#EC8E90; --coral-700:#C45F61;
+  }
+  html[data-theme="dark"] {
+    --bg:#1d2718; --surface:#283420; --text:#EFEBE6; --muted:#9aa890; --soft:#b9c2ad;
+    --accent:#EC8E90; --accent-d:#e07e80; --on-accent:#2E3C24; --line:#3a4733; --strong:#475438;
+    --field:#222d1b; --field-bd:#44523a; --hover:#2f3d26;
+    --coral:#EC8E90; --coral-700:#EC8E90;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background-color: var(--bg); font-family: 'Hanken Grotesk', sans-serif; color: var(--text); min-height: 100vh; display: flex; flex-direction: column; -webkit-font-smoothing: antialiased; }
+  ::selection { background: var(--coral); color: #2E3C24; }
+  a { color: inherit; }
+  .back-link { font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: 1px; text-transform: lowercase; color: var(--muted); text-decoration: none; transition: color .22s; }
+  .back-link:hover { color: var(--coral-700); }
+  .mono { font-family: 'Space Mono', monospace; }
+  .label { font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); }
+  .topbar { display:flex; align-items:center; justify-content:space-between; gap:14px; padding:24px clamp(20px,7vw,84px) 16px; border-bottom:1px solid var(--line); }
+  .icon-btn { background:none; border:1px solid var(--field-bd); color:var(--muted); border-radius:4px; padding:5px 10px; cursor:pointer; font-family:'Space Mono',monospace; font-size:11px; letter-spacing:.5px; transition:color .2s, border-color .2s; }
+  .icon-btn:hover { color:var(--coral-700); border-color:var(--coral-700); }
+
+  .wrap { max-width: 1120px; width: 100%; margin: 0 auto; padding: clamp(20px,5vw,52px) clamp(20px,7vw,84px); flex: 1; }
+
+  .section-title { font-family:'Instrument Serif',serif; font-weight:400; font-size:clamp(24px,3.4vw,34px); letter-spacing:0; margin-bottom:4px; }
+  .section-sub { font-family:'Instrument Serif',serif; font-style:italic; color:var(--soft); font-size:18px; margin-bottom:24px; }
+  .card { background:var(--surface); border:1px solid var(--line); border-radius:4px; padding:22px; margin-bottom:26px; }
+
+  .btn { font-family:'Space Mono',monospace; font-size:12px; letter-spacing:1px; text-transform:uppercase; background:var(--accent); color:var(--on-accent); border:1px solid var(--accent); border-radius:100px; padding:10px 20px; cursor:pointer; transition:background .2s, transform .2s; }
+  .btn:hover { background: var(--accent-d); transform: translateY(-1px); }
+  .btn:disabled { opacity:.5; cursor:not-allowed; transform:none; }
+
+  /* placeholder hero */
+  .ph-hero { text-align:center; padding: clamp(40px,8vw,90px) 0; }
+  .ph-eyebrow { font-family:'Space Mono',monospace; font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--coral-700); margin-bottom:28px; }
+  .ph-title { font-family:'Instrument Serif',serif; font-size:clamp(48px,9vw,96px); line-height:.92; color:var(--text); }
+  .ph-title em { font-style:italic; }
+  .ph-lead { font-family:'Hanken Grotesk',sans-serif; font-size:clamp(16px,1.8vw,19px); line-height:1.55; color:var(--soft); max-width:520px; margin:24px auto 0; }
+  .ph-pill { display:inline-block; font-family:'Space Mono',monospace; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--coral-700); border:1px solid var(--coral-700); border-radius:100px; padding:6px 14px; margin-top:34px; }
+
+  /* breathing circle */
+  .breathe { width:120px; height:120px; margin:0 auto 44px; border-radius:50%; background:radial-gradient(circle at 50% 50%, var(--coral) 0%, transparent 70%); opacity:.55; animation:breathe 8s ease-in-out infinite; }
+  @keyframes breathe { 0%,100% { transform:scale(.7); opacity:.4; } 50% { transform:scale(1); opacity:.7; } }
+  @media (prefers-reduced-motion: reduce) { .breathe { animation:none; } }
+</style>
+</head>
+<body>
+  <div class="topbar">
+    <a href="index.html" class="back-link">← verbandnoun.io</a>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <button id="theme-btn" class="icon-btn" title="Toggle dark mode">◐</button>
+      <span class="mono" style="font-size:11px;letter-spacing:1px;color:var(--muted);text-transform:uppercase;">05 · Meditation</span>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="ph-hero">
+      <div class="breathe"></div>
+      <div class="ph-eyebrow">breathe (v.) · stillness (n.)</div>
+      <div class="ph-title"><em>Meditation</em></div>
+      <p class="ph-lead">A quiet place to breathe — guided sessions, breath timers, and soundscapes. Still being built.</p>
+      <span class="ph-pill">Coming soon</span>
+    </div>
+
+    <div class="card" style="text-align:center;">
+      <div class="section-title">In the works</div>
+      <div class="section-sub">Move, listen, settle.</div>
+      <button class="btn" disabled>Notify me</button>
+    </div>
+  </div>
+
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;padding:22px clamp(20px,7vw,84px);border-top:1px solid var(--line);font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);">
+    <span>verbandnoun.io</span>
+    <span>05 · meditation</span>
+  </div>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+  function applyTheme(t) {
+    document.documentElement.setAttribute('data-theme', t);
+    localStorage.setItem('inv-theme', t);
+  }
+  $('theme-btn').addEventListener('click', () =>
+    applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'));
+  applyTheme(localStorage.getItem('inv-theme') || 'light');
+</script>
+</body>
+</html>
