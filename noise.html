@@ -9,14 +9,94 @@
 <link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,600;1,400&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: #f4eee4; font-family: 'Spectral', serif; color: #2a2018; min-height: 100vh; display: flex; flex-direction: column; }
+  body { background: #f4eee4; font-family: 'Spectral', serif; color: #2a2018; min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
   .back-link { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 1px; text-transform: lowercase; color: #9a8b76; text-decoration: none; transition: color .22s; }
   .back-link:hover { color: #b9683b; }
   #noise-canvas { display: block; width: 100%; cursor: crosshair; }
+
+  /* ── controls drawer ── */
+  #ctrl-drawer {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 50;
+    background: rgba(20,16,12,.92);
+    backdrop-filter: blur(12px);
+    border-top: 1px solid rgba(255,255,255,.08);
+    transform: translateY(calc(100% - 36px));
+    transition: transform .38s cubic-bezier(.2,.7,.2,1);
+  }
+  #ctrl-drawer.open { transform: translateY(0); }
+
+  #ctrl-tab {
+    height: 36px; display: flex; align-items: center; justify-content: center;
+    gap: 8px; cursor: pointer;
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    letter-spacing: 2px; text-transform: uppercase; color: #9a8b76;
+    user-select: none;
+    transition: color .2s;
+  }
+  #ctrl-tab:hover { color: #d8a76e; }
+  #ctrl-arrow { transition: transform .38s cubic-bezier(.2,.7,.2,1); display: inline-block; }
+  #ctrl-drawer.open #ctrl-arrow { transform: rotate(180deg); }
+
+  #ctrl-body {
+    padding: 16px clamp(20px,5vw,64px) 24px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px 48px;
+  }
+
+  .ctrl-group { display: flex; flex-direction: column; gap: 14px; }
+  .ctrl-group-label {
+    font-family: 'JetBrains Mono', monospace; font-size: 9px;
+    letter-spacing: 3px; text-transform: uppercase; color: #5a4e3e;
+    padding-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,.06);
+  }
+
+  .ctrl-row { display: flex; align-items: center; gap: 12px; }
+  .ctrl-label {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    letter-spacing: 1px; text-transform: uppercase; color: #7a6e5e;
+    width: 72px; flex: none;
+  }
+  .ctrl-val {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    color: #d8a76e; width: 32px; text-align: right; flex: none;
+  }
+
+  /* slider */
+  input[type=range] {
+    -webkit-appearance: none; appearance: none;
+    flex: 1; height: 2px; background: #3a3028; border-radius: 1px; outline: none;
+    cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 12px; height: 12px;
+    border-radius: 50%; background: #d8a76e; cursor: pointer;
+    transition: background .2s, transform .15s;
+  }
+  input[type=range]:hover::-webkit-slider-thumb { background: #e8b77e; transform: scale(1.2); }
+  input[type=range]::-webkit-slider-runnable-track { background: transparent; }
+
+  /* toggle buttons */
+  .ctrl-toggles { display: flex; gap: 4px; flex: 1; }
+  .ctrl-btn {
+    font-family: 'JetBrains Mono', monospace; font-size: 9px;
+    letter-spacing: 1px; text-transform: uppercase;
+    padding: 4px 8px; border: 1px solid #3a3028; border-radius: 2px;
+    background: transparent; color: #7a6e5e; cursor: pointer;
+    transition: background .18s, color .18s, border-color .18s;
+    white-space: nowrap;
+  }
+  .ctrl-btn:hover { border-color: #6a5e4e; color: #c9b9a3; }
+  .ctrl-btn.active { background: #d8a76e; border-color: #d8a76e; color: #1a1410; }
+
+  @media (max-width: 600px) {
+    #ctrl-body { grid-template-columns: 1fr; }
+    .ctrl-label { width: 56px; font-size: 9px; }
+  }
 </style>
 </head>
 <body>
-<div style="display:flex;flex-direction:column;min-height:100vh;">
+<div style="display:flex;flex-direction:column;min-height:100vh;padding-bottom:36px;">
 
   <!-- top bar -->
   <div style="display:flex;align-items:center;justify-content:space-between;padding:28px clamp(24px,7vw,84px) 0;border-bottom:1px solid #e0d4bf;padding-bottom:18px;">
@@ -45,58 +125,151 @@
 
 </div>
 
+<!-- controls drawer -->
+<div id="ctrl-drawer">
+  <div id="ctrl-tab">
+    <span>settings</span>
+    <span id="ctrl-arrow">↑</span>
+  </div>
+  <div id="ctrl-body">
+
+    <!-- audio -->
+    <div class="ctrl-group">
+      <div class="ctrl-group-label">Audio</div>
+
+      <div class="ctrl-row">
+        <span class="ctrl-label">Volume</span>
+        <input type="range" id="c-vol" min="0" max="100" value="60">
+        <span class="ctrl-val" id="v-vol">60</span>
+      </div>
+
+      <div class="ctrl-row">
+        <span class="ctrl-label">Reverb</span>
+        <input type="range" id="c-rev" min="0" max="100" value="30">
+        <span class="ctrl-val" id="v-rev">30</span>
+      </div>
+
+      <div class="ctrl-row">
+        <span class="ctrl-label">Wave</span>
+        <div class="ctrl-toggles">
+          <button class="ctrl-btn active" data-group="wave" data-val="sine">sine</button>
+          <button class="ctrl-btn" data-group="wave" data-val="triangle">tri</button>
+          <button class="ctrl-btn" data-group="wave" data-val="sawtooth">saw</button>
+          <button class="ctrl-btn" data-group="wave" data-val="square">sqr</button>
+        </div>
+      </div>
+
+      <div class="ctrl-row">
+        <span class="ctrl-label">Scale</span>
+        <div class="ctrl-toggles">
+          <button class="ctrl-btn active" data-group="scale" data-val="penta">penta</button>
+          <button class="ctrl-btn" data-group="scale" data-val="major">major</button>
+          <button class="ctrl-btn" data-group="scale" data-val="minor">minor</button>
+          <button class="ctrl-btn" data-group="scale" data-val="chrom">chrom</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- visual -->
+    <div class="ctrl-group">
+      <div class="ctrl-group-label">Visual</div>
+
+      <div class="ctrl-row">
+        <span class="ctrl-label">Density</span>
+        <input type="range" id="c-den" min="12" max="48" value="28">
+        <span class="ctrl-val" id="v-den">28</span>
+      </div>
+
+      <div class="ctrl-row">
+        <span class="ctrl-label">Radius</span>
+        <input type="range" id="c-rad" min="40" max="280" value="130">
+        <span class="ctrl-val" id="v-rad">130</span>
+      </div>
+
+      <div class="ctrl-row">
+        <span class="ctrl-label">Speed</span>
+        <input type="range" id="c-spd" min="2" max="30" value="12">
+        <span class="ctrl-val" id="v-spd">12</span>
+      </div>
+
+      <div class="ctrl-row">
+        <span class="ctrl-label">Color</span>
+        <div class="ctrl-toggles">
+          <button class="ctrl-btn active" data-group="color" data-val="amber">amber</button>
+          <button class="ctrl-btn" data-group="color" data-val="blue">blue</button>
+          <button class="ctrl-btn" data-group="color" data-val="white">white</button>
+          <button class="ctrl-btn" data-group="color" data-val="acid">acid</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
 <script>
 (function () {
+  // ── state ──
+  const P = {
+    vol: 0.6,
+    rev: 0.3,
+    wave: 'sine',
+    scale: 'penta',
+    spacing: 28,
+    radius: 130,
+    speed: 0.12,
+    color: 'amber',
+  };
+
+  const SCALES = {
+    penta: [130.81,146.83,164.81,196,220,261.63,293.66,329.63,392,440,523.25,587.33,659.25,784,880],
+    major: [130.81,146.83,164.81,174.61,196,220,246.94,261.63,293.66,329.63,349.23,392,440,493.88,523.25,587.33,659.25,698.46,784,880],
+    minor: [130.81,146.83,155.56,174.61,196,207.65,233.08,261.63,293.66,311.13,349.23,392,415.30,466.16,523.25,587.33,622.25,698.46,784],
+    chrom: [130.81,138.59,146.83,155.56,164.81,174.61,185,196,207.65,220,233.08,246.94,261.63,277.18,293.66,311.13,329.63,349.23,369.99,392,415.30,440,466.16,493.88,523.25],
+  };
+
+  const COLORS = {
+    amber: { bg:'#1a1410', dotLo:[26,20,16], dotHi:[216,127,60], glowA:'rgba(216,167,110,', glowB:'rgba(185,104,59,' },
+    blue:  { bg:'#0d1420', dotLo:[13,20,32], dotHi:[80,160,255], glowA:'rgba(80,160,255,',  glowB:'rgba(40,100,220,' },
+    white: { bg:'#111111', dotLo:[40,40,40], dotHi:[240,235,225], glowA:'rgba(240,235,225,', glowB:'rgba(200,195,185,' },
+    acid:  { bg:'#0d1a0d', dotLo:[13,26,13], dotHi:[120,255,60], glowA:'rgba(120,255,60,',  glowB:'rgba(60,200,20,' },
+  };
+
+  // ── canvas ──
   const canvas = document.getElementById('noise-canvas');
   const ctx = canvas.getContext('2d');
   const hint = document.getElementById('noise-hint');
-
-  // ── layout ──
-  const SPACING = 28;
-  let W, H, cols, rows, dots = [];
+  let W, H, dots = [];
 
   function resize() {
     const rect = canvas.parentElement.getBoundingClientRect();
     W = Math.floor(rect.width);
     H = Math.max(Math.floor(window.innerHeight * 0.55), 320);
-    canvas.width = W;
-    canvas.height = H;
+    canvas.width = W; canvas.height = H;
     buildGrid();
   }
 
   function buildGrid() {
     dots = [];
-    cols = Math.floor(W / SPACING);
-    rows = Math.floor(H / SPACING);
-    const offX = (W - (cols - 1) * SPACING) / 2;
-    const offY = (H - (rows - 1) * SPACING) / 2;
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        dots.push({ x: offX + c * SPACING, y: offY + r * SPACING, glow: 0 });
-      }
-    }
+    const cols = Math.floor(W / P.spacing);
+    const rows = Math.floor(H / P.spacing);
+    const offX = (W - (cols - 1) * P.spacing) / 2;
+    const offY = (H - (rows - 1) * P.spacing) / 2;
+    for (let r = 0; r < rows; r++)
+      for (let c = 0; c < cols; c++)
+        dots.push({ x: offX + c * P.spacing, y: offY + r * P.spacing, glow: 0 });
   }
 
   // ── mouse ──
   let mx = -999, my = -999, hasInteracted = false;
-  const RADIUS = 130;
+  const ripples = [];
 
   canvas.addEventListener('mousemove', e => {
     const r = canvas.getBoundingClientRect();
-    mx = e.clientX - r.left;
-    my = e.clientY - r.top;
-    if (!hasInteracted) {
-      hasInteracted = true;
-      hint.style.opacity = '0';
-      startAudio();
-    }
+    mx = e.clientX - r.left; my = e.clientY - r.top;
+    if (!hasInteracted) { hasInteracted = true; hint.style.opacity = '0'; startAudio(); }
     updateAudio(mx / W, my / H);
   });
-
   canvas.addEventListener('mouseleave', () => { mx = -999; my = -999; stopAudio(); });
-
-  // ripples
-  const ripples = [];
   canvas.addEventListener('click', e => {
     const r = canvas.getBoundingClientRect();
     ripples.push({ x: e.clientX - r.left, y: e.clientY - r.top, t: 0 });
@@ -104,104 +277,103 @@
 
   // ── render ──
   function render() {
-    ctx.fillStyle = '#1a1410';
+    const C = COLORS[P.color];
+    ctx.fillStyle = C.bg;
     ctx.fillRect(0, 0, W, H);
 
-    // ripple rings
     for (let i = ripples.length - 1; i >= 0; i--) {
-      const rp = ripples[i];
-      rp.t += 0.018;
-      const rad = rp.t * 220;
+      const rp = ripples[i]; rp.t += 0.018;
       const alpha = Math.max(0, 1 - rp.t * 1.1);
       ctx.beginPath();
-      ctx.arc(rp.x, rp.y, rad, 0, Math.PI * 2);
-      ctx.strokeStyle = `rgba(216,167,110,${alpha * 0.35})`;
-      ctx.lineWidth = 1.5;
-      ctx.stroke();
+      ctx.arc(rp.x, rp.y, rp.t * 220, 0, Math.PI * 2);
+      ctx.strokeStyle = C.glowA + (alpha * 0.35) + ')';
+      ctx.lineWidth = 1.5; ctx.stroke();
       if (rp.t > 1) ripples.splice(i, 1);
     }
 
-    // cursor halo
     if (mx >= 0 && my >= 0) {
-      const g = ctx.createRadialGradient(mx, my, 0, mx, my, RADIUS * 1.4);
-      g.addColorStop(0, 'rgba(216,167,110,0.13)');
-      g.addColorStop(1, 'rgba(216,167,110,0)');
+      const g = ctx.createRadialGradient(mx, my, 0, mx, my, P.radius * 1.4);
+      g.addColorStop(0, C.glowA + '0.13)');
+      g.addColorStop(1, C.glowA + '0)');
       ctx.fillStyle = g;
-      ctx.beginPath();
-      ctx.arc(mx, my, RADIUS * 1.4, 0, Math.PI * 2);
-      ctx.fill();
+      ctx.beginPath(); ctx.arc(mx, my, P.radius * 1.4, 0, Math.PI * 2); ctx.fill();
     }
 
-    // dots
     for (const d of dots) {
       const dx = d.x - mx, dy = d.y - my;
       const dist = Math.sqrt(dx * dx + dy * dy);
-      const target = dist < RADIUS ? Math.pow(1 - dist / RADIUS, 1.6) : 0;
-      d.glow += (target - d.glow) * 0.12;
-
-      const g = d.glow;
-      const r = 1.5 + g * 4;
+      const target = dist < P.radius ? Math.pow(1 - dist / P.radius, 1.6) : 0;
+      d.glow += (target - d.glow) * P.speed;
+      const g = d.glow, r = 1.5 + g * 4;
 
       if (g > 0.01) {
-        // glow halo around dot
         const halo = ctx.createRadialGradient(d.x, d.y, 0, d.x, d.y, r * 5);
-        const col = g > 0.5 ? `rgba(185,104,59,${g * 0.5})` : `rgba(216,167,110,${g * 0.45})`;
-        halo.addColorStop(0, col);
-        halo.addColorStop(1, 'rgba(0,0,0,0)');
+        const col = g > 0.5 ? C.glowB + (g * 0.5) + ')' : C.glowA + (g * 0.45) + ')';
+        halo.addColorStop(0, col); halo.addColorStop(1, 'rgba(0,0,0,0)');
         ctx.fillStyle = halo;
-        ctx.beginPath();
-        ctx.arc(d.x, d.y, r * 5, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.beginPath(); ctx.arc(d.x, d.y, r * 5, 0, Math.PI * 2); ctx.fill();
       }
 
-      // dot core
-      const brightness = 0.18 + g * 0.82;
-      const rc = Math.round(26 + g * 190);
-      const gc2 = Math.round(20 + g * 87);
-      const bc = Math.round(16 + g * 15);
-      ctx.fillStyle = `rgba(${rc},${gc2},${bc},${brightness})`;
-      ctx.beginPath();
-      ctx.arc(d.x, d.y, r, 0, Math.PI * 2);
-      ctx.fill();
+      const lo = C.dotLo, hi = C.dotHi;
+      const rc = Math.round(lo[0] + g * (hi[0] - lo[0]));
+      const gc2 = Math.round(lo[1] + g * (hi[1] - lo[1]));
+      const bc = Math.round(lo[2] + g * (hi[2] - lo[2]));
+      ctx.fillStyle = `rgba(${rc},${gc2},${bc},${0.18 + g * 0.82})`;
+      ctx.beginPath(); ctx.arc(d.x, d.y, r, 0, Math.PI * 2); ctx.fill();
     }
 
     requestAnimationFrame(render);
   }
 
-  // ── audio (Web Audio API) ──
-  let audioCtx, osc, gainNode, filterNode, started = false;
+  // ── audio ──
+  let audioCtx, osc, gainNode, filterNode, convolver, dryGain, wetGain, started = false;
 
-  // Pentatonic scale: C D E G A across 3 octaves
-  const PENTA = [130.81,146.83,164.81,196,220,261.63,293.66,329.63,392,440,523.25,587.33,659.25,784,880];
+  function makeReverb(ctx, seconds = 2.5) {
+    const rate = ctx.sampleRate;
+    const len = rate * seconds;
+    const buf = ctx.createBuffer(2, len, rate);
+    for (let ch = 0; ch < 2; ch++) {
+      const d = buf.getChannelData(ch);
+      for (let i = 0; i < len; i++)
+        d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2.5);
+    }
+    const c = ctx.createConvolver(); c.buffer = buf; return c;
+  }
 
   function startAudio() {
     if (started) return;
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    osc = audioCtx.createOscillator();
+    osc.type = P.wave;
+    osc.frequency.value = SCALES[P.scale][0];
+
+    filterNode = audioCtx.createBiquadFilter();
+    filterNode.type = 'lowpass'; filterNode.frequency.value = 1200; filterNode.Q.value = 2;
+
     gainNode = audioCtx.createGain();
     gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
 
-    filterNode = audioCtx.createBiquadFilter();
-    filterNode.type = 'lowpass';
-    filterNode.frequency.value = 1200;
-    filterNode.Q.value = 2;
+    convolver = makeReverb(audioCtx);
+    dryGain = audioCtx.createGain(); dryGain.gain.value = 1 - P.rev;
+    wetGain = audioCtx.createGain(); wetGain.gain.value = P.rev;
 
-    osc = audioCtx.createOscillator();
-    osc.type = 'sine';
-    osc.frequency.value = PENTA[0];
     osc.connect(filterNode);
     filterNode.connect(gainNode);
-    gainNode.connect(audioCtx.destination);
+    gainNode.connect(dryGain); dryGain.connect(audioCtx.destination);
+    gainNode.connect(convolver); convolver.connect(wetGain); wetGain.connect(audioCtx.destination);
+
     osc.start();
     started = true;
   }
 
   function updateAudio(nx, ny) {
     if (!started || !audioCtx) return;
-    const idx = Math.min(PENTA.length - 1, Math.floor(nx * PENTA.length));
-    const freq = PENTA[idx];
-    const vol = Math.max(0, (1 - ny) * 0.18);
+    const scale = SCALES[P.scale];
+    const idx = Math.min(scale.length - 1, Math.floor(nx * scale.length));
+    const vol = Math.max(0, (1 - ny) * P.vol * 0.3);
     const now = audioCtx.currentTime;
-    osc.frequency.setTargetAtTime(freq, now, 0.06);
+    osc.frequency.setTargetAtTime(scale[idx], now, 0.06);
     gainNode.gain.setTargetAtTime(vol, now, 0.08);
   }
 
@@ -210,8 +382,37 @@
     gainNode.gain.setTargetAtTime(0, audioCtx.currentTime, 0.12);
   }
 
-  // ── init ──
-  window.addEventListener('resize', () => { resize(); });
+  // ── controls drawer ──
+  const drawer = document.getElementById('ctrl-drawer');
+  document.getElementById('ctrl-tab').addEventListener('click', () => drawer.classList.toggle('open'));
+
+  function bindSlider(id, valId, onchange) {
+    const el = document.getElementById(id);
+    const disp = document.getElementById(valId);
+    el.addEventListener('input', () => { disp.textContent = el.value; onchange(+el.value); });
+  }
+
+  bindSlider('c-vol', 'v-vol', v => { P.vol = v / 100; });
+  bindSlider('c-rev', 'v-rev', v => {
+    P.rev = v / 100;
+    if (dryGain) { dryGain.gain.value = 1 - P.rev; wetGain.gain.value = P.rev; }
+  });
+  bindSlider('c-den', 'v-den', v => { P.spacing = v; buildGrid(); });
+  bindSlider('c-rad', 'v-rad', v => { P.radius = v; });
+  bindSlider('c-spd', 'v-spd', v => { P.speed = v / 100; });
+
+  document.querySelectorAll('.ctrl-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const group = btn.dataset.group, val = btn.dataset.val;
+      document.querySelectorAll(`[data-group="${group}"]`).forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      if (group === 'wave') { P.wave = val; if (osc) osc.type = val; }
+      if (group === 'scale') { P.scale = val; }
+      if (group === 'color') { P.color = val; }
+    });
+  });
+
+  window.addEventListener('resize', resize);
   resize();
   render();
 })();
