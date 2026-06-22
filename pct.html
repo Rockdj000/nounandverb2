@@ -45,7 +45,7 @@
   .margin-tag { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: #fff; padding: 3px 9px; border-radius: 2px; }
 
   /* TIMELINE TABLE */
-  .tl-grid { display: grid; grid-template-columns: 1.6fr 1.2fr .8fr .6fr .9fr .8fr 1fr; min-width: 760px; }
+  .tl-grid { display: grid; grid-template-columns: 1.6fr 1.2fr .8fr .6fr .9fr .8fr; min-width: 760px; }
 
   /* ITIN ROWS */
   .dayrow { display: flex; gap: 14px; padding: 15px 18px; border-bottom: 1px solid #e6dcc8; align-items: flex-start; border-left: 3px solid transparent; transition: opacity .25s; }
@@ -98,11 +98,8 @@
 
 <nav id="site-nav">
   <div class="inner">
-    <div style="display:flex;align-items:baseline;gap:12px;">
-      <a href="index.html" style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:1px;text-transform:lowercase;color:#9a8b76;text-decoration:none;">← verbandnoun.io</a>
-      <a href="#top" style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#2a2018;text-decoration:none;font-weight:700;">PCT · 2027</a>
-    </div>
-    <div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap;" id="nav-links"></div>
+    <a href="index.html" style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:1px;text-transform:lowercase;color:#9a8b76;text-decoration:none;">← verbandnoun.io</a>
+    <a href="#top" style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#2a2018;text-decoration:none;font-weight:700;">PCT · 2027</a>
   </div>
 </nav>
 
@@ -226,27 +223,16 @@ function getScrub(idx) {
 
 /* ─── NAV ─── */
 const navItems = [
-  { id:'overview', href:'#sec-overview', label:'Overview' },
-  { id:'desert',   href:'#sec-desert',   label:'I · Desert' },
-  { id:'sierra',   href:'#sec-sierra',   label:'II · Sierra' },
-  { id:'norcal',   href:'#sec-norcal',   label:'III · NorCal' },
-  { id:'tahoe',    href:'#sec-tahoe',    label:'Tahoe Loop' },
-  { id:'oregon',   href:'#sec-oregon',   label:'IV · Oregon' },
-  { id:'wash',     href:'#sec-wash',     label:'V · Washington' },
+  { id:'overview' }, { id:'desert' }, { id:'sierra' }, { id:'norcal' },
+  { id:'tahoe' }, { id:'oregon' }, { id:'wash' },
 ];
-const navLinks = document.getElementById('nav-links');
-navItems.forEach((n,i) => {
-  const lnk = a(n.href, 'navlink', null, n.label);
-  lnk.dataset.nav = n.id;
-  navLinks.append(lnk);
-});
 
 /* ─── HERO ─── */
 function buildHero() {
   const wrap = div('', { id:'top', maxWidth:'1180px', margin:'0 auto', padding:'128px 7vw 0' });
   wrap.append(
     div('', { display:'flex', justifyContent:'space-between', alignItems:'baseline', fontFamily:"'JetBrains Mono',monospace", fontSize:'12px', letterSpacing:'3px', textTransform:'uppercase', color:'#a8714e', borderBottom:'1px solid #2a2018', paddingBottom:'14px' },
-      span('A Northbound Thru-Hike'), span('MMXXVII', { color:'#9a8b76' })
+      span('A Northbound Thru-Hike')
     ),
     div('', { fontFamily:"'Spectral',serif", fontWeight:'300', fontSize:'20px', color:'#7a5a3c', letterSpacing:'1px', marginTop:'38px' }, 'A single-season walk of the'),
     el('h1', { style:{ fontFamily:"'Spectral',serif", fontWeight:'600', fontSize:'96px', lineHeight:'.94', letterSpacing:'-2px', margin:'6px 0 0', color:'#2a2018' } }, 'Pacific Crest Trail'),
@@ -385,7 +371,7 @@ function buildMapRows() {
     const top = div('', { display:'flex', justifyContent:'space-between', alignItems:'baseline', gap:'12px', flexWrap:'wrap' });
     const title = div('', { fontFamily:"'Spectral',serif", fontWeight:'600', fontSize:'22px' });
     title.append(span(m.roman, { color:m.accent }), '  '+m.name);
-    top.append(title, marginTag(m.margin));
+    top.append(title);
     const meta = div('', { display:'flex', gap:'18px', flexWrap:'wrap', fontFamily:"'JetBrains Mono',monospace", fontSize:'10.5px', letterSpacing:'.5px', color:'#9a8b76', textTransform:'uppercase', marginTop:'8px' });
     [m.months, m.miles+' mi', m.totalDays+' days', m.avg+' mi/day'].forEach(t => meta.append(span(t)));
     const detail = div('mapdetail', null,
@@ -445,7 +431,7 @@ function buildTimeline() {
   const ow = div('', { overflowX:'auto' });
   const inner = div('', { minWidth:'760px' });
   const hdr = div('tl-grid', { borderTop:'1px solid #2a2018', borderBottom:'1px solid #2a2018', fontFamily:"'JetBrains Mono',monospace", fontSize:'10px', letterSpacing:'1px', textTransform:'uppercase', color:'#9a8b76', padding:'10px 0' });
-  ['Section','Dates','Hike+Zero','Rest','Miles','Mi/day','Margin'].forEach(c => hdr.append(div('', { padding:'0 10px' }, c)));
+  ['Section','Dates','Hike+Zero','Rest','Miles','Mi/day'].forEach(c => hdr.append(div('', { padding:'0 10px' }, c)));
   inner.append(hdr);
   D.masterTimeline.forEach(t => {
     const row = div('tl-grid', { borderBottom:'1px solid #e6dcc8', padding:'14px 0', alignItems:'center' });
@@ -459,7 +445,6 @@ function buildTimeline() {
       div('', { padding:'0 10px', fontFamily:"'JetBrains Mono',monospace", fontSize:'12px', color:'#6a5e4d' }, t.rest),
       div('', { padding:'0 10px', fontFamily:"'Spectral',serif", fontWeight:'600', fontSize:'16px' }, t.miles),
       div('', { padding:'0 10px', fontFamily:"'JetBrains Mono',monospace", fontSize:'12px' }, t.avg),
-      div('', { padding:'0 10px' }, marginTag(t.margin)),
     ];
     row.append(sc, ...cells); inner.append(row);
   });
@@ -584,12 +569,12 @@ function buildSection(id) {
     );
     statG.append(cell);
   });
-  const mgCell = div('cell', null);
-  mgCell.append(
-    div('', { display:'inline-block', fontFamily:"'JetBrains Mono',monospace", fontSize:'13px', fontWeight:'700', letterSpacing:'1px', textTransform:'uppercase', color:'#fff', background:marginColor(m.margin), padding:'5px 12px', borderRadius:'2px', marginTop:'2px' }, m.margin),
-    div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'10px', letterSpacing:'1.5px', textTransform:'uppercase', color:'#9a8b76', marginTop:'8px' }, 'margin · '+m.rest+' rest')
+  const restCell = div('cell', null);
+  restCell.append(
+    div('', { fontFamily:"'Spectral',serif", fontWeight:'600', fontSize:'30px', lineHeight:'1' }, m.zeros),
+    div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'10px', letterSpacing:'1.5px', textTransform:'uppercase', color:'#9a8b76', marginTop:'6px' }, 'rest days')
   );
-  statG.append(mgCell); statWrap.append(statG);
+  statG.append(restCell); statWrap.append(statG);
 
   // Intro
   const intro = div('rv', { maxWidth:'760px', margin:'0 auto', padding:'48px 7vw 0' },
