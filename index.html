@@ -11,8 +11,8 @@
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: #f4eee4; font-family: 'Spectral', serif; color: #2a2018; min-height: 100vh; display: flex; flex-direction: column; }
   .vn-row {
-    display: flex; align-items: baseline; gap: clamp(18px,3vw,40px);
-    padding: clamp(28px,4vw,42px) 10px; border-top: 1px solid #2a2018;
+    display: flex; align-items: baseline; gap: clamp(12px,3vw,40px);
+    padding: clamp(22px,4vw,42px) 10px; border-top: 1px solid #2a2018;
     text-decoration: none; color: #2a2018;
     transition: transform .35s cubic-bezier(.2,.7,.2,1), background .35s;
   }
@@ -20,9 +20,16 @@
   .vn-row:hover .vn-title { color: #b9683b; }
   .vn-row:hover .vn-arrow { transform: translateX(8px); color: #b9683b; }
   .vn-row:hover .vn-num { color: #b9683b; }
-  .vn-title { font-family: 'Spectral', serif; font-weight: 600; font-size: clamp(34px,5vw,58px); line-height: 1; letter-spacing: -1px; transition: color .35s; }
-  .vn-num { font-family: 'Spectral', serif; font-weight: 300; font-size: clamp(40px,6vw,76px); line-height: .8; color: #cdab92; flex: none; width: 1.4em; transition: color .35s; }
-  .vn-arrow { font-family: 'Spectral', serif; font-size: clamp(28px,3.4vw,40px); color: #2a2018; line-height: 1; transition: transform .35s cubic-bezier(.2,.7,.2,1), color .35s; }
+  .vn-title { font-family: 'Spectral', serif; font-weight: 600; font-size: clamp(28px,5vw,58px); line-height: 1; letter-spacing: -1px; transition: color .35s; }
+  .vn-num { font-family: 'Spectral', serif; font-weight: 300; font-size: clamp(32px,6vw,76px); line-height: .8; color: #cdab92; flex: none; width: 1.4em; transition: color .35s; }
+  .vn-arrow { font-family: 'Spectral', serif; font-size: clamp(22px,3.4vw,40px); color: #2a2018; line-height: 1; transition: transform .35s cubic-bezier(.2,.7,.2,1), color .35s; }
+  .vn-meta { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: #9a8b76; line-height: 1.7; }
+  .vn-right { flex: none; text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 14px; }
+  @media (max-width: 480px) {
+    .vn-num { display: none; }
+    .vn-right { display: none; }
+    .vn-row { gap: 0; }
+  }
 </style>
 </head>
 <body>
@@ -39,7 +46,7 @@
       <span>headword</span>
       <span style="color:#c9b9a3;letter-spacing:1px;text-transform:none;font-size:13px;">&middot; \&hairsp;v&#601;rb-&#601;n(d)-&#712;nau&#818;n&hairsp;\</span>
     </div>
-    <h1 style="font-family:'Spectral',serif;font-weight:600;font-size:clamp(60px,12vw,164px);line-height:.9;letter-spacing:-3px;margin:16px 0 0;">verbandnoun<span style="font-weight:300;color:#b9683b;">.io</span></h1>
+    <h1 style="font-family:'Spectral',serif;font-weight:600;font-size:clamp(44px,12vw,164px);line-height:.9;letter-spacing:-3px;margin:16px 0 0;word-break:break-all;">verbandnoun<span style="font-weight:300;color:#b9683b;">.io</span></h1>
 
     <div style="display:flex;flex-wrap:wrap;gap:24px 52px;margin-top:38px;">
       <div style="max-width:340px;border-left:2px solid #2a2018;padding-left:18px;">
@@ -74,7 +81,7 @@
           <div class="vn-title">PCT &rsquo;27</div>
           <div style="font-family:'Spectral',serif;font-style:italic;font-size:clamp(16px,1.7vw,20px);color:#7a6e5b;margin-top:10px;max-width:560px;">Campo to Canada on foot &mdash; a single-season northbound thru-hike plan, mapped mile by mile.</div>
         </div>
-        <div style="flex:none;text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:14px;">
+        <div class="vn-right">
           <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:#9a8b76;line-height:1.7;">2,659 mi<br>2027 &middot; ready</div>
           <div class="vn-arrow">&rarr;</div>
         </div>
@@ -87,7 +94,7 @@
           <div class="vn-title">Photo</div>
           <div style="font-family:'Spectral',serif;font-style:italic;font-size:clamp(16px,1.7vw,20px);color:#7a6e5b;margin-top:10px;max-width:560px;">Photographs from the trail and elsewhere &mdash; a gallery still being gathered.</div>
         </div>
-        <div style="flex:none;text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:14px;">
+        <div class="vn-right">
           <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:#9a8b76;line-height:1.7;">&mdash;<br>in progress</div>
           <div class="vn-arrow">&rarr;</div>
         </div>
@@ -100,7 +107,7 @@
           <div class="vn-title">Noise</div>
           <div style="font-family:'Spectral',serif;font-style:italic;font-size:clamp(16px,1.7vw,20px);color:#7a6e5b;margin-top:10px;max-width:560px;">An interactive sound and light field &mdash; move, listen, dissolve.</div>
         </div>
-        <div style="flex:none;text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:14px;">
+        <div class="vn-right">
           <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:#9a8b76;line-height:1.7;">&mdash;<br>experiment</div>
           <div class="vn-arrow">&rarr;</div>
         </div>
