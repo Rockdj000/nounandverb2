@@ -12,50 +12,208 @@
   body { background: #f4eee4; font-family: 'Spectral', serif; color: #2a2018; min-height: 100vh; display: flex; flex-direction: column; }
   .back-link { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 1px; text-transform: lowercase; color: #9a8b76; text-decoration: none; transition: color .22s; }
   .back-link:hover { color: #b9683b; }
-  .ph-cell {
-    border-radius: 3px; overflow: hidden;
-    border: 1px solid #e0d4bf; aspect-ratio: 4/3;
+
+  /* hero */
+  .ph-hero {
+    width: 100%; height: 72vh; min-height: 320px;
+    overflow: hidden; cursor: zoom-in; position: relative;
   }
-  .ph-cell img {
+  .ph-hero img {
     width: 100%; height: 100%; object-fit: cover; display: block;
-    transition: transform .4s cubic-bezier(.2,.7,.2,1);
+    transition: transform .6s cubic-bezier(.2,.7,.2,1);
   }
-  .ph-cell:hover img { transform: scale(1.03); }
-  .ph-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
-  @media (max-width: 600px) { .ph-grid { grid-template-columns: repeat(2,1fr); gap: 10px; } }
+  .ph-hero:hover img { transform: scale(1.03); }
+
+  /* masonry */
+  .ph-masonry {
+    columns: 2; column-gap: 12px;
+    padding: 12px clamp(24px,7vw,84px);
+  }
+  .ph-masonry-item {
+    break-inside: avoid; margin-bottom: 12px;
+    overflow: hidden; border-radius: 2px;
+    cursor: zoom-in; position: relative;
+  }
+  .ph-masonry-item img {
+    width: 100%; display: block;
+    transition: transform .5s cubic-bezier(.2,.7,.2,1);
+  }
+  .ph-masonry-item:hover img { transform: scale(1.04); }
+
+  /* filmstrip */
+  .ph-strip-wrap {
+    padding: 24px clamp(24px,7vw,84px) 0;
+  }
+  .ph-strip-label {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    letter-spacing: 2px; text-transform: uppercase; color: #9a8b76;
+    margin-bottom: 10px;
+  }
+  .ph-strip {
+    display: flex; gap: 8px;
+    overflow-x: auto; scroll-snap-type: x mandatory;
+    cursor: grab; user-select: none;
+    scrollbar-width: none;
+    padding-bottom: 4px;
+  }
+  .ph-strip::-webkit-scrollbar { display: none; }
+  .ph-strip:active { cursor: grabbing; }
+  .ph-strip-cell {
+    flex: none; height: 120px; width: 180px;
+    overflow: hidden; border-radius: 2px;
+    scroll-snap-align: start; cursor: zoom-in;
+  }
+  .ph-strip-cell img {
+    width: 100%; height: 100%; object-fit: cover; display: block;
+    transition: transform .4s cubic-bezier(.2,.7,.2,1), opacity .3s;
+    opacity: .75;
+  }
+  .ph-strip-cell:hover img { transform: scale(1.06); opacity: 1; }
+  .ph-strip-cell.active img { opacity: 1; }
+
+  /* lightbox */
+  #lightbox {
+    position: fixed; inset: 0; z-index: 100;
+    background: rgba(20,16,12,.92);
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none;
+    transition: opacity .3s;
+  }
+  #lightbox.open { opacity: 1; pointer-events: all; }
+  #lightbox img {
+    max-width: 92vw; max-height: 90vh;
+    object-fit: contain; display: block;
+    border-radius: 2px;
+    transform: scale(.96);
+    transition: transform .35s cubic-bezier(.2,.7,.2,1);
+  }
+  #lightbox.open img { transform: scale(1); }
+  #lb-close {
+    position: absolute; top: 24px; right: 28px;
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    letter-spacing: 1.5px; text-transform: uppercase;
+    color: #9a8b76; cursor: pointer; transition: color .2s;
+  }
+  #lb-close:hover { color: #f4eee4; }
+  #lb-prev, #lb-next {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    font-family: 'Spectral', serif; font-size: 36px; color: #9a8b76;
+    cursor: pointer; padding: 20px; transition: color .2s; line-height: 1;
+    user-select: none;
+  }
+  #lb-prev { left: 12px; }
+  #lb-next { right: 12px; }
+  #lb-prev:hover, #lb-next:hover { color: #f4eee4; }
+  #lb-counter {
+    position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%);
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    letter-spacing: 2px; color: #9a8b76;
+  }
 </style>
 </head>
 <body>
-<div style="max-width:1080px;margin:0 auto;padding:0 7vw;flex:1;display:flex;flex-direction:column;">
+<div style="display:flex;flex-direction:column;min-height:100vh;">
 
   <!-- top bar -->
-  <div style="display:flex;align-items:center;justify-content:space-between;padding:28px 0 0;border-bottom:1px solid #e0d4bf;padding-bottom:18px;">
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:28px clamp(24px,7vw,84px) 18px;border-bottom:1px solid #e0d4bf;">
     <a href="index.html" class="back-link">← verbandnoun.io</a>
     <span style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:1px;color:#9a8b76;text-transform:uppercase;">02 · Photo</span>
   </div>
 
-  <!-- hero -->
-  <div style="padding:72px 0 0;">
+  <!-- header -->
+  <div style="padding:56px clamp(24px,7vw,84px) 40px;">
     <h1 style="font-family:'Spectral',serif;font-weight:300;font-size:clamp(60px,12vw,150px);line-height:.88;letter-spacing:-3px;color:#2a2018;">Photo</h1>
-    <p style="font-family:'Spectral',serif;font-style:italic;font-size:19px;color:#6a5e4d;max-width:560px;line-height:1.62;margin-top:28px;">
-      Photographs from the trail and elsewhere.
-    </p>
+    <p style="font-family:'Spectral',serif;font-style:italic;font-size:18px;color:#9a8b76;margin-top:20px;">Photographs from the trail and elsewhere.</p>
   </div>
 
-  <!-- photo grid -->
-  <div class="ph-grid" style="margin-top:64px;">
-    <div class="ph-cell"><img src="assets/DSC02280.jpg" alt=""></div>
-    <div class="ph-cell"><img src="assets/DSC02275.jpg" alt=""></div>
-    <div class="ph-cell"><img src="assets/DSC02028.jpg" alt=""></div>
-    <div class="ph-cell"><img src="assets/DSC01698.jpg" alt=""></div>
-    <div class="ph-cell"><img src="assets/DSC01191.jpg" alt=""></div>
+  <!-- masonry -->
+  <div class="ph-masonry">
+    <div class="ph-masonry-item" data-idx="0"><img src="assets/DSC02280.jpg" alt=""></div>
+    <div class="ph-masonry-item" data-idx="1"><img src="assets/DSC02275.jpg" alt=""></div>
+    <div class="ph-masonry-item" data-idx="2"><img src="assets/DSC02028.jpg" alt=""></div>
+    <div class="ph-masonry-item" data-idx="3"><img src="assets/DSC01698.jpg" alt=""></div>
+    <div class="ph-masonry-item" data-idx="4"><img src="assets/DSC01191.jpg" alt=""></div>
   </div>
 
   <!-- footer -->
-  <div style="margin-top:80px;padding-bottom:32px;padding-top:32px;display:flex;justify-content:space-between;align-items:baseline;border-top:1px solid #e0d4bf;">
+  <div style="margin-top:64px;padding:28px clamp(24px,7vw,84px);border-top:1px solid #e0d4bf;display:flex;justify-content:space-between;align-items:baseline;">
     <a href="index.html" class="back-link">← back to index</a>
     <span style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:2px;color:#9a8b76;">verbandnoun<span style="color:#b9683b;">.io</span></span>
   </div>
+
 </div>
+
+<!-- lightbox -->
+<div id="lightbox">
+  <span id="lb-close">esc · close</span>
+  <span id="lb-prev">←</span>
+  <img id="lb-img" src="" alt="">
+  <span id="lb-next">→</span>
+  <span id="lb-counter"></span>
+</div>
+
+<script>
+(function () {
+  const PHOTOS = [
+    'assets/DSC02280.jpg',
+    'assets/DSC02275.jpg',
+    'assets/DSC02028.jpg',
+    'assets/DSC01698.jpg',
+    'assets/DSC01191.jpg',
+  ];
+
+  let current = 0;
+  const lb = document.getElementById('lightbox');
+  const lbImg = document.getElementById('lb-img');
+  const lbCounter = document.getElementById('lb-counter');
+
+  function open(idx) {
+    current = ((idx % PHOTOS.length) + PHOTOS.length) % PHOTOS.length;
+    lbImg.src = PHOTOS[current];
+    lbCounter.textContent = (current + 1) + ' / ' + PHOTOS.length;
+    lb.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function close() {
+    lb.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  function prev() { open(current - 1); }
+  function next() { open(current + 1); }
+
+  document.getElementById('lb-close').addEventListener('click', close);
+  document.getElementById('lb-prev').addEventListener('click', e => { e.stopPropagation(); prev(); });
+  document.getElementById('lb-next').addEventListener('click', e => { e.stopPropagation(); next(); });
+  lb.addEventListener('click', e => { if (e.target === lb || e.target === lbImg) close(); });
+
+  document.addEventListener('keydown', e => {
+    if (!lb.classList.contains('open')) return;
+    if (e.key === 'Escape') close();
+    if (e.key === 'ArrowLeft') prev();
+    if (e.key === 'ArrowRight') next();
+  });
+
+  // wire all clickable photo elements
+  document.querySelectorAll('[data-idx]').forEach(el => {
+    el.addEventListener('click', () => open(+el.dataset.idx));
+  });
+
+  // drag-to-scroll filmstrip
+  const strip = document.getElementById('filmstrip');
+  let isDragging = false, startX, scrollLeft;
+  strip.addEventListener('mousedown', e => {
+    isDragging = true; startX = e.pageX - strip.offsetLeft; scrollLeft = strip.scrollLeft;
+  });
+  strip.addEventListener('mouseleave', () => isDragging = false);
+  strip.addEventListener('mouseup', () => isDragging = false);
+  strip.addEventListener('mousemove', e => {
+    if (!isDragging) return;
+    e.preventDefault();
+    strip.scrollLeft = scrollLeft - (e.pageX - strip.offsetLeft - startX);
+  });
+})();
+</script>
 </body>
 </html>
