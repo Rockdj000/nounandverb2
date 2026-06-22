@@ -201,20 +201,6 @@
   document.querySelectorAll('[data-idx]').forEach(el => {
     el.addEventListener('click', () => open(+el.dataset.idx));
   });
-
-  // drag-to-scroll filmstrip
-  const strip = document.getElementById('filmstrip');
-  let isDragging = false, startX, scrollLeft;
-  strip.addEventListener('mousedown', e => {
-    isDragging = true; startX = e.pageX - strip.offsetLeft; scrollLeft = strip.scrollLeft;
-  });
-  strip.addEventListener('mouseleave', () => isDragging = false);
-  strip.addEventListener('mouseup', () => isDragging = false);
-  strip.addEventListener('mousemove', e => {
-    if (!isDragging) return;
-    e.preventDefault();
-    strip.scrollLeft = scrollLeft - (e.pageX - strip.offsetLeft - startX);
-  });
 })();
 </script>
 </body>
