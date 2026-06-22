@@ -5,52 +5,54 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Invoice · verbandnoun.io</title>
 <link rel="manifest" href="/manifest.webmanifest">
-<meta name="theme-color" content="#b9683b">
+<meta name="theme-color" content="#2E3C24">
+<link rel="icon" href="/icon.svg">
 <link rel="apple-touch-icon" href="/icon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Hanken+Grotesk:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <style>
   :root {
-    --bg:#f4eee4; --surface:#fbf7ef; --text:#2a2018; --muted:#9a8b76; --soft:#7a6e5b;
-    --accent:#b9683b; --accent-d:#a3582f; --line:#e0d4bf; --strong:#2a2018;
-    --field:#fbf7ef; --field-bd:#d8cab2; --hover:#efe6d4;
-    --bill:#e3ecdd; --bill-t:#5a7344; --non:#ece4d6; --non-t:#9a8b76;
-    --sent:#e6e0ef; --sent-t:#6a5a8a; --warn-bg:#faf0e2; --warn-bd:#e6c79a; --warn-t:#7a5a2f;
-    --danger:#a8453b;
+    --bg:#EFEBE6; --surface:#F6F3ED; --text:#283420; --muted:#8a8578; --soft:#6f6a5d;
+    --accent:#2E3C24; --accent-d:#1d2718; --on-accent:#EFEBE6; --line:#e2dcd4; --strong:#2E3C24;
+    --field:#FFFFFF; --field-bd:#cfc8ba; --hover:#ece7dd;
+    --bill:#e3ecd9; --bill-t:#4f5a20; --non:#e7e1d7; --non-t:#8a8578;
+    --sent:#dde3ea; --sent-t:#3F5A73; --warn-bg:#f6edd6; --warn-bd:#e3cf9a; --warn-t:#8f6b2f;
+    --danger:#C24230;
   }
   html[data-theme="dark"] {
-    --bg:#211c16; --surface:#2b2520; --text:#f0e8da; --muted:#a2937e; --soft:#c2b6a2;
-    --accent:#cf7d4e; --accent-d:#b96d40; --line:#3a322a; --strong:#6a5c49;
-    --field:#322b23; --field-bd:#4a4036; --hover:#332c24;
-    --bill:#2e3a28; --bill-t:#9cb583; --non:#3a322a; --non-t:#a2937e;
-    --sent:#332e40; --sent-t:#b3a6cf; --warn-bg:#3a2f1d; --warn-bd:#6a542f; --warn-t:#e0c79a;
-    --danger:#d6685c;
+    --bg:#1d2718; --surface:#283420; --text:#EFEBE6; --muted:#9aa890; --soft:#b9c2ad;
+    --accent:#EC8E90; --accent-d:#e07e80; --on-accent:#2E3C24; --line:#3a4733; --strong:#475438;
+    --field:#222d1b; --field-bd:#44523a; --hover:#2f3d26;
+    --bill:#33442a; --bill-t:#a9c089; --non:#374733; --non-t:#9aa890;
+    --sent:#2c3a44; --sent-t:#9bb4c9; --warn-bg:#3a3320; --warn-bd:#6a5a2f; --warn-t:#dcc488;
+    --danger:#e07a6c;
   }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background-color: var(--bg); font-family: 'Spectral', serif; color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
+  body { background-color: var(--bg); font-family: 'Hanken Grotesk', sans-serif; color: var(--text); min-height: 100vh; display: flex; flex-direction: column; -webkit-font-smoothing: antialiased; }
+  ::selection { background: var(--accent); color: var(--on-accent); }
   a { color: inherit; }
-  .back-link { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 1px; text-transform: lowercase; color: var(--muted); text-decoration: none; transition: color .22s; }
+  .back-link { font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: 1px; text-transform: lowercase; color: var(--muted); text-decoration: none; transition: color .22s; }
   .back-link:hover { color: var(--accent); }
-  .mono { font-family: 'JetBrains Mono', monospace; }
-  .label { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); }
+  .mono { font-family: 'Space Mono', monospace; }
+  .label { font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); }
   .topbar { display:flex; align-items:center; justify-content:space-between; gap:14px; padding:24px clamp(20px,7vw,84px) 16px; border-bottom:1px solid var(--line); }
-  .icon-btn { background:none; border:1px solid var(--field-bd); color:var(--muted); border-radius:4px; padding:5px 10px; cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.5px; transition:color .2s, border-color .2s; }
+  .icon-btn { background:none; border:1px solid var(--field-bd); color:var(--muted); border-radius:4px; padding:5px 10px; cursor:pointer; font-family:'Space Mono',monospace; font-size:11px; letter-spacing:.5px; transition:color .2s, border-color .2s; }
   .icon-btn:hover { color:var(--accent); border-color:var(--accent); }
 
   .wrap { max-width: 1120px; width: 100%; margin: 0 auto; padding: clamp(20px,5vw,52px) clamp(20px,7vw,84px); flex: 1; }
 
   .tabs { display: flex; gap: 2px; flex-wrap: nowrap; overflow-x:auto; border-bottom: 1px solid var(--strong); margin-bottom: 28px; scrollbar-width:none; }
   .tabs::-webkit-scrollbar { display:none; }
-  .tab { font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:1px; text-transform:uppercase; color:var(--muted); background:none; border:none; padding:12px 15px; cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1px; white-space:nowrap; transition:color .2s, border-color .2s; }
+  .tab { font-family:'Space Mono',monospace; font-size:12px; letter-spacing:1px; text-transform:uppercase; color:var(--muted); background:none; border:none; padding:12px 15px; cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1px; white-space:nowrap; transition:color .2s, border-color .2s; }
   .tab:hover { color: var(--text); }
   .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
 
   .field { display: flex; flex-direction: column; gap: 5px; }
   input, select, textarea {
-    font-family:'Spectral',serif; font-size:15px; color:var(--text);
+    font-family:'Hanken Grotesk',sans-serif; font-size:15px; color:var(--text);
     background:var(--field); border:1px solid var(--field-bd); border-radius:3px;
     padding:9px 11px; width:100%; transition:border-color .2s;
   }
@@ -59,7 +61,7 @@
   input[type=checkbox] { width:auto; accent-color: var(--accent); }
   .form-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:14px; align-items:end; }
 
-  .btn { font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:1px; text-transform:uppercase; background:var(--accent); color:#fbf7ef; border:1px solid var(--accent); border-radius:3px; padding:10px 18px; cursor:pointer; transition:background .2s, transform .2s; }
+  .btn { font-family:'Space Mono',monospace; font-size:12px; letter-spacing:1px; text-transform:uppercase; background:var(--accent); color:var(--on-accent); border:1px solid var(--accent); border-radius:100px; padding:10px 20px; cursor:pointer; transition:background .2s, transform .2s; }
   .btn:hover { background: var(--accent-d); transform: translateY(-1px); }
   .btn.ghost { background:none; color:var(--text); border-color:var(--field-bd); }
   .btn.ghost:hover { background:var(--hover); color:var(--accent); transform:none; }
@@ -70,18 +72,18 @@
 
   .tbl-scroll { overflow-x:auto; -webkit-overflow-scrolling:touch; }
   table { width: 100%; border-collapse: collapse; font-size: 14px; }
-  th { font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); text-align:left; padding:10px; border-bottom:1px solid var(--strong); font-weight:500; white-space:nowrap; }
+  th { font-family:'Space Mono',monospace; font-size:10px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); text-align:left; padding:10px; border-bottom:1px solid var(--strong); font-weight:500; white-space:nowrap; }
   td { padding:11px 10px; border-bottom:1px solid var(--line); vertical-align:top; }
   tr:hover td { background: var(--hover); }
   td.num, th.num { text-align:right; font-variant-numeric:tabular-nums; }
-  .pill { font-family:'JetBrains Mono',monospace; font-size:9.5px; letter-spacing:1px; text-transform:uppercase; padding:3px 8px; border-radius:10px; display:inline-block; white-space:nowrap; }
+  .pill { font-family:'Space Mono',monospace; font-size:9.5px; letter-spacing:1px; text-transform:uppercase; padding:3px 8px; border-radius:10px; display:inline-block; white-space:nowrap; }
   .pill.bill,.pill.paid { background:var(--bill); color:var(--bill-t); }
   .pill.nonbill,.pill.draft { background:var(--non); color:var(--non-t); }
   .pill.sent,.pill.partial { background:var(--sent); color:var(--sent-t); }
-  .pill.overdue,.pill.unpaid { background:#f4d9d4; color:#a8453b; }
+  .pill.overdue,.pill.unpaid { background:#f3ded9; color:#C24230; }
 
-  .section-title { font-family:'Spectral',serif; font-weight:600; font-size:clamp(22px,3vw,30px); letter-spacing:-.5px; margin-bottom:4px; }
-  .section-sub { font-family:'Spectral',serif; font-style:italic; color:var(--soft); font-size:16px; margin-bottom:24px; }
+  .section-title { font-family:'Instrument Serif',serif; font-weight:400; font-size:clamp(24px,3.4vw,34px); letter-spacing:0; margin-bottom:4px; }
+  .section-sub { font-family:'Instrument Serif',serif; font-style:italic; color:var(--soft); font-size:18px; margin-bottom:24px; }
   .card { background:var(--surface); border:1px solid var(--line); border-radius:4px; padding:22px; margin-bottom:26px; }
   .empty { color:var(--muted); font-style:italic; padding:24px 0; }
   .toggle-row { display:flex; align-items:center; gap:8px; }
@@ -89,9 +91,9 @@
   .totals .grand { font-weight:600; font-size:20px; color:var(--accent); }
   .row-actions { display:flex; gap:6px; justify-content:flex-end; flex-wrap:wrap; }
   .toolbar { display:flex; gap:12px; flex-wrap:wrap; align-items:end; margin-bottom:18px; }
-  .toast { position:fixed; bottom:22px; left:50%; transform:translateX(-50%); background:var(--strong); color:var(--bg); font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:.5px; padding:12px 20px; border-radius:4px; opacity:0; pointer-events:none; transition:opacity .25s, transform .25s; z-index:200; }
+  .toast { position:fixed; bottom:22px; left:50%; transform:translateX(-50%); background:var(--strong); color:var(--bg); font-family:'Space Mono',monospace; font-size:12px; letter-spacing:.5px; padding:12px 20px; border-radius:4px; opacity:0; pointer-events:none; transition:opacity .25s, transform .25s; z-index:200; }
   .toast.show { opacity:1; transform:translateX(-50%) translateY(-4px); }
-  .toast.err { background:#8a3530; color:#fff; }
+  .toast.err { background:#C24230; color:#fff; }
 
   .kpis { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:14px; margin-bottom:26px; }
   .kpi { background:var(--surface); border:1px solid var(--line); border-radius:4px; padding:18px; }
@@ -99,14 +101,14 @@
   .kpi.accent .v { color:var(--accent); }
   .chart-card { background:var(--surface); border:1px solid var(--line); border-radius:4px; padding:20px; margin-bottom:26px; }
   .timer-box { display:flex; align-items:center; gap:14px; flex-wrap:wrap; background:var(--surface); border:1px solid var(--line); border-radius:4px; padding:14px 18px; margin-bottom:20px; }
-  .timer-clock { font-family:'JetBrains Mono',monospace; font-size:24px; font-variant-numeric:tabular-nums; letter-spacing:1px; }
+  .timer-clock { font-family:'Space Mono',monospace; font-size:24px; font-variant-numeric:tabular-nums; letter-spacing:1px; }
 
   .gate { max-width:420px; margin:8vh auto; text-align:center; }
-  .gate h1 { font-family:'Spectral',serif; font-weight:600; font-size:40px; letter-spacing:-1px; margin-bottom:10px; }
+  .gate h1 { font-family:'Instrument Serif',serif; font-weight:400; font-size:48px; letter-spacing:0; margin-bottom:10px; }
   .gate p { color:var(--soft); margin-bottom:26px; }
   .gate .field { text-align:left; margin-bottom:16px; }
   .banner { background:var(--warn-bg); border:1px solid var(--warn-bd); border-radius:4px; padding:16px 18px; margin-bottom:24px; font-size:14px; color:var(--warn-t); }
-  .banner code { font-family:'JetBrains Mono',monospace; font-size:12.5px; background:rgba(0,0,0,.07); padding:1px 5px; border-radius:3px; }
+  .banner code { font-family:'Space Mono',monospace; font-size:12.5px; background:rgba(0,0,0,.07); padding:1px 5px; border-radius:3px; }
   @media (max-width:640px){ th.hide-sm, td.hide-sm { display:none; } }
 </style>
 </head>
@@ -121,7 +123,7 @@
 
   <div id="app" class="wrap"></div>
 
-  <div style="display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;padding:22px clamp(20px,7vw,84px);border-top:1px solid var(--line);font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);">
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;padding:22px clamp(20px,7vw,84px);border-top:1px solid var(--line);font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);">
     <span>verbandnoun.io</span>
     <span id="user-bar"></span>
   </div>
@@ -397,8 +399,8 @@ function barChart(items) {
     const h = (it.value / max) * (H - pad * 2);
     const x = pad + i * bw, y = H - pad - h;
     bars += `<rect x="${x + bw * 0.15}" y="${y}" width="${bw * 0.7}" height="${h}" rx="2" fill="var(--accent)"/>`;
-    bars += `<text x="${x + bw / 2}" y="${H - pad + 14}" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="var(--muted)">${it.label}</text>`;
-    if (it.value) bars += `<text x="${x + bw / 2}" y="${y - 5}" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="var(--soft)">${Math.round(it.value)}</text>`;
+    bars += `<text x="${x + bw / 2}" y="${H - pad + 14}" text-anchor="middle" font-family="Space Mono,monospace" font-size="9" fill="var(--muted)">${it.label}</text>`;
+    if (it.value) bars += `<text x="${x + bw / 2}" y="${y - 5}" text-anchor="middle" font-family="Space Mono,monospace" font-size="9" fill="var(--soft)">${Math.round(it.value)}</text>`;
   });
   svg.innerHTML = `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block">${bars}</svg>`;
   return svg;

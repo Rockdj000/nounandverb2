@@ -1,7 +1,7 @@
 /* Minimal service worker for the Invoice app.
    Caches the same-origin app shell so it loads offline; everything else
    (Supabase API, CDN libs) goes to the network. */
-const CACHE = 'invoice-shell-v1';
+const CACHE = 'invoice-shell-v2';
 const SHELL = ['/invoice.html', '/manifest.webmanifest', '/icon.svg'];
 
 self.addEventListener('install', (e) => {

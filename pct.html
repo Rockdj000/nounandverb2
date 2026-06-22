@@ -4,13 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>PCT 2027 · Pacific Crest Trail</title>
+<link rel="icon" href="icon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Hanken+Grotesk:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   html { scroll-behavior: smooth; }
-  body { background: #f4eee4; font-family: 'Spectral', serif; color: #2a2018; }
+  body { background: #EFEBE6; font-family: 'Instrument Serif', serif; color: #283420; }
 
   .rv { opacity: 0; transform: translateY(20px); transition: opacity .8s cubic-bezier(.2,.7,.2,1), transform .8s cubic-bezier(.2,.7,.2,1); }
   .rv.in { opacity: 1; transform: none; }
@@ -21,7 +22,7 @@
   .maprow-list:hover .maprow { opacity: .5; }
   .maprow-list .maprow:hover { opacity: 1; }
   .mapbar { transform: scaleY(0); transform-origin: top center; transition: transform .85s cubic-bezier(.2,.7,.2,1), width .4s, filter .4s, box-shadow .4s; }
-  .maprow:hover .mapbar { width: 16px !important; filter: brightness(1.12); box-shadow: 0 0 0 4px rgba(185,104,59,.10); }
+  .maprow:hover .mapbar { width: 16px !important; filter: brightness(1.12); box-shadow: 0 0 0 4px rgba(196,95,97,.10); }
   .maprow { transition: opacity .35s; }
   .mapcard { transition: transform .35s cubic-bezier(.2,.7,.2,1), box-shadow .35s, border-left-width .35s; }
   .maprow:hover .mapcard { transform: translateX(5px); box-shadow: 0 8px 24px rgba(90,55,25,.14); border-left-width: 9px !important; }
@@ -30,31 +31,31 @@
 
   /* NAV */
   #progress-bar { position: fixed; top: 0; left: 0; right: 0; height: 3px; z-index: 60; }
-  #progress-fill { height: 100%; width: 0%; background: #b9683b; transition: width .1s linear; }
-  #site-nav { position: fixed; top: 3px; left: 0; right: 0; z-index: 50; background: rgba(244,238,228,.86); backdrop-filter: blur(10px); border-bottom: 1px solid #e0d4bf; }
+  #progress-fill { height: 100%; width: 0%; background: #C45F61; transition: width .1s linear; }
+  #site-nav { position: fixed; top: 3px; left: 0; right: 0; z-index: 50; background: rgba(239,235,230,.86); backdrop-filter: blur(10px); border-bottom: 1px solid #e2dcd4; }
   #site-nav .inner { max-width: 1280px; margin: 0 auto; padding: 0 26px; height: 52px; display: flex; align-items: center; justify-content: space-between; gap: 18px; }
-  .navlink { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: #9a8b76; text-decoration: none; padding: 6px 10px; border-bottom: 2px solid transparent; transition: color .25s, border-color .25s; }
-  .navlink.active { color: #2a2018; border-bottom-color: #b9683b; }
+  .navlink { font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: #8a8578; text-decoration: none; padding: 6px 10px; border-bottom: 2px solid transparent; transition: color .25s, border-color .25s; }
+  .navlink.active { color: #283420; border-bottom-color: #C45F61; }
 
   /* CHAPBAR */
-  #chapbar { position: fixed; top: 55px; left: 0; right: 0; z-index: 45; background: rgba(244,238,228,.93); backdrop-filter: blur(8px); border-bottom: 1px solid #e0d4bf; transform: translateY(-120%); transition: transform .3s cubic-bezier(.2,.7,.2,1); }
+  #chapbar { position: fixed; top: 55px; left: 0; right: 0; z-index: 45; background: rgba(239,235,230,.93); backdrop-filter: blur(8px); border-bottom: 1px solid #e2dcd4; transform: translateY(-120%); transition: transform .3s cubic-bezier(.2,.7,.2,1); }
   #chapbar .inner { max-width: 1280px; margin: 0 auto; padding: 8px 26px; display: flex; align-items: center; justify-content: space-between; gap: 14px; }
   #chapbar-prog { height: 2px; width: 0%; transition: width .2s; }
 
   /* MARGIN TAGS */
-  .margin-tag { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: #fff; padding: 3px 9px; border-radius: 2px; }
+  .margin-tag { display: inline-block; font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: #fff; padding: 3px 9px; border-radius: 2px; }
 
   /* TIMELINE TABLE */
   .tl-grid { display: grid; grid-template-columns: 1.6fr 1.2fr .8fr .6fr .9fr .8fr; min-width: 760px; }
 
   /* ITIN ROWS */
-  .dayrow { display: flex; gap: 14px; padding: 15px 18px; border-bottom: 1px solid #e6dcc8; align-items: flex-start; border-left: 3px solid transparent; transition: opacity .25s; }
-  .check-circle { width: 19px; height: 19px; flex: none; margin-top: 1px; border-radius: 50%; border: 2px solid #cdbfa6; background: transparent; color: #fff; font-size: 11px; line-height: 16px; text-align: center; cursor: pointer; user-select: none; transition: background .2s, border-color .2s; }
+  .dayrow { display: flex; gap: 14px; padding: 15px 18px; border-bottom: 1px solid #e7e1d7; align-items: flex-start; border-left: 3px solid transparent; transition: opacity .25s; }
+  .check-circle { width: 19px; height: 19px; flex: none; margin-top: 1px; border-radius: 50%; border: 2px solid #cdd0c2; background: transparent; color: #fff; font-size: 11px; line-height: 16px; text-align: center; cursor: pointer; user-select: none; transition: background .2s, border-color .2s; }
   .check-circle.done { background: var(--accent); border-color: var(--accent); }
 
   /* SECTION STAT GRID */
-  .sec-stat-grid { display: grid; grid-template-columns: repeat(6,1fr); border-top: 1px solid #2a2018; }
-  .sec-stat-grid .cell { padding: 20px 16px 18px; border-right: 1px solid #ddd0bb; }
+  .sec-stat-grid { display: grid; grid-template-columns: repeat(6,1fr); border-top: 1px solid #283420; }
+  .sec-stat-grid .cell { padding: 20px 16px 18px; border-right: 1px solid #ddd7cc; }
   .sec-stat-grid .cell:last-child { border-right: none; }
 
   /* PASSES */
@@ -65,7 +66,7 @@
   .resupply-ov-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 12px; }
 
   /* FILTER CHIPS */
-  .filter-chip { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; padding: 6px 11px; border-radius: 2px; cursor: pointer; border: 1px solid #ddd0bb; background: transparent; color: #8a7c66; transition: background .2s, color .2s; }
+  .filter-chip { font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; padding: 6px 11px; border-radius: 2px; cursor: pointer; border: 1px solid #ddd7cc; background: transparent; color: #6f6a5d; transition: background .2s, color .2s; }
   .filter-chip.active { color: #fff; }
 
   /* HERO IMG */
@@ -73,13 +74,13 @@
   .sec-img { display: block; width: 100%; height: 420px; object-fit: cover; }
 
   /* SCRUBBER */
-  input[type=range] { accent-color: #d8a76e; cursor: pointer; }
+  input[type=range] { accent-color: #C9A24B; cursor: pointer; }
 
   /* TAHOE */
-  .tahoe-section { background: #0f1c14; color: #e9e6dc; }
+  .tahoe-section { background: #1d2718; color: #e7e1d7; }
 
   /* FOOTER */
-  .site-footer { background: #2a2018; color: #f4efe2; }
+  .site-footer { background: #283420; color: #F6F3ED; }
 
   /* MOBILE */
   @media (max-width: 700px) {
@@ -98,20 +99,20 @@
 
 <nav id="site-nav">
   <div class="inner">
-    <a href="index.html" style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:1px;text-transform:lowercase;color:#9a8b76;text-decoration:none;">← verbandnoun.io</a>
-    <a href="#top" style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#2a2018;text-decoration:none;font-weight:700;">PCT · 2027</a>
+    <a href="index.html" style="font-family:'Space Mono',monospace;font-size:11px;letter-spacing:1px;text-transform:lowercase;color:#8a8578;text-decoration:none;">← verbandnoun.io</a>
+    <a href="#top" style="font-family:'Space Mono',monospace;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#283420;text-decoration:none;font-weight:700;">PCT · 2027</a>
   </div>
 </nav>
 
 <div id="chapbar">
   <div class="inner">
     <div style="display:flex;align-items:baseline;gap:10px;">
-      <span id="chapbar-roman" style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;letter-spacing:1px;color:#b9683b;"></span>
-      <span id="chapbar-name" style="font-family:'Spectral',serif;font-weight:600;font-size:15px;color:#2a2018;"></span>
+      <span id="chapbar-roman" style="font-family:'Space Mono',monospace;font-size:11px;font-weight:700;letter-spacing:1px;color:#C45F61;"></span>
+      <span id="chapbar-name" style="font-family:'Instrument Serif',serif;font-weight:600;font-size:15px;color:#283420;"></span>
     </div>
-    <div id="chapbar-mile" style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:1px;color:#9a8b76;"></div>
+    <div id="chapbar-mile" style="font-family:'Space Mono',monospace;font-size:11px;letter-spacing:1px;color:#8a8578;"></div>
   </div>
-  <div id="chapbar-prog" style="background:#b9683b;"></div>
+  <div id="chapbar-prog" style="background:#C45F61;"></div>
 </div>
 
 <div id="app"></div>
@@ -169,13 +170,13 @@ function setState(patch) { Object.assign(state, typeof patch === 'function' ? pa
 /* ─── data helpers ─── */
 const D = window.PCT_DATA;
 
-function marginColor(m) { return m === 'Risk' ? '#b3402e' : m === 'Tight' ? '#bd7a2a' : '#5f7d66'; }
+function marginColor(m) { return m === 'Risk' ? '#C24230' : m === 'Tight' ? '#C9A24B' : '#6F7C2F'; }
 function hexA(hex, a) {
   const h = hex.replace('#',''), r = parseInt(h.slice(0,2),16), g = parseInt(h.slice(2,4),16), b = parseInt(h.slice(4,6),16);
   return `rgba(${r},${g},${b},${a})`;
 }
 function marginTag(m, extra) {
-  const s = span(m, { display:'inline-block', fontFamily:"'JetBrains Mono',monospace", fontSize:'10px', letterSpacing:'1px', textTransform:'uppercase', color:'#fff', padding:'3px 9px', borderRadius:'2px', background: marginColor(m) });
+  const s = span(m, { display:'inline-block', fontFamily:"'Space Mono',monospace", fontSize:'10px', letterSpacing:'1px', textTransform:'uppercase', color:'#fff', padding:'3px 9px', borderRadius:'2px', background: marginColor(m) });
   if (extra) Object.assign(s.style, extra);
   return s;
 }
@@ -231,16 +232,16 @@ const navItems = [
 function buildHero() {
   const wrap = div('', { id:'top', maxWidth:'1180px', margin:'0 auto', padding:'128px 7vw 0' });
   wrap.append(
-    div('', { display:'flex', justifyContent:'space-between', alignItems:'baseline', fontFamily:"'JetBrains Mono',monospace", fontSize:'12px', letterSpacing:'3px', textTransform:'uppercase', color:'#a8714e', borderBottom:'1px solid #2a2018', paddingBottom:'14px' },
+    div('', { display:'flex', justifyContent:'space-between', alignItems:'baseline', fontFamily:"'Space Mono',monospace", fontSize:'12px', letterSpacing:'3px', textTransform:'uppercase', color:'#C45F61', borderBottom:'1px solid #283420', paddingBottom:'14px' },
       span('A Northbound Thru-Hike')
     ),
-    div('', { fontFamily:"'Spectral',serif", fontWeight:'300', fontSize:'20px', color:'#7a5a3c', letterSpacing:'1px', marginTop:'38px' }, 'A single-season walk of the'),
-    el('h1', { style:{ fontFamily:"'Spectral',serif", fontWeight:'600', fontSize:'96px', lineHeight:'.94', letterSpacing:'-2px', margin:'6px 0 0', color:'#2a2018' } }, 'Pacific Crest Trail'),
-    div('', { fontFamily:"'Spectral',serif", fontStyle:'italic', fontSize:'26px', color:'#6a5640', marginTop:'20px' }, 'Mexico to Canada on foot: 2,659 miles in a single season.'),
+    div('', { fontFamily:"'Instrument Serif',serif", fontWeight:'300', fontSize:'20px', color:'#8f6b2f', letterSpacing:'1px', marginTop:'38px' }, 'A single-season walk of the'),
+    el('h1', { style:{ fontFamily:"'Instrument Serif',serif", fontWeight:'600', fontSize:'96px', lineHeight:'.94', letterSpacing:'-2px', margin:'6px 0 0', color:'#283420' } }, 'Pacific Crest Trail'),
+    div('', { fontFamily:"'Instrument Serif',serif", fontStyle:'italic', fontSize:'26px', color:'#564A54', marginTop:'20px' }, 'Mexico to Canada on foot: 2,659 miles in a single season.'),
     buildHeroImg(),
     buildStatBar(),
-    div('', { maxWidth:'680px', fontFamily:"'Spectral',serif", fontSize:'19px', lineHeight:'1.66', color:'#3a3226', marginTop:'38px' }, D.meta.blurb),
-    div('', { marginTop:'34px', display:'flex', alignItems:'center', gap:'10px', color:'#a8714e', fontFamily:"'JetBrains Mono',monospace", fontSize:'11px', letterSpacing:'2px', textTransform:'uppercase', animation:'floaty 2.4s ease-in-out infinite' },
+    div('', { maxWidth:'680px', fontFamily:"'Instrument Serif',serif", fontSize:'19px', lineHeight:'1.66', color:'#2E3C24', marginTop:'38px' }, D.meta.blurb),
+    div('', { marginTop:'34px', display:'flex', alignItems:'center', gap:'10px', color:'#C45F61', fontFamily:"'Space Mono',monospace", fontSize:'11px', letterSpacing:'2px', textTransform:'uppercase', animation:'floaty 2.4s ease-in-out infinite' },
       span('Begin the journey'), span('↓', { fontSize:'15px' })
     )
   );
@@ -249,7 +250,7 @@ function buildHero() {
 function buildHeroImg() {
   const w = div('rv in', { position:'relative', marginTop:'40px', borderRadius:'3px', overflow:'hidden' });
   const img = el('img', { src:'assets/temp-hero.png', alt:'Pacific Crest Trail', style:{ display:'block', width:'100%', height:'460px', objectFit:'cover' } });
-  const cap = div('', { position:'absolute', left:'0', bottom:'0', width:'100%', padding:'18px 24px', fontFamily:"'JetBrains Mono',monospace", fontSize:'11px', letterSpacing:'2px', textTransform:'uppercase', color:'#fff', textShadow:'0 1px 6px rgba(0,0,0,.6)', background:'linear-gradient(to top,rgba(0,0,0,.5),transparent)' }, 'the long walk north · mexico to canada');
+  const cap = div('', { position:'absolute', left:'0', bottom:'0', width:'100%', padding:'18px 24px', fontFamily:"'Space Mono',monospace", fontSize:'11px', letterSpacing:'2px', textTransform:'uppercase', color:'#fff', textShadow:'0 1px 6px rgba(0,0,0,.6)', background:'linear-gradient(to top,rgba(0,0,0,.5),transparent)' }, 'the long walk north · mexico to canada');
   w.append(img, cap); return w;
 }
 function buildStatBar() {
@@ -258,11 +259,11 @@ function buildStatBar() {
     {num:'32',lbl:'zero days'},{num:'16.8',lbl:'avg mi/day'},
     {num:'Mar 23\nSep 28',lbl:'2027',small:true}
   ];
-  const g = div('', { display:'grid', gridTemplateColumns:'repeat(6,1fr)', marginTop:'42px', borderTop:'1px solid #2a2018', borderBottom:'1px solid #2a2018' });
+  const g = div('', { display:'grid', gridTemplateColumns:'repeat(6,1fr)', marginTop:'42px', borderTop:'1px solid #283420', borderBottom:'1px solid #283420' });
   stats.forEach((s,i) => {
-    const cell = div('', { padding:'22px 14px', borderRight: i<5 ? '1px solid #ddd0bb' : 'none' });
-    const num = div('', { fontFamily:"'Spectral',serif", fontWeight:'600', fontSize: s.small?'22px':'34px', lineHeight: s.small?'1.1':'1', marginTop: s.small?'5px':'0', whiteSpace:'pre-line' }, s.num);
-    const lbl = div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'10px', letterSpacing:'1.5px', textTransform:'uppercase', color:'#9a8b76', marginTop:'6px' }, s.lbl);
+    const cell = div('', { padding:'22px 14px', borderRight: i<5 ? '1px solid #ddd7cc' : 'none' });
+    const num = div('', { fontFamily:"'Instrument Serif',serif", fontWeight:'600', fontSize: s.small?'22px':'34px', lineHeight: s.small?'1.1':'1', marginTop: s.small?'5px':'0', whiteSpace:'pre-line' }, s.num);
+    const lbl = div('', { fontFamily:"'Space Mono',monospace", fontSize:'10px', letterSpacing:'1.5px', textTransform:'uppercase', color:'#8a8578', marginTop:'6px' }, s.lbl);
     cell.append(num, lbl); g.append(cell);
   });
   return g;
@@ -272,28 +273,28 @@ function buildStatBar() {
 function buildScrubber() {
   const ad = allDays();
   const card = div('rv', { maxWidth:'1000px', margin:'40px auto 0', padding:'0 7vw' });
-  const inner = div('', { background:'#2a2018', color:'#f4efe2', borderRadius:'4px', padding:'24px 28px' });
+  const inner = div('', { background:'#283420', color:'#F6F3ED', borderRadius:'4px', padding:'24px 28px' });
   const hdr = div('', { display:'flex', justifyContent:'space-between', alignItems:'baseline', flexWrap:'wrap', gap:'10px' },
-    div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'11px', letterSpacing:'3px', textTransform:'uppercase', color:'#d8a76e' }, 'Follow Along'),
-    div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'11px', letterSpacing:'1px', color:'#b3a890' }, `≈ ${Math.max(0,Math.ceil((new Date(2027,2,23)-new Date())/86400000))} days until Campo · Mar 23, 2027`)
+    div('', { fontFamily:"'Space Mono',monospace", fontSize:'11px', letterSpacing:'3px', textTransform:'uppercase', color:'#C9A24B' }, 'Follow Along'),
+    div('', { fontFamily:"'Space Mono',monospace", fontSize:'11px', letterSpacing:'1px', color:'#9aa48a' }, `≈ ${Math.max(0,Math.ceil((new Date(2027,2,23)-new Date())/86400000))} days until Campo · Mar 23, 2027`)
   );
-  const sub = div('', { fontFamily:"'Spectral',serif", fontSize:'15px', color:'#cabfab', marginTop:'8px', fontStyle:'italic' }, 'Drag to walk the calendar and see where the plan puts you on any given day.');
+  const sub = div('', { fontFamily:"'Instrument Serif',serif", fontSize:'15px', color:'#cdd0c2', marginTop:'8px', fontStyle:'italic' }, 'Drag to walk the calendar and see where the plan puts you on any given day.');
   const slider = el('input', { type:'range', min:'0', max:String(ad.length-1), value:'0', style:{ width:'100%', margin:'20px 0 8px' } });
 
   // Stat cells with stable IDs for in-place updates
   const scrubGrid = div('scrub-grid', { display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:'16px', marginTop:'8px' });
   ['scrub-date','scrub-sec','scrub-mile','scrub-togo'].forEach(id => {
-    const val = div('', { fontFamily:"'Spectral',serif", fontWeight:'600', fontSize:'24px', lineHeight:'1' });
+    const val = div('', { fontFamily:"'Instrument Serif',serif", fontWeight:'600', fontSize:'24px', lineHeight:'1' });
     val.id = id;
-    const lbl = div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'10px', letterSpacing:'1px', color:'#9a8b76', textTransform:'uppercase', marginTop:'5px' });
+    const lbl = div('', { fontFamily:"'Space Mono',monospace", fontSize:'10px', letterSpacing:'1px', color:'#8a8578', textTransform:'uppercase', marginTop:'5px' });
     lbl.id = id + '-lbl';
     scrubGrid.append(div('',null,val,lbl));
   });
 
-  const foot = div('', { marginTop:'16px', borderTop:'1px solid #4a3e30', paddingTop:'13px', display:'flex', justifyContent:'space-between', gap:'16px', flexWrap:'wrap', alignItems:'baseline' });
-  const footSeg = div('', { fontFamily:"'Spectral',serif", fontSize:'15px', color:'#e6dcc8', flex:'1', minWidth:'200px' });
+  const foot = div('', { marginTop:'16px', borderTop:'1px solid #283420', paddingTop:'13px', display:'flex', justifyContent:'space-between', gap:'16px', flexWrap:'wrap', alignItems:'baseline' });
+  const footSeg = div('', { fontFamily:"'Instrument Serif',serif", fontSize:'15px', color:'#e7e1d7', flex:'1', minWidth:'200px' });
   footSeg.id = 'scrub-seg';
-  const footRes = div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'10.5px', letterSpacing:'.5px', color:'#d8a76e', textTransform:'uppercase', whiteSpace:'nowrap' });
+  const footRes = div('', { fontFamily:"'Space Mono',monospace", fontSize:'10.5px', letterSpacing:'.5px', color:'#C9A24B', textTransform:'uppercase', whiteSpace:'nowrap' });
   footRes.id = 'scrub-res';
   foot.append(footSeg, footRes);
 
@@ -336,11 +337,11 @@ function buildOverview() {
 
   const hdr = div('', { maxWidth:'1180px', margin:'0 auto', padding:'0 7vw' },
     div('', { display:'flex', alignItems:'baseline', gap:'16px' },
-      div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'12px', letterSpacing:'4px', textTransform:'uppercase', color:'#a8714e' }, 'The Route'),
-      div('', { flex:'1', height:'1px', background:'#2a2018' })
+      div('', { fontFamily:"'Space Mono',monospace", fontSize:'12px', letterSpacing:'4px', textTransform:'uppercase', color:'#C45F61' }, 'The Route'),
+      div('', { flex:'1', height:'1px', background:'#283420' })
     ),
-    el('h2', { style:{ fontFamily:"'Spectral',serif", fontWeight:'600', fontSize:'46px', lineHeight:'1.05', letterSpacing:'-1px', margin:'18px 0 0' } }, 'Five sections, south to north'),
-    div('', { maxWidth:'680px', fontFamily:"'Spectral',serif", fontSize:'18px', lineHeight:'1.6', color:'#6a5e4d', marginTop:'14px', fontStyle:'italic' }, 'The desert breaks you in; the Sierra is the crown; NorCal is the grind; Oregon is the sprint; Washington is the gamble. Tap any segment to drop into its chapter.')
+    el('h2', { style:{ fontFamily:"'Instrument Serif',serif", fontWeight:'600', fontSize:'46px', lineHeight:'1.05', letterSpacing:'-1px', margin:'18px 0 0' } }, 'Five sections, south to north'),
+    div('', { maxWidth:'680px', fontFamily:"'Instrument Serif',serif", fontSize:'18px', lineHeight:'1.6', color:'#6f6a5d', marginTop:'14px', fontStyle:'italic' }, 'The desert breaks you in; the Sierra is the crown; NorCal is the grind; Oregon is the sprint; Washington is the gamble. Tap any segment to drop into its chapter.')
   );
   wrap.append(hdr, buildScrubber(), buildMapRows(), buildTrailStrip(), buildTimeline(), buildSchedule(), buildResupplyOverview());
   return wrap;
@@ -354,31 +355,31 @@ function buildMapRows() {
 
   list.append(div('', { display:'flex', alignItems:'center', gap:'20px' },
     div('', { width:'170px', textAlign:'right', flex:'none' },
-      div('', { fontFamily:"'Spectral',serif", fontWeight:'600', fontSize:'17px' }, 'Campo, CA'),
-      div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'10px', color:'#9a8b76', letterSpacing:'1px', marginTop:'2px' }, 'SOUTHERN TERMINUS · MILE 0')
+      div('', { fontFamily:"'Instrument Serif',serif", fontWeight:'600', fontSize:'17px' }, 'Campo, CA'),
+      div('', { fontFamily:"'Space Mono',monospace", fontSize:'10px', color:'#8a8578', letterSpacing:'1px', marginTop:'2px' }, 'SOUTHERN TERMINUS · MILE 0')
     ),
     div('', { width:'34px', display:'flex', justifyContent:'center', flex:'none' },
-      div('', { width:'18px', height:'18px', borderRadius:'50%', background:'#2a2018', border:'3px solid #f4eee4', boxShadow:'0 0 0 1px #2a2018' })
+      div('', { width:'18px', height:'18px', borderRadius:'50%', background:'#283420', border:'3px solid #EFEBE6', boxShadow:'0 0 0 1px #283420' })
     ),
-    div('', { flex:'1', fontFamily:"'JetBrains Mono',monospace", fontSize:'10px', letterSpacing:'2px', color:'#9a8b76', textTransform:'uppercase' }, 'U.S. / Mexico border')
+    div('', { flex:'1', fontFamily:"'Space Mono',monospace", fontSize:'10px', letterSpacing:'2px', color:'#8a8578', textTransform:'uppercase' }, 'U.S. / Mexico border')
   ));
 
   D.order.forEach(id => {
     const m = D.sectionMeta[id]; const barH = (40 + m.totalDays*1.7) + 'px';
     const row = div('maprow', { display:'flex', alignItems:'stretch', gap:'20px' });
     const bar = div('mapbar', { width:'8px', background:m.accent, height:barH });
-    const card = a('#sec-'+id, 'mapcard', { flex:'1', textDecoration:'none', color:'inherit', display:'block', padding:'14px 18px', margin:'8px 0', background:'#fffdf9', border:'1px solid #e6dcc8', borderLeft:'4px solid '+m.accent, borderRadius:'3px' });
+    const card = a('#sec-'+id, 'mapcard', { flex:'1', textDecoration:'none', color:'inherit', display:'block', padding:'14px 18px', margin:'8px 0', background:'#F6F3ED', border:'1px solid #e7e1d7', borderLeft:'4px solid '+m.accent, borderRadius:'3px' });
     const top = div('', { display:'flex', justifyContent:'space-between', alignItems:'baseline', gap:'12px', flexWrap:'wrap' });
-    const title = div('', { fontFamily:"'Spectral',serif", fontWeight:'600', fontSize:'22px' });
+    const title = div('', { fontFamily:"'Instrument Serif',serif", fontWeight:'600', fontSize:'22px' });
     title.append(span(m.roman, { color:m.accent }), '  '+m.name);
     top.append(title);
-    const meta = div('', { display:'flex', gap:'18px', flexWrap:'wrap', fontFamily:"'JetBrains Mono',monospace", fontSize:'10.5px', letterSpacing:'.5px', color:'#9a8b76', textTransform:'uppercase', marginTop:'8px' });
+    const meta = div('', { display:'flex', gap:'18px', flexWrap:'wrap', fontFamily:"'Space Mono',monospace", fontSize:'10.5px', letterSpacing:'.5px', color:'#8a8578', textTransform:'uppercase', marginTop:'8px' });
     [m.months, m.miles+' mi', m.totalDays+' days', m.avg+' mi/day'].forEach(t => meta.append(span(t)));
     const detail = div('mapdetail', null,
-      div('', { height:'1px', background:'#eadfca', marginBottom:'10px' }),
-      div('', { fontFamily:"'Spectral',serif", fontStyle:'italic', fontSize:'15px', color:'#5a5040', lineHeight:'1.45' }, m.tagline),
-      div('', { display:'flex', gap:'18px', flexWrap:'wrap', marginTop:'9px', fontFamily:"'JetBrains Mono',monospace", fontSize:'10px', letterSpacing:'.5px', color:m.accent, textTransform:'uppercase' },
-        span('→ '+endNames[id]), span('High pt · '+m.highPoint, { color:'#9a8b76' }), span('Read chapter', { color:'#9a8b76' })
+      div('', { height:'1px', background:'#e7e1d7', marginBottom:'10px' }),
+      div('', { fontFamily:"'Instrument Serif',serif", fontStyle:'italic', fontSize:'15px', color:'#564A54', lineHeight:'1.45' }, m.tagline),
+      div('', { display:'flex', gap:'18px', flexWrap:'wrap', marginTop:'9px', fontFamily:"'Space Mono',monospace", fontSize:'10px', letterSpacing:'.5px', color:m.accent, textTransform:'uppercase' },
+        span('→ '+endNames[id]), span('High pt · '+m.highPoint, { color:'#8a8578' }), span('Read chapter', { color:'#8a8578' })
       )
     );
     card.append(top, meta, detail);
@@ -386,21 +387,21 @@ function buildMapRows() {
     list.append(row);
     list.append(div('', { display:'flex', alignItems:'center', gap:'20px' },
       div('', { width:'170px', textAlign:'right', flex:'none' },
-        div('', { fontFamily:"'Spectral',serif", fontWeight:'600', fontSize:'15px' }, endNames[id]),
-        div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'10px', color:'#9a8b76', letterSpacing:'1px', marginTop:'2px' }, 'MILE '+endMiles[id])
+        div('', { fontFamily:"'Instrument Serif',serif", fontWeight:'600', fontSize:'15px' }, endNames[id]),
+        div('', { fontFamily:"'Space Mono',monospace", fontSize:'10px', color:'#8a8578', letterSpacing:'1px', marginTop:'2px' }, 'MILE '+endMiles[id])
       ),
-      div('', { width:'34px', display:'flex', justifyContent:'center', flex:'none' }, div('', { width:'13px', height:'13px', borderRadius:'50%', background:'#f4eee4', border:'2px solid #2a2018' })),
+      div('', { width:'34px', display:'flex', justifyContent:'center', flex:'none' }, div('', { width:'13px', height:'13px', borderRadius:'50%', background:'#EFEBE6', border:'2px solid #283420' })),
       div('', { flex:'1' })
     ));
   });
 
   list.append(div('', { display:'flex', alignItems:'center', gap:'20px', marginTop:'-6px' },
     div('', { width:'170px', textAlign:'right', flex:'none' },
-      div('', { fontFamily:"'Spectral',serif", fontWeight:'700', fontSize:'18px', color:'#b9683b' }, 'Manning Park, BC'),
-      div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'10px', color:'#9a8b76', letterSpacing:'1px', marginTop:'2px' }, 'NORTHERN TERMINUS · FINISH')
+      div('', { fontFamily:"'Instrument Serif',serif", fontWeight:'700', fontSize:'18px', color:'#C45F61' }, 'Manning Park, BC'),
+      div('', { fontFamily:"'Space Mono',monospace", fontSize:'10px', color:'#8a8578', letterSpacing:'1px', marginTop:'2px' }, 'NORTHERN TERMINUS · FINISH')
     ),
-    div('', { width:'34px', display:'flex', justifyContent:'center', flex:'none' }, div('', { width:'22px', height:'22px', borderRadius:'50%', background:'#b9683b', border:'3px solid #f4eee4', boxShadow:'0 0 0 1px #b9683b' })),
-    div('', { flex:'1', fontFamily:"'JetBrains Mono',monospace", fontSize:'10px', letterSpacing:'2px', color:'#9a8b76', textTransform:'uppercase' }, 'Canada · 2,659 miles done')
+    div('', { width:'34px', display:'flex', justifyContent:'center', flex:'none' }, div('', { width:'22px', height:'22px', borderRadius:'50%', background:'#C45F61', border:'3px solid #EFEBE6', boxShadow:'0 0 0 1px #C45F61' })),
+    div('', { flex:'1', fontFamily:"'Space Mono',monospace", fontSize:'10px', letterSpacing:'2px', color:'#8a8578', textTransform:'uppercase' }, 'Canada · 2,659 miles done')
   ));
   outer.append(list); return outer;
 }
@@ -409,11 +410,11 @@ function buildMapRows() {
 function buildTrailStrip() {
   const wrap = div('rv', { maxWidth:'1180px', margin:'64px auto 0', padding:'0 7vw' },
     div('', { display:'flex', alignItems:'baseline', gap:'14px', marginBottom:'14px' },
-      div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'11px', letterSpacing:'3px', textTransform:'uppercase', color:'#a8714e' }, 'Elevation, End to End'),
-      div('', { flex:'1', height:'1px', background:'#ddd0bb' }),
-      div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'11px', color:'#9a8b76' }, '2,659 mi · hover to read · click to jump')
+      div('', { fontFamily:"'Space Mono',monospace", fontSize:'11px', letterSpacing:'3px', textTransform:'uppercase', color:'#C45F61' }, 'Elevation, End to End'),
+      div('', { flex:'1', height:'1px', background:'#ddd7cc' }),
+      div('', { fontFamily:"'Space Mono',monospace", fontSize:'11px', color:'#8a8578' }, '2,659 mi · hover to read · click to jump')
     ),
-    div('', { background:'#fffdf9', border:'1px solid #e6dcc8', borderRadius:'3px', padding:'14px 16px', boxShadow:'0 1px 3px rgba(80,60,30,.06)' },
+    div('', { background:'#F6F3ED', border:'1px solid #e7e1d7', borderRadius:'3px', padding:'14px 16px', boxShadow:'0 1px 3px rgba(80,60,30,.06)' },
       (() => { const d = div('', { position:'relative', width:'100%', height:'240px' }); d.id = 'trailstrip'; return d; })()
     )
   );
@@ -424,39 +425,39 @@ function buildTrailStrip() {
 function buildTimeline() {
   const wrap = div('rv', { maxWidth:'1180px', margin:'64px auto 0', padding:'0 7vw' });
   const headRow = div('', { display:'flex', alignItems:'baseline', gap:'14px', marginBottom:'18px' },
-    div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'11px', letterSpacing:'3px', textTransform:'uppercase', color:'#a8714e' }, 'Master Timeline'),
-    div('', { flex:'1', height:'1px', background:'#ddd0bb' }),
-    div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'11px', color:'#9a8b76' }, 'official mileage')
+    div('', { fontFamily:"'Space Mono',monospace", fontSize:'11px', letterSpacing:'3px', textTransform:'uppercase', color:'#C45F61' }, 'Master Timeline'),
+    div('', { flex:'1', height:'1px', background:'#ddd7cc' }),
+    div('', { fontFamily:"'Space Mono',monospace", fontSize:'11px', color:'#8a8578' }, 'official mileage')
   );
   const ow = div('', { overflowX:'auto' });
   const inner = div('', { minWidth:'760px' });
-  const hdr = div('tl-grid', { borderTop:'1px solid #2a2018', borderBottom:'1px solid #2a2018', fontFamily:"'JetBrains Mono',monospace", fontSize:'10px', letterSpacing:'1px', textTransform:'uppercase', color:'#9a8b76', padding:'10px 0' });
+  const hdr = div('tl-grid', { borderTop:'1px solid #283420', borderBottom:'1px solid #283420', fontFamily:"'Space Mono',monospace", fontSize:'10px', letterSpacing:'1px', textTransform:'uppercase', color:'#8a8578', padding:'10px 0' });
   ['Section','Dates','Hike+Zero','Rest','Miles','Mi/day'].forEach(c => hdr.append(div('', { padding:'0 10px' }, c)));
   inner.append(hdr);
   D.masterTimeline.forEach(t => {
-    const row = div('tl-grid', { borderBottom:'1px solid #e6dcc8', padding:'14px 0', alignItems:'center' });
+    const row = div('tl-grid', { borderBottom:'1px solid #e7e1d7', padding:'14px 0', alignItems:'center' });
     const sc = div('', { padding:'0 10px', display:'flex', alignItems:'center' });
     const dot = div('', { width:'9px', height:'9px', borderRadius:'50%', background:t.accent, marginRight:'9px', flexShrink:'0' });
-    const nm = span(t.sec, { fontFamily:"'Spectral',serif", fontWeight:'600', fontSize:'16px' });
+    const nm = span(t.sec, { fontFamily:"'Instrument Serif',serif", fontWeight:'600', fontSize:'16px' });
     sc.append(dot,nm);
     const cells = [
-      div('', { padding:'0 10px', fontFamily:"'JetBrains Mono',monospace", fontSize:'11px', color:'#6a5e4d' }, t.dates),
-      div('', { padding:'0 10px', fontFamily:"'JetBrains Mono',monospace", fontSize:'12px' }, t.hz),
-      div('', { padding:'0 10px', fontFamily:"'JetBrains Mono',monospace", fontSize:'12px', color:'#6a5e4d' }, t.rest),
-      div('', { padding:'0 10px', fontFamily:"'Spectral',serif", fontWeight:'600', fontSize:'16px' }, t.miles),
-      div('', { padding:'0 10px', fontFamily:"'JetBrains Mono',monospace", fontSize:'12px' }, t.avg),
+      div('', { padding:'0 10px', fontFamily:"'Space Mono',monospace", fontSize:'11px', color:'#6f6a5d' }, t.dates),
+      div('', { padding:'0 10px', fontFamily:"'Space Mono',monospace", fontSize:'12px' }, t.hz),
+      div('', { padding:'0 10px', fontFamily:"'Space Mono',monospace", fontSize:'12px', color:'#6f6a5d' }, t.rest),
+      div('', { padding:'0 10px', fontFamily:"'Instrument Serif',serif", fontWeight:'600', fontSize:'16px' }, t.miles),
+      div('', { padding:'0 10px', fontFamily:"'Space Mono',monospace", fontSize:'12px' }, t.avg),
     ];
     row.append(sc, ...cells); inner.append(row);
   });
-  const total = div('tl-grid', { borderTop:'2px solid #2a2018', padding:'14px 0', alignItems:'center', background:'#efe6d6' });
+  const total = div('tl-grid', { borderTop:'2px solid #283420', padding:'14px 0', alignItems:'center', background:'#F6F3ED' });
   [
-    ['TOTAL', { padding:'0 10px', fontFamily:"'Spectral',serif", fontWeight:'700', fontSize:'16px' }],
-    ['Mar 23 – Sep 28', { padding:'0 10px', fontFamily:"'JetBrains Mono',monospace", fontSize:'11px', color:'#6a5e4d' }],
-    ['158 + 32', { padding:'0 10px', fontFamily:"'JetBrains Mono',monospace", fontSize:'12px', fontWeight:'700' }],
-    ['20%', { padding:'0 10px', fontFamily:"'JetBrains Mono',monospace", fontSize:'12px' }],
-    ['~2,659', { padding:'0 10px', fontFamily:"'Spectral',serif", fontWeight:'700', fontSize:'16px' }],
-    ['16.8', { padding:'0 10px', fontFamily:"'JetBrains Mono',monospace", fontSize:'12px' }],
-    ['190 days', { padding:'0 10px', fontFamily:"'JetBrains Mono',monospace", fontSize:'11px', color:'#6a5e4d' }],
+    ['TOTAL', { padding:'0 10px', fontFamily:"'Instrument Serif',serif", fontWeight:'700', fontSize:'16px' }],
+    ['Mar 23 – Sep 28', { padding:'0 10px', fontFamily:"'Space Mono',monospace", fontSize:'11px', color:'#6f6a5d' }],
+    ['158 + 32', { padding:'0 10px', fontFamily:"'Space Mono',monospace", fontSize:'12px', fontWeight:'700' }],
+    ['20%', { padding:'0 10px', fontFamily:"'Space Mono',monospace", fontSize:'12px' }],
+    ['~2,659', { padding:'0 10px', fontFamily:"'Instrument Serif',serif", fontWeight:'700', fontSize:'16px' }],
+    ['16.8', { padding:'0 10px', fontFamily:"'Space Mono',monospace", fontSize:'12px' }],
+    ['190 days', { padding:'0 10px', fontFamily:"'Space Mono',monospace", fontSize:'11px', color:'#6f6a5d' }],
   ].forEach(([t,s]) => total.append(div('',s,t)));
   inner.append(total); ow.append(inner);
   wrap.append(headRow, ow); return wrap;
@@ -468,26 +469,26 @@ function buildSchedule() {
   const wrap = div('rv', { maxWidth:'1180px', margin:'80px auto 0', padding:'0 7vw' });
   const grid = div('', { display:'grid', gridTemplateColumns:'1.1fr .9fr', gap:'54px', alignItems:'start' });
   const left = div('',null,
-    div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'11px', letterSpacing:'3px', textTransform:'uppercase', color:'#a8714e' }, 'The Schedule'),
-    el('h3', { style:{ fontFamily:"'Spectral',serif", fontWeight:'600', fontSize:'34px', lineHeight:'1.08', margin:'12px 0 0' } }, sch.lead),
-    div('', { fontFamily:"'Spectral',serif", fontSize:'17px', lineHeight:'1.62', color:'#3a3226', marginTop:'16px' }, sch.body),
-    div('', { marginTop:'20px', padding:'18px 20px', background:'#f6e9df', borderLeft:'4px solid #b3402e', borderRadius:'2px' },
-      div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'10px', letterSpacing:'2px', textTransform:'uppercase', color:'#b3402e', marginBottom:'8px' }, 'The defining risk'),
-      div('', { fontFamily:"'Spectral',serif", fontSize:'16px', lineHeight:'1.58', color:'#3a3226' }, sch.risk)
+    div('', { fontFamily:"'Space Mono',monospace", fontSize:'11px', letterSpacing:'3px', textTransform:'uppercase', color:'#C45F61' }, 'The Schedule'),
+    el('h3', { style:{ fontFamily:"'Instrument Serif',serif", fontWeight:'600', fontSize:'34px', lineHeight:'1.08', margin:'12px 0 0' } }, sch.lead),
+    div('', { fontFamily:"'Instrument Serif',serif", fontSize:'17px', lineHeight:'1.62', color:'#2E3C24', marginTop:'16px' }, sch.body),
+    div('', { marginTop:'20px', padding:'18px 20px', background:'#F6F3ED', borderLeft:'4px solid #C24230', borderRadius:'2px' },
+      div('', { fontFamily:"'Space Mono',monospace", fontSize:'10px', letterSpacing:'2px', textTransform:'uppercase', color:'#C24230', marginBottom:'8px' }, 'The defining risk'),
+      div('', { fontFamily:"'Instrument Serif',serif", fontSize:'16px', lineHeight:'1.58', color:'#2E3C24' }, sch.risk)
     )
   );
   const right = div('',null,
-    div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'11px', letterSpacing:'3px', textTransform:'uppercase', color:'#a8714e', marginBottom:'16px' }, 'Levers & Trade-offs'),
+    div('', { fontFamily:"'Space Mono',monospace", fontSize:'11px', letterSpacing:'3px', textTransform:'uppercase', color:'#C45F61', marginBottom:'16px' }, 'Levers & Trade-offs'),
     div('', { display:'flex', flexDirection:'column', gap:'10px' },
       ...D.levers.map(l => {
-        const card = div('', { background:'#fffdf9', border:'1px solid #e6dcc8', borderRadius:'3px', padding:'14px 16px' });
-        if (l.chosen) { card.style.borderColor = '#d8a76e'; card.style.borderLeft = '4px solid #b9683b'; }
+        const card = div('', { background:'#F6F3ED', border:'1px solid #e7e1d7', borderRadius:'3px', padding:'14px 16px' });
+        if (l.chosen) { card.style.borderColor = '#C9A24B'; card.style.borderLeft = '4px solid #C45F61'; }
         card.append(
           div('', { display:'flex', justifyContent:'space-between', alignItems:'baseline', gap:'10px' },
-            div('', { fontFamily:"'Spectral',serif", fontWeight:'600', fontSize:'16px' }, l.lever),
-            span(l.effect, { fontFamily:"'JetBrains Mono',monospace", fontSize:'10px', letterSpacing:'.5px', color: l.chosen?'#b3402e':'#9a8b76', whiteSpace:'nowrap' })
+            div('', { fontFamily:"'Instrument Serif',serif", fontWeight:'600', fontSize:'16px' }, l.lever),
+            span(l.effect, { fontFamily:"'Space Mono',monospace", fontSize:'10px', letterSpacing:'.5px', color: l.chosen?'#C24230':'#8a8578', whiteSpace:'nowrap' })
           ),
-          div('', { fontFamily:"'Spectral',serif", fontSize:'13.5px', lineHeight:'1.5', color:'#6a5e4d', marginTop:'6px' }, l.trade)
+          div('', { fontFamily:"'Instrument Serif',serif", fontSize:'13.5px', lineHeight:'1.5', color:'#6f6a5d', marginTop:'6px' }, l.trade)
         );
         return card;
       })
@@ -501,18 +502,18 @@ function buildResupplyOverview() {
   const wrap = div('rv', { maxWidth:'1180px', margin:'78px auto 0', padding:'0 7vw' });
   wrap.append(
     div('', { display:'flex', alignItems:'baseline', gap:'14px', marginBottom:'18px' },
-      div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'11px', letterSpacing:'3px', textTransform:'uppercase', color:'#a8714e' }, 'Resupply at a Glance'),
-      div('', { flex:'1', height:'1px', background:'#ddd0bb' }),
-      div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'11px', color:'#9a8b76' }, '~40 stops · only a handful mailed')
+      div('', { fontFamily:"'Space Mono',monospace", fontSize:'11px', letterSpacing:'3px', textTransform:'uppercase', color:'#C45F61' }, 'Resupply at a Glance'),
+      div('', { flex:'1', height:'1px', background:'#ddd7cc' }),
+      div('', { fontFamily:"'Space Mono',monospace", fontSize:'11px', color:'#8a8578' }, '~40 stops · only a handful mailed')
     ),
     div('resupply-ov-grid', null, ...D.resupplyOverview.map(r => {
-      const card = div('', { background:'#fffdf9', border:'1px solid #e6dcc8', borderTop:'3px solid '+r.accent, borderRadius:'2px', padding:'16px' });
+      const card = div('', { background:'#F6F3ED', border:'1px solid #e7e1d7', borderTop:'3px solid '+r.accent, borderRadius:'2px', padding:'16px' });
       card.append(
-        div('', { fontFamily:"'Spectral',serif", fontWeight:'600', fontSize:'17px', lineHeight:'1.15' }, r.sec),
-        div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'11px', color:r.accent, marginTop:'6px', letterSpacing:'.5px' }, r.stops+' stops'),
-        div('', { fontFamily:"'Spectral',serif", fontSize:'13px', lineHeight:'1.45', color:'#6a5e4d', marginTop:'10px' }, r.line),
-        div('', { marginTop:'10px', paddingTop:'10px', borderTop:'1px solid #eadfca', fontFamily:"'JetBrains Mono',monospace", fontSize:'9.5px', letterSpacing:'.5px', color:'#9a8b76', textTransform:'uppercase' },
-          'Longest carry', el('br'), span(r.carry, { color:'#6a5e4d' })
+        div('', { fontFamily:"'Instrument Serif',serif", fontWeight:'600', fontSize:'17px', lineHeight:'1.15' }, r.sec),
+        div('', { fontFamily:"'Space Mono',monospace", fontSize:'11px', color:r.accent, marginTop:'6px', letterSpacing:'.5px' }, r.stops+' stops'),
+        div('', { fontFamily:"'Instrument Serif',serif", fontSize:'13px', lineHeight:'1.45', color:'#6f6a5d', marginTop:'10px' }, r.line),
+        div('', { marginTop:'10px', paddingTop:'10px', borderTop:'1px solid #e7e1d7', fontFamily:"'Space Mono',monospace", fontSize:'9.5px', letterSpacing:'.5px', color:'#8a8578', textTransform:'uppercase' },
+          'Longest carry', el('br'), span(r.carry, { color:'#6f6a5d' })
         )
       );
       return card;
@@ -526,7 +527,7 @@ function buildSection(id) {
   const m = D.sectionMeta[id], d = Object.assign({}, m, D.sections[id]);
   const accent = m.accent;
   const bgColors = { sierra:'#eef3ee', wash:'#eeeef2' };
-  const wrapBg = bgColors[id] || '#f4eee4';
+  const wrapBg = bgColors[id] || '#EFEBE6';
   const outer = div('', { marginTop:'40px', background:wrapBg });
   outer.id = 'sec-'+id;
   outer.setAttribute('data-nav-target', id);
@@ -534,15 +535,15 @@ function buildSection(id) {
 
   // Chapter opener
   const opener = div('', { position:'relative', padding:'88px 7vw 0', maxWidth:'1180px', margin:'0 auto', overflow:'hidden' });
-  const bigNum = div('', { position:'absolute', top:'30px', right:'5vw', fontFamily:"'Spectral',serif", fontWeight:'300', fontSize:'230px', lineHeight:'.7', color:hexA(accent,0.10), pointerEvents:'none', userSelect:'none', zIndex:'0' }, m.roman);
+  const bigNum = div('', { position:'absolute', top:'30px', right:'5vw', fontFamily:"'Instrument Serif',serif", fontWeight:'300', fontSize:'230px', lineHeight:'.7', color:hexA(accent,0.10), pointerEvents:'none', userSelect:'none', zIndex:'0' }, m.roman);
   const opC = div('', { position:'relative', zIndex:'1' });
   opC.append(
     div('', { width:'54px', height:'3px', background:accent, marginBottom:'22px' }),
-    div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'12px', letterSpacing:'4px', textTransform:'uppercase', color:accent }, 'Section '+m.roman),
-    div('', { fontFamily:"'Spectral',serif", fontWeight:'600', fontSize:'64px', lineHeight:'1.02', letterSpacing:'-1px', margin:'10px 0 0', maxWidth:'760px' }, m.name),
-    div('', { fontFamily:"'Spectral',serif", fontStyle:'italic', fontSize:'23px', color:'#6a5e4d', marginTop:'14px', maxWidth:'620px' }, m.tagline),
-    div('', { display:'flex', flexWrap:'wrap', gap:'10px 26px', marginTop:'24px', fontFamily:"'JetBrains Mono',monospace", fontSize:'12px', letterSpacing:'1px', color:'#8a7c66', textTransform:'uppercase' },
-      span(m.months), span('/', { color:'#c9bca6' }), span(m.route)
+    div('', { fontFamily:"'Space Mono',monospace", fontSize:'12px', letterSpacing:'4px', textTransform:'uppercase', color:accent }, 'Section '+m.roman),
+    div('', { fontFamily:"'Instrument Serif',serif", fontWeight:'600', fontSize:'64px', lineHeight:'1.02', letterSpacing:'-1px', margin:'10px 0 0', maxWidth:'760px' }, m.name),
+    div('', { fontFamily:"'Instrument Serif',serif", fontStyle:'italic', fontSize:'23px', color:'#6f6a5d', marginTop:'14px', maxWidth:'620px' }, m.tagline),
+    div('', { display:'flex', flexWrap:'wrap', gap:'10px 26px', marginTop:'24px', fontFamily:"'Space Mono',monospace", fontSize:'12px', letterSpacing:'1px', color:'#6f6a5d', textTransform:'uppercase' },
+      span(m.months), span('/', { color:'#cdd0c2' }), span(m.route)
     )
   );
   opener.append(bigNum, opC);
@@ -551,7 +552,7 @@ function buildSection(id) {
   const photoWrap = div('rv', { position:'relative', maxWidth:'1180px', margin:'40px auto 0', padding:'0 7vw' });
   const imgC = div('', { position:'relative', borderRadius:'3px', overflow:'hidden' });
   const img = el('img', { src:'assets/temp-'+id+'.png', alt:m.name, style:{ display:'block', width:'100%', height:'420px', objectFit:'cover' } });
-  const cap = div('', { position:'absolute', left:'0', bottom:'0', padding:'16px 22px', fontFamily:"'JetBrains Mono',monospace", fontSize:'11px', letterSpacing:'2px', textTransform:'uppercase', color:'#fff', textShadow:'0 1px 6px rgba(0,0,0,.6)', background:'linear-gradient(to top,rgba(0,0,0,.45),transparent)', width:'100%' }, m.heroCaption);
+  const cap = div('', { position:'absolute', left:'0', bottom:'0', padding:'16px 22px', fontFamily:"'Space Mono',monospace", fontSize:'11px', letterSpacing:'2px', textTransform:'uppercase', color:'#fff', textShadow:'0 1px 6px rgba(0,0,0,.6)', background:'linear-gradient(to top,rgba(0,0,0,.45),transparent)', width:'100%' }, m.heroCaption);
   imgC.append(img, cap); photoWrap.append(imgC);
 
   // Stats
@@ -564,34 +565,34 @@ function buildSection(id) {
   ].forEach(s => {
     const cell = div('cell', null);
     cell.append(
-      div('', { fontFamily:"'Spectral',serif", fontWeight:'600', fontSize:s.small?'18px':'30px', lineHeight:'1', marginTop:s.small?'4px':'0' }, s.val),
-      div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'10px', letterSpacing:'1.5px', textTransform:'uppercase', color:'#9a8b76', marginTop:'6px' }, s.lbl)
+      div('', { fontFamily:"'Instrument Serif',serif", fontWeight:'600', fontSize:s.small?'18px':'30px', lineHeight:'1', marginTop:s.small?'4px':'0' }, s.val),
+      div('', { fontFamily:"'Space Mono',monospace", fontSize:'10px', letterSpacing:'1.5px', textTransform:'uppercase', color:'#8a8578', marginTop:'6px' }, s.lbl)
     );
     statG.append(cell);
   });
   const restCell = div('cell', null);
   restCell.append(
-    div('', { fontFamily:"'Spectral',serif", fontWeight:'600', fontSize:'30px', lineHeight:'1' }, m.zeros),
-    div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'10px', letterSpacing:'1.5px', textTransform:'uppercase', color:'#9a8b76', marginTop:'6px' }, 'rest days')
+    div('', { fontFamily:"'Instrument Serif',serif", fontWeight:'600', fontSize:'30px', lineHeight:'1' }, m.zeros),
+    div('', { fontFamily:"'Space Mono',monospace", fontSize:'10px', letterSpacing:'1.5px', textTransform:'uppercase', color:'#8a8578', marginTop:'6px' }, 'rest days')
   );
   statG.append(restCell); statWrap.append(statG);
 
   // Intro
   const intro = div('rv', { maxWidth:'760px', margin:'0 auto', padding:'48px 7vw 0' },
-    div('', { fontFamily:"'Spectral',serif", fontSize:'21px', lineHeight:'1.66', color:'#3a3226' }, d.intro)
+    div('', { fontFamily:"'Instrument Serif',serif", fontSize:'21px', lineHeight:'1.66', color:'#2E3C24' }, d.intro)
   );
 
   // Elevation chart (SVG)
   const elevWrap = div('rv', { maxWidth:'1180px', margin:'0 auto', padding:'48px 7vw 0' });
   elevWrap.append(
     div('', { display:'flex', alignItems:'baseline', gap:'14px', marginBottom:'16px' },
-      div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'11px', letterSpacing:'3px', textTransform:'uppercase', color:accent }, 'Elevation Profile'),
-      div('', { flex:'1', height:'1px', background:'#ddd0bb' }),
-      div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'11px', letterSpacing:'1px', color:'#9a8b76' }, 'daily camps + resupply')
+      div('', { fontFamily:"'Space Mono',monospace", fontSize:'11px', letterSpacing:'3px', textTransform:'uppercase', color:accent }, 'Elevation Profile'),
+      div('', { flex:'1', height:'1px', background:'#ddd7cc' }),
+      div('', { fontFamily:"'Space Mono',monospace", fontSize:'11px', letterSpacing:'1px', color:'#8a8578' }, 'daily camps + resupply')
     ),
-    div('', { background:'#fffdf9', border:'1px solid #e6dcc8', borderRadius:'3px', padding:'14px 16px 8px', boxShadow:'0 1px 3px rgba(80,60,30,.06)' },
+    div('', { background:'#F6F3ED', border:'1px solid #e7e1d7', borderRadius:'3px', padding:'14px 16px 8px', boxShadow:'0 1px 3px rgba(80,60,30,.06)' },
       (() => { const c = div('elevchart', { position:'relative', width:'100%', height:'260px' }); c.dataset.sec = id; return c; })(),
-      div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'9.5px', letterSpacing:'.5px', color:'#b3a890', textTransform:'uppercase', marginTop:'2px', textAlign:'right' }, 'interpolated from documented landmarks · hover to read · click a point to filter the days below')
+      div('', { fontFamily:"'Space Mono',monospace", fontSize:'9.5px', letterSpacing:'.5px', color:'#9aa48a', textTransform:'uppercase', marginTop:'2px', textAlign:'right' }, 'interpolated from documented landmarks · hover to read · click a point to filter the days below')
     )
   );
 
@@ -601,16 +602,16 @@ function buildSection(id) {
     passesEl = div('rv', { maxWidth:'1180px', margin:'0 auto', padding:'48px 7vw 0' });
     passesEl.append(
       div('', { display:'flex', alignItems:'baseline', gap:'14px', marginBottom:'18px' },
-        div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'11px', letterSpacing:'3px', textTransform:'uppercase', color:accent }, 'The Eight Major Passes'),
-        div('', { flex:'1', height:'1px', background:'#ddd0bb' })
+        div('', { fontFamily:"'Space Mono',monospace", fontSize:'11px', letterSpacing:'3px', textTransform:'uppercase', color:accent }, 'The Eight Major Passes'),
+        div('', { flex:'1', height:'1px', background:'#ddd7cc' })
       ),
       div('passes-grid', null, ...D.passes.map(pp => {
-        const card = div('', { background:'#fffdf9', border:'1px solid #e6dcc8', borderTop:'3px solid #5f7d66', borderRadius:'2px', padding:'16px 16px 14px' });
+        const card = div('', { background:'#F6F3ED', border:'1px solid #e7e1d7', borderTop:'3px solid #6F7C2F', borderRadius:'2px', padding:'16px 16px 14px' });
         card.append(
-          div('', { fontFamily:"'Spectral',serif", fontWeight:'600', fontSize:'20px' }, pp.name),
-          div('', { fontFamily:"'Spectral',serif", fontWeight:'600', fontSize:'26px', color:'#5f7d66', marginTop:'2px' }, pp.elev, span(' ft', { fontSize:'13px', color:'#9a8b76', fontWeight:'400' })),
-          div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'10px', letterSpacing:'1px', color:'#9a8b76', marginTop:'4px' }, 'MILE '+pp.mile),
-          div('', { fontFamily:"'Spectral',serif", fontSize:'13.5px', lineHeight:'1.45', color:'#6a5e4d', marginTop:'9px' }, pp.note)
+          div('', { fontFamily:"'Instrument Serif',serif", fontWeight:'600', fontSize:'20px' }, pp.name),
+          div('', { fontFamily:"'Instrument Serif',serif", fontWeight:'600', fontSize:'26px', color:'#6F7C2F', marginTop:'2px' }, pp.elev, span(' ft', { fontSize:'13px', color:'#8a8578', fontWeight:'400' })),
+          div('', { fontFamily:"'Space Mono',monospace", fontSize:'10px', letterSpacing:'1px', color:'#8a8578', marginTop:'4px' }, 'MILE '+pp.mile),
+          div('', { fontFamily:"'Instrument Serif',serif", fontSize:'13.5px', lineHeight:'1.45', color:'#6f6a5d', marginTop:'9px' }, pp.note)
         );
         return card;
       }))
@@ -625,24 +626,24 @@ function buildSection(id) {
   const rsWrap = div('rv', { maxWidth:'1180px', margin:'0 auto', padding:'54px 7vw 0' });
   rsWrap.append(
     div('', { display:'flex', alignItems:'baseline', gap:'14px', marginBottom:'18px' },
-      div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'11px', letterSpacing:'3px', textTransform:'uppercase', color:accent }, 'Resupply'),
-      div('', { flex:'1', height:'1px', background:'#ddd0bb' }),
-      div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'11px', letterSpacing:'1px', color:'#9a8b76' }, 'buy · mail · carry')
+      div('', { fontFamily:"'Space Mono',monospace", fontSize:'11px', letterSpacing:'3px', textTransform:'uppercase', color:accent }, 'Resupply'),
+      div('', { flex:'1', height:'1px', background:'#ddd7cc' }),
+      div('', { fontFamily:"'Space Mono',monospace", fontSize:'11px', letterSpacing:'1px', color:'#8a8578' }, 'buy · mail · carry')
     ),
     div('resupply-grid', null, ...(d.resupply||[]).map(rs => {
       const isMail = (rs.buymail||'').toLowerCase().startsWith('mail');
-      const tagBg = isMail ? '#8a6d3b' : accent;
-      const card = div('', { background:'#fffdf9', border:'1px solid #e6dcc8', borderRadius:'3px', padding:'18px 20px' });
-      const meta = div('', { display:'flex', gap:'18px', marginTop:'8px', fontFamily:"'JetBrains Mono',monospace", fontSize:'10.5px', letterSpacing:'.5px', color:'#9a8b76', textTransform:'uppercase' });
+      const tagBg = isMail ? '#C9A24B' : accent;
+      const card = div('', { background:'#F6F3ED', border:'1px solid #e7e1d7', borderRadius:'3px', padding:'18px 20px' });
+      const meta = div('', { display:'flex', gap:'18px', marginTop:'8px', fontFamily:"'Space Mono',monospace", fontSize:'10.5px', letterSpacing:'.5px', color:'#8a8578', textTransform:'uppercase' });
       if (rs.next && /\d/.test(rs.next)) meta.append(span(rs.next+' mi to next'));
       if (rs.days && rs.days !== '—' && /\d/.test(rs.days)) meta.append(span(rs.days+' days'));
       card.append(
         div('', { display:'flex', justifyContent:'space-between', alignItems:'baseline', gap:'10px' },
-          div('', { fontFamily:"'Spectral',serif", fontWeight:'600', fontSize:'19px', lineHeight:'1.2' }, rs.stop),
-          span(rs.buymail, { fontFamily:"'JetBrains Mono',monospace", fontSize:'10px', letterSpacing:'1px', textTransform:'uppercase', color:'#fff', background:tagBg, padding:'4px 9px', borderRadius:'2px', whiteSpace:'nowrap', flex:'none' })
+          div('', { fontFamily:"'Instrument Serif',serif", fontWeight:'600', fontSize:'19px', lineHeight:'1.2' }, rs.stop),
+          span(rs.buymail, { fontFamily:"'Space Mono',monospace", fontSize:'10px', letterSpacing:'1px', textTransform:'uppercase', color:'#fff', background:tagBg, padding:'4px 9px', borderRadius:'2px', whiteSpace:'nowrap', flex:'none' })
         ),
         meta,
-        div('', { fontFamily:"'Spectral',serif", fontSize:'14px', lineHeight:'1.5', color:'#6a5e4d', marginTop:'10px' }, rs.tips)
+        div('', { fontFamily:"'Instrument Serif',serif", fontSize:'14px', lineHeight:'1.5', color:'#6f6a5d', marginTop:'10px' }, rs.tips)
       );
       return card;
     }))
@@ -652,18 +653,18 @@ function buildSection(id) {
   const notes = div('rv', { maxWidth:'900px', margin:'0 auto', padding:'54px 7vw 88px' });
   notes.append(
     div('', { display:'flex', alignItems:'baseline', gap:'14px', marginBottom:'22px' },
-      div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'11px', letterSpacing:'3px', textTransform:'uppercase', color:accent }, 'Planning Notes & Caveats'),
-      div('', { flex:'1', height:'1px', background:'#ddd0bb' })
+      div('', { fontFamily:"'Space Mono',monospace", fontSize:'11px', letterSpacing:'3px', textTransform:'uppercase', color:accent }, 'Planning Notes & Caveats'),
+      div('', { flex:'1', height:'1px', background:'#ddd7cc' })
     ),
     div('', { display:'flex', flexDirection:'column', gap:'18px' },
       ...(d.notes||[]).map(nt => div('', { display:'flex', gap:'16px', alignItems:'flex-start' },
         div('', { width:'10px', height:'10px', flex:'none', marginTop:'9px', border:'2px solid '+accent, borderRadius:'50%' }),
-        div('', { fontFamily:"'Spectral',serif", fontSize:'17px', lineHeight:'1.6', color:'#3a3226' }, nt)
+        div('', { fontFamily:"'Instrument Serif',serif", fontSize:'17px', lineHeight:'1.6', color:'#2E3C24' }, nt)
       ))
     )
   );
 
-  const inner = div('', { fontFamily:"'Spectral',serif", color:'#2a2018' });
+  const inner = div('', { fontFamily:"'Instrument Serif',serif", color:'#283420' });
   inner.append(opener, photoWrap, statWrap, intro, elevWrap);
   if (passesEl) inner.append(passesEl);
   inner.append(itinWrap, rsWrap, notes);
@@ -700,14 +701,14 @@ function renderItinerary(id, container) {
   container.innerHTML = '';
   const hdRow = div('', { display:'flex', alignItems:'flex-end', justifyContent:'space-between', gap:'14px', marginBottom:'14px', flexWrap:'wrap' });
   const hdLeft = div('',null,
-    div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'11px', letterSpacing:'3px', textTransform:'uppercase', color:accent }, 'Daily Itinerary'),
-    div('', { fontFamily:"'Spectral',serif", fontStyle:'italic', fontSize:'15px', color:'#9a8b76', marginTop:'4px' }, ledgerHint)
+    div('', { fontFamily:"'Space Mono',monospace", fontSize:'11px', letterSpacing:'3px', textTransform:'uppercase', color:accent }, 'Daily Itinerary'),
+    div('', { fontFamily:"'Instrument Serif',serif", fontStyle:'italic', fontSize:'15px', color:'#8a8578', marginTop:'4px' }, ledgerHint)
   );
   const hdRight = div('', { display:'flex', alignItems:'center', gap:'10px', flexWrap:'wrap' });
-  const doneLabel = span(`${doneCount} / ${days.length} walked`, { fontFamily:"'JetBrains Mono',monospace", fontSize:'10px', letterSpacing:'1px', textTransform:'uppercase', color:accent, background:'#fff', border:'1px solid #e6dcc8', padding:'6px 10px', borderRadius:'2px' });
+  const doneLabel = span(`${doneCount} / ${days.length} walked`, { fontFamily:"'Space Mono',monospace", fontSize:'10px', letterSpacing:'1px', textTransform:'uppercase', color:accent, background:'#fff', border:'1px solid #e7e1d7', padding:'6px 10px', borderRadius:'2px' });
   hdRight.append(doneLabel);
   if (!pinned && tagFilter === 'all') {
-    const toggleBtn = el('button', { style:{ fontFamily:"'JetBrains Mono',monospace", fontSize:'11px', letterSpacing:'1.5px', textTransform:'uppercase', color:accent, background:'transparent', border:'1px solid '+accent, padding:'9px 16px', borderRadius:'2px', cursor:'pointer' } }, showAll ? 'Show highlights' : `Show all ${days.length} days`);
+    const toggleBtn = el('button', { style:{ fontFamily:"'Space Mono',monospace", fontSize:'11px', letterSpacing:'1.5px', textTransform:'uppercase', color:accent, background:'transparent', border:'1px solid '+accent, padding:'9px 16px', borderRadius:'2px', cursor:'pointer' } }, showAll ? 'Show highlights' : `Show all ${days.length} days`);
     toggleBtn.addEventListener('click', () => setState(st => ({ showAll: Object.assign({},st.showAll,{[id]:!st.showAll[id]}) })));
     hdRight.append(toggleBtn);
   }
@@ -719,7 +720,7 @@ function renderItinerary(id, container) {
   fdef.filter(f => f.key==='all'||cnt(f.key)>0).forEach(f => {
     const active = !pinned && tagFilter === f.key;
     const c = f.key==='all' ? days.length : cnt(f.key);
-    const chip = el('button', { className:'filter-chip'+(active?' active':''), style:{ background: active?accent:'transparent', color: active?'#fff':'#8a7c66', borderColor: active?accent:'#ddd0bb', '--accent':accent } }, `${f.label} (${c})`);
+    const chip = el('button', { className:'filter-chip'+(active?' active':''), style:{ background: active?accent:'transparent', color: active?'#fff':'#6f6a5d', borderColor: active?accent:'#ddd7cc', '--accent':accent } }, `${f.label} (${c})`);
     chip.addEventListener('click', () => setState(st => ({ filter: Object.assign({},st.filter,{[id]:f.key}), pinnedDay: Object.assign({},st.pinnedDay,{[id]:null}) })));
     chips.append(chip);
   });
@@ -730,12 +731,12 @@ function renderItinerary(id, container) {
   }
 
   // Rows
-  const rowsEl = div('', { borderTop:'1px solid #2a2018' });
+  const rowsEl = div('', { borderTop:'1px solid #283420' });
   list.forEach(r => {
     const isZero = r.tag==='zero', isPass = r.tag==='pass', isTown = r.tag==='town';
     const special = isZero || isPass || isTown;
     const k = keyFor(id, r); const isDone = !!checked[k];
-    const row = div('dayrow', { background: isZero?(m.tint||'#efe3d2'):'#fffdf9', borderLeftColor: special?accent:'transparent', opacity: isDone?'0.5':'1' });
+    const row = div('dayrow', { background: isZero?(m.tint||'#efe3d2'):'#F6F3ED', borderLeftColor: special?accent:'transparent', opacity: isDone?'0.5':'1' });
     row.classList.add('dayrow'); row.dataset.sec = id; row.dataset.mile = r.mile; row.dataset.tag = r.tag;
 
     const circle = div('check-circle'+(isDone?' done':''), { '--accent':accent });
@@ -752,16 +753,16 @@ function renderItinerary(id, container) {
     row.append(
       circle,
       div('', { width:'70px', flex:'none' },
-        div('', { display:'inline-block', fontFamily:"'JetBrains Mono',monospace", fontSize:'11px', fontWeight:'700', letterSpacing:'.5px', color: isZero?accent:(isPass?'#5f7d66':'#2a2018') }, isZero?'ZERO':(isPass?'PASS':'DAY '+r.day)),
-        div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'10px', color:'#a89880', marginTop:'3px' }, r.date||'')
+        div('', { display:'inline-block', fontFamily:"'Space Mono',monospace", fontSize:'11px', fontWeight:'700', letterSpacing:'.5px', color: isZero?accent:(isPass?'#6F7C2F':'#283420') }, isZero?'ZERO':(isPass?'PASS':'DAY '+r.day)),
+        div('', { fontFamily:"'Space Mono',monospace", fontSize:'10px', color:'#9aa48a', marginTop:'3px' }, r.date||'')
       ),
       div('', { flex:'1', minWidth:'0' },
-        div('', { fontFamily:"'Spectral',serif", fontWeight:'600', fontSize:'16px', lineHeight:'1.3', color:'#2a2018' }, r.segment||''),
-        r.notes ? div('', { fontFamily:"'Spectral',serif", fontSize:'14px', lineHeight:'1.5', color:'#7a6e5b', marginTop:'3px' }, r.notes) : null
+        div('', { fontFamily:"'Instrument Serif',serif", fontWeight:'600', fontSize:'16px', lineHeight:'1.3', color:'#283420' }, r.segment||''),
+        r.notes ? div('', { fontFamily:"'Instrument Serif',serif", fontSize:'14px', lineHeight:'1.5', color:'#6f6a5d', marginTop:'3px' }, r.notes) : null
       ),
       div('', { width:'96px', flex:'none', textAlign:'right' },
-        div('', { fontFamily:"'Spectral',serif", fontWeight:'600', fontSize:'19px', color:'#2a2018' }, isZero?'—':(r.mi||'')),
-        div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'10px', letterSpacing:'.5px', color:'#a89880', marginTop:'3px' }, r.mile?'mi '+r.mile:'')
+        div('', { fontFamily:"'Instrument Serif',serif", fontWeight:'600', fontSize:'19px', color:'#283420' }, isZero?'—':(r.mi||'')),
+        div('', { fontFamily:"'Space Mono',monospace", fontSize:'10px', letterSpacing:'.5px', color:'#9aa48a', marginTop:'3px' }, r.mile?'mi '+r.mile:'')
       )
     );
     rowsEl.append(row);
@@ -778,43 +779,43 @@ function buildTahoe() {
   const inner = div('', { maxWidth:'1180px', margin:'0 auto', padding:'84px 7vw' });
   inner.append(
     div('rv', { display:'flex', alignItems:'center', gap:'14px' },
-      div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'12px', letterSpacing:'4px', textTransform:'uppercase', color:'#9fc0a0', border:'1px dashed #4d6b50', padding:'6px 12px', borderRadius:'2px' }, 'Optional Appendix'),
-      div('', { flex:'1', height:'1px', background:'#34503a' })
+      div('', { fontFamily:"'Space Mono',monospace", fontSize:'12px', letterSpacing:'4px', textTransform:'uppercase', color:'#9aa48a', border:'1px dashed #475438', padding:'6px 12px', borderRadius:'2px' }, 'Optional Appendix'),
+      div('', { flex:'1', height:'1px', background:'#475438' })
     ),
-    el('h2', { class:'rv', style:{ fontFamily:"'Spectral',serif", fontWeight:'600', fontSize:'56px', lineHeight:'1.02', letterSpacing:'-1px', margin:'24px 0 0', color:'#f4efe2' } }, 'The Tahoe Rim Loop'),
-    div('rv', { fontFamily:"'Spectral',serif", fontStyle:'italic', fontSize:'22px', color:'#bcc7b3', marginTop:'12px' }, '≈165 miles around the lake. Only if you\'re ahead of schedule.'),
-    div('rv', { maxWidth:'760px', fontFamily:"'Spectral',serif", fontSize:'18px', lineHeight:'1.66', color:'#d6d2c4', marginTop:'24px' }, T.intro),
+    el('h2', { class:'rv', style:{ fontFamily:"'Instrument Serif',serif", fontWeight:'600', fontSize:'56px', lineHeight:'1.02', letterSpacing:'-1px', margin:'24px 0 0', color:'#F6F3ED' } }, 'The Tahoe Rim Loop'),
+    div('rv', { fontFamily:"'Instrument Serif',serif", fontStyle:'italic', fontSize:'22px', color:'#b9c2ad', marginTop:'12px' }, '≈165 miles around the lake. Only if you\'re ahead of schedule.'),
+    div('rv', { maxWidth:'760px', fontFamily:"'Instrument Serif',serif", fontSize:'18px', lineHeight:'1.66', color:'#ddd7cc', marginTop:'24px' }, T.intro),
     div('rv', { display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:'12px', marginTop:'34px' },
       ...[{v:T.stat.added,l:T.stat.hiking},{v:T.stat.dist,l:'circuit length'},{v:T.stat.finish,l:'pushes finish to'},{v:T.stat.cost,l:'schedule cost',small:true}].map(s =>
-        div('', { border:'1px solid #34503a', borderRadius:'3px', padding:'16px' },
-          div('', { fontFamily:"'Spectral',serif", fontWeight:'600', fontSize:s.small?'18px':'26px', color:'#9fc0a0', lineHeight:s.small?'1.2':'1', marginTop:s.small?'3px':'0' }, s.v),
-          div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'10px', letterSpacing:'1px', textTransform:'uppercase', color:'#8aa28b', marginTop:'5px' }, s.l)
+        div('', { border:'1px solid #475438', borderRadius:'3px', padding:'16px' },
+          div('', { fontFamily:"'Instrument Serif',serif", fontWeight:'600', fontSize:s.small?'18px':'26px', color:'#9aa48a', lineHeight:s.small?'1.2':'1', marginTop:s.small?'3px':'0' }, s.v),
+          div('', { fontFamily:"'Space Mono',monospace", fontSize:'10px', letterSpacing:'1px', textTransform:'uppercase', color:'#9aa48a', marginTop:'5px' }, s.l)
         )
       )
     ),
     (() => {
-      const dw = div('rv', { marginTop:'40px', borderTop:'1px solid #34503a' });
+      const dw = div('rv', { marginTop:'40px', borderTop:'1px solid #475438' });
       T.days.forEach(r => {
         const isRest = r.label==='Rest';
-        const row = div('', { display:'flex', gap:'18px', padding:'14px 2px', borderBottom:'1px solid #25382b', alignItems:'flex-start', background:isRest?'rgba(159,192,160,.07)':'transparent' });
+        const row = div('', { display:'flex', gap:'18px', padding:'14px 2px', borderBottom:'1px solid #1d2718', alignItems:'flex-start', background:isRest?'rgba(159,192,160,.07)':'transparent' });
         row.append(
-          div('', { width:'64px', flex:'none' }, span(isRest?'REST':r.label, { fontFamily:"'JetBrains Mono',monospace", fontSize:'11px', fontWeight:'700', letterSpacing:'.5px', color:isRest?'#c99a6a':'#9fc0a0' })),
+          div('', { width:'64px', flex:'none' }, span(isRest?'REST':r.label, { fontFamily:"'Space Mono',monospace", fontSize:'11px', fontWeight:'700', letterSpacing:'.5px', color:isRest?'#C9A24B':'#9aa48a' })),
           div('', { flex:'1', minWidth:'0' },
-            div('', { fontFamily:"'Spectral',serif", fontWeight:'600', fontSize:'16px', color:'#f0ece0' }, r.segment),
-            r.notes ? div('', { fontFamily:"'Spectral',serif", fontSize:'13.5px', lineHeight:'1.5', color:'#b7bfae', marginTop:'3px' }, r.notes) : null
+            div('', { fontFamily:"'Instrument Serif',serif", fontWeight:'600', fontSize:'16px', color:'#F6F3ED' }, r.segment),
+            r.notes ? div('', { fontFamily:"'Instrument Serif',serif", fontSize:'13.5px', lineHeight:'1.5', color:'#b9c2ad', marginTop:'3px' }, r.notes) : null
           ),
-          div('', { width:'56px', flex:'none', textAlign:'right', fontFamily:"'Spectral',serif", fontWeight:'600', fontSize:'18px', color:'#9fc0a0' }, isRest?'—':(r.mi||''))
+          div('', { width:'56px', flex:'none', textAlign:'right', fontFamily:"'Instrument Serif',serif", fontWeight:'600', fontSize:'18px', color:'#9aa48a' }, isRest?'—':(r.mi||''))
         );
         dw.append(row);
       });
       return dw;
     })(),
     div('rv', { marginTop:'34px' },
-      div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'11px', letterSpacing:'3px', textTransform:'uppercase', color:'#9fc0a0', marginBottom:'16px' }, 'Loop Logistics'),
+      div('', { fontFamily:"'Space Mono',monospace", fontSize:'11px', letterSpacing:'3px', textTransform:'uppercase', color:'#9aa48a', marginBottom:'16px' }, 'Loop Logistics'),
       div('', { display:'grid', gridTemplateColumns:'repeat(2,1fr)', gap:'14px' },
         ...T.logistics.map(g => div('', { display:'flex', gap:'14px', alignItems:'flex-start' },
-          div('', { width:'8px', height:'8px', flex:'none', marginTop:'8px', border:'2px solid #9fc0a0', borderRadius:'50%' }),
-          div('', { fontFamily:"'Spectral',serif", fontSize:'15px', lineHeight:'1.55', color:'#d6d2c4' }, g)
+          div('', { width:'8px', height:'8px', flex:'none', marginTop:'8px', border:'2px solid #9aa48a', borderRadius:'50%' }),
+          div('', { fontFamily:"'Instrument Serif',serif", fontSize:'15px', lineHeight:'1.55', color:'#ddd7cc' }, g)
         ))
       )
     )
@@ -826,17 +827,17 @@ function buildTahoe() {
 function buildFinish() {
   const sec = div('site-footer');
   sec.append(div('', { maxWidth:'900px', margin:'0 auto', padding:'96px 7vw', textAlign:'center' },
-    div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'12px', letterSpacing:'5px', textTransform:'uppercase', color:'#c99a6a' }, 'Monument 78 · Northern Terminus'),
-    el('h2', { style:{ fontFamily:"'Spectral',serif", fontWeight:'600', fontSize:'64px', lineHeight:'1.02', letterSpacing:'-1px', margin:'22px 0 0' } }, '2,659 miles.', el('br'), el('em', { style:{fontStyle:'italic',color:'#d8a76e'} }, 'You finished the PCT.')),
-    div('', { fontFamily:"'Spectral',serif", fontSize:'19px', lineHeight:'1.66', color:'#cabfab', margin:'24px auto 0', maxWidth:'620px' }, 'From the desert shakedown at Campo to the golden-larch North Cascades, with a full Tahoe Rim Trail loop folded in. The whole set, one season, from the Mexican border to Manning Park, British Columbia.'),
-    div('', { marginTop:'36px', padding:'20px 24px', background:'#3a2e22', border:'1px dashed #6a5640', borderRadius:'3px', maxWidth:'620px', marginLeft:'auto', marginRight:'auto', textAlign:'left' },
-      div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'10px', letterSpacing:'2px', textTransform:'uppercase', color:'#d8a76e', marginBottom:'8px' }, "Don't forget · the one piece of paper"),
-      div('', { fontFamily:"'Spectral',serif", fontSize:'16px', lineHeight:'1.58', color:'#e6dcc8' }, "You cannot legally finish at Manning Park without the Canadian PCT entry permit. Apply months ahead, back when you secure the start date. Without it you turn around at Monument 78 and hike ~30 miles back to Hart's Pass.")
+    div('', { fontFamily:"'Space Mono',monospace", fontSize:'12px', letterSpacing:'5px', textTransform:'uppercase', color:'#C9A24B' }, 'Monument 78 · Northern Terminus'),
+    el('h2', { style:{ fontFamily:"'Instrument Serif',serif", fontWeight:'600', fontSize:'64px', lineHeight:'1.02', letterSpacing:'-1px', margin:'22px 0 0' } }, '2,659 miles.', el('br'), el('em', { style:{fontStyle:'italic',color:'#C9A24B'} }, 'You finished the PCT.')),
+    div('', { fontFamily:"'Instrument Serif',serif", fontSize:'19px', lineHeight:'1.66', color:'#cdd0c2', margin:'24px auto 0', maxWidth:'620px' }, 'From the desert shakedown at Campo to the golden-larch North Cascades, with a full Tahoe Rim Trail loop folded in. The whole set, one season, from the Mexican border to Manning Park, British Columbia.'),
+    div('', { marginTop:'36px', padding:'20px 24px', background:'#283420', border:'1px dashed #564A54', borderRadius:'3px', maxWidth:'620px', marginLeft:'auto', marginRight:'auto', textAlign:'left' },
+      div('', { fontFamily:"'Space Mono',monospace", fontSize:'10px', letterSpacing:'2px', textTransform:'uppercase', color:'#C9A24B', marginBottom:'8px' }, "Don't forget · the one piece of paper"),
+      div('', { fontFamily:"'Instrument Serif',serif", fontSize:'16px', lineHeight:'1.58', color:'#e7e1d7' }, "You cannot legally finish at Manning Park without the Canadian PCT entry permit. Apply months ahead, back when you secure the start date. Without it you turn around at Monument 78 and hike ~30 miles back to Hart's Pass.")
     ),
-    div('', { marginTop:'44px', display:'flex', gap:'14px', justifyContent:'center', flexWrap:'wrap', fontFamily:"'JetBrains Mono',monospace", fontSize:'11px', letterSpacing:'1px', color:'#9a8b76', textTransform:'uppercase' },
-      span('Campo → Canada'), span('/', { color:'#6a5640' }), span('Mar 23 – Sep 28, 2027'), span('/', { color:'#6a5640' }), span('190 days')
+    div('', { marginTop:'44px', display:'flex', gap:'14px', justifyContent:'center', flexWrap:'wrap', fontFamily:"'Space Mono',monospace", fontSize:'11px', letterSpacing:'1px', color:'#8a8578', textTransform:'uppercase' },
+      span('Campo → Canada'), span('/', { color:'#564A54' }), span('Mar 23 – Sep 28, 2027'), span('/', { color:'#564A54' }), span('190 days')
     ),
-    a('#top', '', { display:'inline-block', marginTop:'36px', fontFamily:"'JetBrains Mono',monospace", fontSize:'11px', letterSpacing:'2px', textTransform:'uppercase', color:'#d8a76e', textDecoration:'none', border:'1px solid #6a5640', padding:'11px 20px', borderRadius:'2px' }, '↑ Back to the start')
+    a('#top', '', { display:'inline-block', marginTop:'36px', fontFamily:"'Space Mono',monospace", fontSize:'11px', letterSpacing:'2px', textTransform:'uppercase', color:'#C9A24B', textDecoration:'none', border:'1px solid #564A54', padding:'11px 20px', borderRadius:'2px' }, '↑ Back to the start')
   ));
   return sec;
 }
@@ -893,16 +894,16 @@ function buildCharts() {
     for (let k=0;k<=N;k++) { const m=mMin+(mMax-mMin)*k/N; line.push([X(m),Y(elevAt(m))]); }
     const linePath = 'M'+line.map(p=>p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' L');
     const areaPath = linePath+' L'+X(mMax).toFixed(1)+' '+(H-padB)+' L'+X(mMin).toFixed(1)+' '+(H-padB)+' Z';
-    let grid=''; for (let i=0;i<=4;i++) { const e=eMin+(eMax-eMin)*i/4,y=Y(e); grid+=`<line x1="${padL}" y1="${y.toFixed(1)}" x2="${W-padR}" y2="${y.toFixed(1)}" stroke="#eadfca" stroke-width="1"/><text x="${padL-8}" y="${(y+3).toFixed(1)}" text-anchor="end" font-family="monospace" font-size="9" fill="#b3a890">${Math.round(e/100)/10}k</text>`; }
-    let xlab=''; [mMin,(mMin+mMax)/2,mMax].forEach(m => { xlab+=`<text x="${X(m).toFixed(1)}" y="${H-8}" text-anchor="middle" font-family="monospace" font-size="9" fill="#b3a890">${Math.round(m)}</text>`; });
+    let grid=''; for (let i=0;i<=4;i++) { const e=eMin+(eMax-eMin)*i/4,y=Y(e); grid+=`<line x1="${padL}" y1="${y.toFixed(1)}" x2="${W-padR}" y2="${y.toFixed(1)}" stroke="#e7e1d7" stroke-width="1"/><text x="${padL-8}" y="${(y+3).toFixed(1)}" text-anchor="end" font-family="monospace" font-size="9" fill="#9aa48a">${Math.round(e/100)/10}k</text>`; }
+    let xlab=''; [mMin,(mMin+mMax)/2,mMax].forEach(m => { xlab+=`<text x="${X(m).toFixed(1)}" y="${H-8}" text-anchor="middle" font-family="monospace" font-size="9" fill="#9aa48a">${Math.round(m)}</text>`; });
     const labeled = wpIn.filter(p=>p[2]).sort((a,b)=>b[1]-a[1]).slice(0,5);
-    let marks=''; labeled.forEach(p => { const x=X(p[0]),y=Y(p[1]); marks+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3" fill="${accent}"/><text x="${x.toFixed(1)}" y="${(y-8).toFixed(1)}" text-anchor="middle" font-family="Georgia,serif" font-size="11" fill="#5a5040">${p[2]}</text>`; });
+    let marks=''; labeled.forEach(p => { const x=X(p[0]),y=Y(p[1]); marks+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3" fill="${accent}"/><text x="${x.toFixed(1)}" y="${(y-8).toFixed(1)}" text-anchor="middle" font-family="Georgia,serif" font-size="11" fill="#564A54">${p[2]}</text>`; });
     const svgStr = `<svg width="${W}" height="${H}" style="display:block"><defs><linearGradient id="g_${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${accent}" stop-opacity="0.22"/><stop offset="1" stop-color="${accent}" stop-opacity="0.02"/></linearGradient></defs>${grid}<path d="${areaPath}" fill="url(#g_${id})"/><path d="${linePath}" fill="none" stroke="${accent}" stroke-width="2"/>${marks}${xlab}</svg>`;
     box.innerHTML = svgStr +
       `<div class="ec-guide" style="position:absolute;top:${padT}px;width:1px;background:${accent};opacity:0;pointer-events:none;height:${H-padT-padB}px;"></div>`+
-      `<div class="ec-dot" style="position:absolute;width:9px;height:9px;border-radius:50%;background:${accent};border:2px solid #fffdf9;opacity:0;pointer-events:none;transform:translate(-50%,-50%);z-index:4;"></div>`+
-      `<div class="ec-tip" style="position:absolute;top:4px;background:#2a2018;color:#f4efe2;font-family:monospace;font-size:10px;line-height:1.5;padding:7px 10px;border-radius:3px;opacity:0;pointer-events:none;white-space:nowrap;transform:translateX(-50%);z-index:5;"></div>`+
-      `<div class="ec-pin" style="position:absolute;width:14px;height:14px;border-radius:50%;background:#fffdf9;border:3px solid ${accent};box-shadow:0 0 0 4px ${hexA(accent,0.18)};opacity:0;pointer-events:none;transform:translate(-50%,-50%);z-index:3;"></div>`+
+      `<div class="ec-dot" style="position:absolute;width:9px;height:9px;border-radius:50%;background:${accent};border:2px solid #F6F3ED;opacity:0;pointer-events:none;transform:translate(-50%,-50%);z-index:4;"></div>`+
+      `<div class="ec-tip" style="position:absolute;top:4px;background:#283420;color:#F6F3ED;font-family:'Space Mono',monospace;font-size:10px;line-height:1.5;padding:7px 10px;border-radius:3px;opacity:0;pointer-events:none;white-space:nowrap;transform:translateX(-50%);z-index:5;"></div>`+
+      `<div class="ec-pin" style="position:absolute;width:14px;height:14px;border-radius:50%;background:#F6F3ED;border:3px solid ${accent};box-shadow:0 0 0 4px ${hexA(accent,0.18)};opacity:0;pointer-events:none;transform:translate(-50%,-50%);z-index:3;"></div>`+
       `<div class="ec-hit" style="position:absolute;left:${padL}px;top:${padT}px;width:${W-padL-padR}px;height:${H-padT-padB}px;cursor:pointer;"></div>`;
     const guide = box.querySelector('.ec-guide'), dot = box.querySelector('.ec-dot'), tip = box.querySelector('.ec-tip'), hit = box.querySelector('.ec-hit'), pinEl = box.querySelector('.ec-pin');
     const show = mile => {
@@ -911,7 +912,7 @@ function buildCharts() {
       guide.style.left=gx+'px'; guide.style.opacity='0.5';
       dot.style.left=gx+'px'; dot.style.top=gy+'px'; dot.style.opacity='1';
       tip.style.left=Math.max(64,Math.min(W-64,gx))+'px'; tip.style.opacity='1';
-      tip.innerHTML=`<b style="color:${accent}">DAY ${nd.day} · ${nd.date}</b><br>mile ${nd.mile} · ~${Math.round(nd.elev/10)*10} ft<br><span style="color:#b3a890">${nd.seg.replace(/</g,'&lt;')}</span>`;
+      tip.innerHTML=`<b style="color:${accent}">DAY ${nd.day} · ${nd.date}</b><br>mile ${nd.mile} · ~${Math.round(nd.elev/10)*10} ft<br><span style="color:#9aa48a">${nd.seg.replace(/</g,'&lt;')}</span>`;
     };
     const hide = () => { guide.style.opacity='0'; dot.style.opacity='0'; tip.style.opacity='0'; };
     const nearestDay = mile => { let nd=days[0],best=1e9; days.forEach(d=>{const dd=Math.abs(d.mile-mile);if(dd<best){best=dd;nd=d;}}); return nd; };
@@ -949,7 +950,7 @@ function buildStrip() {
   const X=m=>padL+(m-mMin)/(mMax-mMin)*(W-padL-padR);
   const Y=e=>padT+(1-(e-eMin)/((eMax-eMin)||1))*(H-padT-padB);
   const N=700, line=[]; for (let k=0;k<=N;k++){const m=mMin+(mMax-mMin)*k/N;line.push([m,X(m),Y(elevAt(m))]);}
-  let grid=''; for(let i=0;i<=4;i++){const e=eMin+(eMax-eMin)*i/4,y=Y(e);grid+=`<line x1="${padL}" y1="${y.toFixed(1)}" x2="${W-padR}" y2="${y.toFixed(1)}" stroke="#eadfca"/><text x="${padL-8}" y="${(y+3).toFixed(1)}" text-anchor="end" font-family="monospace" font-size="9" fill="#b3a890">${Math.round(e/1000)}k</text>`;}
+  let grid=''; for(let i=0;i<=4;i++){const e=eMin+(eMax-eMin)*i/4,y=Y(e);grid+=`<line x1="${padL}" y1="${y.toFixed(1)}" x2="${W-padR}" y2="${y.toFixed(1)}" stroke="#e7e1d7"/><text x="${padL-8}" y="${(y+3).toFixed(1)}" text-anchor="end" font-family="monospace" font-size="9" fill="#9aa48a">${Math.round(e/1000)}k</text>`;}
   let areas='',labels='';
   D.order.forEach(id=>{
     const rng=D.mileRanges[id],accent=D.sectionMeta[id].accent,meta=D.sectionMeta[id];
@@ -958,19 +959,19 @@ function buildStrip() {
     areas+=`<path d="${ld} L${X(rng[1]).toFixed(1)} ${H-padB} L${X(rng[0]).toFixed(1)} ${H-padB} Z" fill="${accent}" fill-opacity="0.16"/><path d="${ld}" fill="none" stroke="${accent}" stroke-width="1.6"/>`;
     const x0=X(rng[0]),x1=X(rng[1]);
     labels+=`<text x="${((x0+x1)/2).toFixed(1)}" y="${H-9}" text-anchor="middle" font-family="monospace" font-size="10" letter-spacing="1" fill="${accent}">${meta.roman}</text>`;
-    if(id!=='wash') grid+=`<line x1="${x1}" y1="${padT}" x2="${x1}" y2="${H-padB}" stroke="#ddd0bb" stroke-dasharray="3 3"/>`;
+    if(id!=='wash') grid+=`<line x1="${x1}" y1="${padT}" x2="${x1}" y2="${H-padB}" stroke="#ddd7cc" stroke-dasharray="3 3"/>`;
   });
   let marks=''; ['Forester','Baden-Powell','Sonora Pass','Cascade Locks','Knife’s Edge'].forEach(nm=>{
     const p=wps.find(q=>q[2]===nm); if(!p)return;
-    const x=X(p[0]),y=Y(p[1]); marks+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3" fill="#2a2018"/><text x="${x.toFixed(1)}" y="${(y-8).toFixed(1)}" text-anchor="middle" font-family="Georgia,serif" font-size="11" fill="#3a3226">${p[2]}</text>`;
+    const x=X(p[0]),y=Y(p[1]); marks+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3" fill="#283420"/><text x="${x.toFixed(1)}" y="${(y-8).toFixed(1)}" text-anchor="middle" font-family="Georgia,serif" font-size="11" fill="#2E3C24">${p[2]}</text>`;
   });
   box.innerHTML=`<svg width="${W}" height="${H}" style="display:block">${grid}${areas}${marks}${labels}</svg>`+
-    `<div class="ts-guide" style="position:absolute;top:${padT}px;width:1px;background:#2a2018;opacity:0;pointer-events:none;height:${H-padT-padB}px;"></div>`+
-    `<div class="ts-tip" style="position:absolute;top:2px;background:#2a2018;color:#f4efe2;font-family:monospace;font-size:10px;padding:6px 9px;border-radius:3px;opacity:0;pointer-events:none;white-space:nowrap;transform:translateX(-50%);z-index:5;"></div>`+
+    `<div class="ts-guide" style="position:absolute;top:${padT}px;width:1px;background:#283420;opacity:0;pointer-events:none;height:${H-padT-padB}px;"></div>`+
+    `<div class="ts-tip" style="position:absolute;top:2px;background:#283420;color:#F6F3ED;font-family:'Space Mono',monospace;font-size:10px;padding:6px 9px;border-radius:3px;opacity:0;pointer-events:none;white-space:nowrap;transform:translateX(-50%);z-index:5;"></div>`+
     `<div class="ts-hit" style="position:absolute;left:${padL}px;top:${padT}px;width:${W-padL-padR}px;height:${H-padT-padB}px;cursor:pointer;"></div>`;
   const hit=box.querySelector('.ts-hit'),guide=box.querySelector('.ts-guide'),tip=box.querySelector('.ts-tip');
   const mileAt=cx=>{const r=box.getBoundingClientRect();let px=Math.max(padL,Math.min(W-padR,cx-r.left));return{px,m:mMin+(px-padL)/((W-padL-padR))*(mMax-mMin)};};
-  hit.addEventListener('mousemove',e=>{const o=mileAt(e.clientX),el2=elevAt(o.m);guide.style.left=o.px+'px';guide.style.opacity='0.45';tip.style.left=Math.max(54,Math.min(W-54,o.px))+'px';tip.style.opacity='1';let near=null,best=1e9;wps.forEach(p=>{if(p[2]){const dd=Math.abs(p[0]-o.m);if(dd<best){best=dd;near=p;}}});tip.innerHTML='mile '+Math.round(o.m)+' · ~'+(Math.round(el2/10)*10).toLocaleString()+' ft'+(near&&best<45?'<br><span style="color:#b3a890">near '+near[2]+'</span>':'');});
+  hit.addEventListener('mousemove',e=>{const o=mileAt(e.clientX),el2=elevAt(o.m);guide.style.left=o.px+'px';guide.style.opacity='0.45';tip.style.left=Math.max(54,Math.min(W-54,o.px))+'px';tip.style.opacity='1';let near=null,best=1e9;wps.forEach(p=>{if(p[2]){const dd=Math.abs(p[0]-o.m);if(dd<best){best=dd;near=p;}}});tip.innerHTML='mile '+Math.round(o.m)+' · ~'+(Math.round(el2/10)*10).toLocaleString()+' ft'+(near&&best<45?'<br><span style="color:#9aa48a">near '+near[2]+'</span>':'');});
   hit.addEventListener('mouseleave',()=>{guide.style.opacity='0';tip.style.opacity='0';});
   hit.addEventListener('click',e=>{const o=mileAt(e.clientX);let sec='desert';D.order.forEach(id=>{const rng=D.mileRanges[id];if(o.m>=rng[0]&&o.m<=rng[1])sec=id;});const t=document.getElementById('sec-'+sec);if(t)window.scrollTo({top:t.getBoundingClientRect().top+window.pageYOffset-60,behavior:'smooth'});});
 }
@@ -993,8 +994,8 @@ function updateChapBar() {
   if (!id || !chapters[id]) { bar.style.transform='translateY(-120%)'; return; }
   const roman=document.getElementById('chapbar-roman'),name=document.getElementById('chapbar-name'),mileEl=document.getElementById('chapbar-mile'),prog=document.getElementById('chapbar-prog');
   if (id==='tahoe') {
-    roman.textContent='TRT'; roman.style.color='#5f7d66'; name.textContent='Tahoe Rim Loop';
-    mileEl.textContent='optional · +165 mi'; prog.style.background='#5f7d66'; prog.style.width='100%';
+    roman.textContent='TRT'; roman.style.color='#6F7C2F'; name.textContent='Tahoe Rim Loop';
+    mileEl.textContent='optional · +165 mi'; prog.style.background='#6F7C2F'; prog.style.width='100%';
   } else {
     const m=D.sectionMeta[id], rng=D.mileRanges && D.mileRanges[id];
     if (!rng) { bar.style.transform='translateY(-120%)'; return; }

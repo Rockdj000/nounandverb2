@@ -1,6 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="96" fill="#b9683b"/>
-  <text x="50%" y="54%" text-anchor="middle" dominant-baseline="middle"
-        font-family="Georgia, 'Times New Roman', serif" font-weight="700"
-        font-size="300" fill="#f4eee4">$</text>
+  <rect width="512" height="512" rx="96" fill="#2E3C24"/>
+  <text x="50%" y="50%" text-anchor="middle" dominant-baseline="central"
+        font-family="'Instrument Serif', Georgia, 'Times New Roman', serif" font-size="248" fill="#EFEBE6">
+    <tspan font-style="italic">V</tspan><tspan fill="#EC8E90" font-size="170" dx="2" dy="0">&amp;</tspan><tspan dx="2">N</tspan>
+  </text>
 </svg>

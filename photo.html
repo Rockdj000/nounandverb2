@@ -4,14 +4,16 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Photo · verbandnoun.io</title>
+<link rel="icon" href="icon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Hanken+Grotesk:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: #f4eee4; font-family: 'Spectral', serif; color: #2a2018; min-height: 100vh; display: flex; flex-direction: column; }
-  .back-link { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 1px; text-transform: lowercase; color: #9a8b76; text-decoration: none; transition: color .22s; }
-  .back-link:hover { color: #b9683b; }
+  body { background: #EFEBE6; font-family: 'Hanken Grotesk', sans-serif; color: #283420; min-height: 100vh; display: flex; flex-direction: column; -webkit-font-smoothing: antialiased; }
+  ::selection { background: #EC8E90; color: #2E3C24; }
+  .back-link { font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: 1px; text-transform: lowercase; color: #8a8578; text-decoration: none; transition: color .22s; }
+  .back-link:hover { color: #C45F61; }
 
   /* hero */
   .ph-hero {
@@ -45,8 +47,8 @@
     padding: 24px clamp(24px,7vw,84px) 0;
   }
   .ph-strip-label {
-    font-family: 'JetBrains Mono', monospace; font-size: 10px;
-    letter-spacing: 2px; text-transform: uppercase; color: #9a8b76;
+    font-family: 'Space Mono', monospace; font-size: 10px;
+    letter-spacing: 2px; text-transform: uppercase; color: #8a8578;
     margin-bottom: 10px;
   }
   .ph-strip {
@@ -74,7 +76,7 @@
   /* lightbox */
   #lightbox {
     position: fixed; inset: 0; z-index: 100;
-    background: rgba(20,16,12,.92);
+    background: rgba(29,39,24,.94);
     display: flex; align-items: center; justify-content: center;
     opacity: 0; pointer-events: none;
     transition: opacity .3s;
@@ -90,24 +92,24 @@
   #lightbox.open img { transform: scale(1); }
   #lb-close {
     position: absolute; top: 24px; right: 28px;
-    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    font-family: 'Space Mono', monospace; font-size: 11px;
     letter-spacing: 1.5px; text-transform: uppercase;
-    color: #9a8b76; cursor: pointer; transition: color .2s;
+    color: #8a8578; cursor: pointer; transition: color .2s;
   }
-  #lb-close:hover { color: #f4eee4; }
+  #lb-close:hover { color: #EFEBE6; }
   #lb-prev, #lb-next {
     position: absolute; top: 50%; transform: translateY(-50%);
-    font-family: 'Spectral', serif; font-size: 36px; color: #9a8b76;
+    font-family: 'Instrument Serif', serif; font-size: 40px; color: #8a8578;
     cursor: pointer; padding: 20px; transition: color .2s; line-height: 1;
     user-select: none;
   }
   #lb-prev { left: 12px; }
   #lb-next { right: 12px; }
-  #lb-prev:hover, #lb-next:hover { color: #f4eee4; }
+  #lb-prev:hover, #lb-next:hover { color: #EFEBE6; }
   #lb-counter {
     position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%);
-    font-family: 'JetBrains Mono', monospace; font-size: 10px;
-    letter-spacing: 2px; color: #9a8b76;
+    font-family: 'Space Mono', monospace; font-size: 10px;
+    letter-spacing: 2px; color: #8a8578;
   }
 </style>
 </head>
@@ -115,15 +117,15 @@
 <div style="display:flex;flex-direction:column;min-height:100vh;">
 
   <!-- top bar -->
-  <div style="display:flex;align-items:center;justify-content:space-between;padding:28px clamp(24px,7vw,84px) 18px;border-bottom:1px solid #e0d4bf;">
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:28px clamp(24px,7vw,84px) 18px;border-bottom:1px solid #e2dcd4;">
     <a href="index.html" class="back-link">← verbandnoun.io</a>
-    <span style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:1px;color:#9a8b76;text-transform:uppercase;">02 · Photo</span>
+    <span style="font-family:'Space Mono',monospace;font-size:11px;letter-spacing:1px;color:#8a8578;text-transform:uppercase;">02 · Photo</span>
   </div>
 
   <!-- header -->
   <div style="padding:56px clamp(24px,7vw,84px) 40px;">
-    <h1 style="font-family:'Spectral',serif;font-weight:300;font-size:clamp(60px,12vw,150px);line-height:.88;letter-spacing:-3px;color:#2a2018;">Photo</h1>
-    <p style="font-family:'Spectral',serif;font-style:italic;font-size:18px;color:#9a8b76;margin-top:20px;">Photographs from the trail and elsewhere.</p>
+    <h1 style="font-family:'Instrument Serif',serif;font-weight:400;font-size:clamp(64px,13vw,160px);line-height:.84;letter-spacing:-1px;color:#2E3C24;">Photo</h1>
+    <p style="font-family:'Instrument Serif',serif;font-style:italic;font-size:20px;color:#8a8578;margin-top:20px;">Photographs from the trail and elsewhere.</p>
   </div>
 
   <!-- masonry -->
@@ -136,9 +138,9 @@
   </div>
 
   <!-- footer -->
-  <div style="margin-top:64px;padding:28px clamp(24px,7vw,84px);border-top:1px solid #e0d4bf;display:flex;justify-content:space-between;align-items:baseline;">
+  <div style="margin-top:64px;padding:28px clamp(24px,7vw,84px);border-top:1px solid #e2dcd4;display:flex;justify-content:space-between;align-items:baseline;">
     <a href="index.html" class="back-link">← back to index</a>
-    <span style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:2px;color:#9a8b76;">verbandnoun<span style="color:#b9683b;">.io</span></span>
+    <span style="font-family:'Space Mono',monospace;font-size:11px;letter-spacing:2px;color:#8a8578;">verbandnoun<span style="color:#C45F61;">.io</span></span>
   </div>
 
 </div>

@@ -4,20 +4,22 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Noise · verbandnoun.io</title>
+<link rel="icon" href="icon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,600;1,400&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Hanken+Grotesk:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: #f4eee4; font-family: 'Spectral', serif; color: #2a2018; min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
-  .back-link { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 1px; text-transform: lowercase; color: #9a8b76; text-decoration: none; transition: color .22s; }
-  .back-link:hover { color: #b9683b; }
+  body { background: #EFEBE6; font-family: 'Hanken Grotesk', sans-serif; color: #283420; min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+  ::selection { background: #EC8E90; color: #2E3C24; }
+  .back-link { font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: 1px; text-transform: lowercase; color: #8a8578; text-decoration: none; transition: color .22s; }
+  .back-link:hover { color: #C45F61; }
   #noise-canvas { display: block; width: 100%; cursor: crosshair; }
 
   /* ── controls drawer ── */
   #ctrl-drawer {
     position: fixed; bottom: 0; left: 0; right: 0; z-index: 50;
-    background: rgba(20,16,12,.92);
+    background: rgba(29,39,24,.92);
     backdrop-filter: blur(12px);
     border-top: 1px solid rgba(255,255,255,.08);
     transform: translateY(calc(100% - 36px));
@@ -28,12 +30,12 @@
   #ctrl-tab {
     height: 36px; display: flex; align-items: center; justify-content: center;
     gap: 8px; cursor: pointer;
-    font-family: 'JetBrains Mono', monospace; font-size: 10px;
-    letter-spacing: 2px; text-transform: uppercase; color: #9a8b76;
+    font-family: 'Space Mono', monospace; font-size: 10px;
+    letter-spacing: 2px; text-transform: uppercase; color: #8a8578;
     user-select: none;
     transition: color .2s;
   }
-  #ctrl-tab:hover { color: #d8a76e; }
+  #ctrl-tab:hover { color: #EC8E90; }
   #ctrl-arrow { transition: transform .38s cubic-bezier(.2,.7,.2,1); display: inline-block; }
   #ctrl-drawer.open #ctrl-arrow { transform: rotate(180deg); }
 
@@ -46,48 +48,48 @@
 
   .ctrl-group { display: flex; flex-direction: column; gap: 14px; }
   .ctrl-group-label {
-    font-family: 'JetBrains Mono', monospace; font-size: 9px;
-    letter-spacing: 3px; text-transform: uppercase; color: #5a4e3e;
+    font-family: 'Space Mono', monospace; font-size: 9px;
+    letter-spacing: 3px; text-transform: uppercase; color: #6b7659;
     padding-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,.06);
   }
 
   .ctrl-row { display: flex; align-items: center; gap: 12px; }
   .ctrl-label {
-    font-family: 'JetBrains Mono', monospace; font-size: 10px;
-    letter-spacing: 1px; text-transform: uppercase; color: #7a6e5e;
+    font-family: 'Space Mono', monospace; font-size: 10px;
+    letter-spacing: 1px; text-transform: uppercase; color: #9aa890;
     width: 72px; flex: none;
   }
   .ctrl-val {
-    font-family: 'JetBrains Mono', monospace; font-size: 10px;
-    color: #d8a76e; width: 32px; text-align: right; flex: none;
+    font-family: 'Space Mono', monospace; font-size: 10px;
+    color: #EC8E90; width: 32px; text-align: right; flex: none;
   }
 
   /* slider */
   input[type=range] {
     -webkit-appearance: none; appearance: none;
-    flex: 1; height: 2px; background: #3a3028; border-radius: 1px; outline: none;
+    flex: 1; height: 2px; background: #475438; border-radius: 1px; outline: none;
     cursor: pointer;
   }
   input[type=range]::-webkit-slider-thumb {
     -webkit-appearance: none; width: 12px; height: 12px;
-    border-radius: 50%; background: #d8a76e; cursor: pointer;
+    border-radius: 50%; background: #EC8E90; cursor: pointer;
     transition: background .2s, transform .15s;
   }
-  input[type=range]:hover::-webkit-slider-thumb { background: #e8b77e; transform: scale(1.2); }
+  input[type=range]:hover::-webkit-slider-thumb { background: #f0a6a8; transform: scale(1.2); }
   input[type=range]::-webkit-slider-runnable-track { background: transparent; }
 
   /* toggle buttons */
   .ctrl-toggles { display: flex; gap: 4px; flex: 1; }
   .ctrl-btn {
-    font-family: 'JetBrains Mono', monospace; font-size: 9px;
+    font-family: 'Space Mono', monospace; font-size: 9px;
     letter-spacing: 1px; text-transform: uppercase;
-    padding: 4px 8px; border: 1px solid #3a3028; border-radius: 2px;
-    background: transparent; color: #7a6e5e; cursor: pointer;
+    padding: 4px 8px; border: 1px solid #475438; border-radius: 2px;
+    background: transparent; color: #9aa890; cursor: pointer;
     transition: background .18s, color .18s, border-color .18s;
     white-space: nowrap;
   }
-  .ctrl-btn:hover { border-color: #6a5e4e; color: #c9b9a3; }
-  .ctrl-btn.active { background: #d8a76e; border-color: #d8a76e; color: #1a1410; }
+  .ctrl-btn:hover { border-color: #6b7659; color: #b9c2ad; }
+  .ctrl-btn.active { background: #EC8E90; border-color: #EC8E90; color: #1d2718; }
 
   @media (max-width: 600px) {
     #ctrl-body { grid-template-columns: 1fr; }
@@ -99,28 +101,28 @@
 <div style="display:flex;flex-direction:column;min-height:100vh;padding-bottom:36px;">
 
   <!-- top bar -->
-  <div style="display:flex;align-items:center;justify-content:space-between;padding:28px clamp(24px,7vw,84px) 0;border-bottom:1px solid #e0d4bf;padding-bottom:18px;">
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:28px clamp(24px,7vw,84px) 0;border-bottom:1px solid #e2dcd4;padding-bottom:18px;">
     <a href="index.html" class="back-link">← verbandnoun.io</a>
-    <span style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:1px;color:#9a8b76;text-transform:uppercase;">03 · Noise</span>
+    <span style="font-family:'Space Mono',monospace;font-size:11px;letter-spacing:1px;color:#8a8578;text-transform:uppercase;">03 · Noise</span>
   </div>
 
   <!-- header -->
   <div style="padding:56px clamp(24px,7vw,84px) 40px;">
-    <h1 style="font-family:'Spectral',serif;font-weight:300;font-size:clamp(60px,12vw,150px);line-height:.88;letter-spacing:-3px;color:#2a2018;">Noise</h1>
-    <p id="noise-hint" style="font-family:'Spectral',serif;font-style:italic;font-size:18px;color:#9a8b76;margin-top:20px;transition:opacity .4s;">Move the cursor. Listen.</p>
+    <h1 style="font-family:'Instrument Serif',serif;font-weight:400;font-size:clamp(64px,13vw,160px);line-height:.84;letter-spacing:-1px;color:#2E3C24;">Noise</h1>
+    <p id="noise-hint" style="font-family:'Instrument Serif',serif;font-style:italic;font-size:20px;color:#8a8578;margin-top:20px;transition:opacity .4s;">Move the cursor. Listen.</p>
   </div>
 
   <!-- canvas -->
   <div style="flex:1;padding:0 clamp(24px,7vw,84px) 40px;">
-    <div style="border-radius:4px;overflow:hidden;border:1px solid #2a2018;">
+    <div style="border-radius:4px;overflow:hidden;border:1px solid #283420;">
       <canvas id="noise-canvas"></canvas>
     </div>
   </div>
 
   <!-- footer -->
-  <div style="padding:28px clamp(24px,7vw,84px);border-top:1px solid #e0d4bf;display:flex;justify-content:space-between;align-items:baseline;">
+  <div style="padding:28px clamp(24px,7vw,84px);border-top:1px solid #e2dcd4;display:flex;justify-content:space-between;align-items:baseline;">
     <a href="index.html" class="back-link">← back to index</a>
-    <span style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:2px;color:#9a8b76;">verbandnoun<span style="color:#b9683b;">.io</span></span>
+    <span style="font-family:'Space Mono',monospace;font-size:11px;letter-spacing:2px;color:#8a8578;">verbandnoun<span style="color:#C45F61;">.io</span></span>
   </div>
 
 </div>
