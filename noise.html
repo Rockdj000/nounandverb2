@@ -3,6 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
 <title>Noise · verbandnoun.io</title>
 <link rel="icon" href="icon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -14,7 +16,7 @@
   ::selection { background: #EC8E90; color: #2E3C24; }
   .back-link { font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: 1px; text-transform: lowercase; color: #8a8578; text-decoration: none; transition: color .22s; }
   .back-link:hover { color: #C45F61; }
-  #noise-canvas { display: block; width: 100%; cursor: crosshair; }
+  #noise-canvas { display: block; width: 100%; cursor: crosshair; touch-action: none; }
 
   /* ── controls drawer ── */
   #ctrl-drawer {
@@ -246,7 +248,10 @@
     const rect = canvas.parentElement.getBoundingClientRect();
     W = Math.floor(rect.width);
     H = Math.max(Math.floor(window.innerHeight * 0.55), 320);
-    canvas.width = W; canvas.height = H;
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = W * dpr; canvas.height = H * dpr;   // backing store at device resolution
+    canvas.style.height = H + 'px';                    // CSS height (width stays 100% of parent)
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);            // draw in CSS px; re-applied since width assignment resets it
     buildGrid();
   }
 
@@ -261,20 +266,28 @@
         dots.push({ x: offX + c * P.spacing, y: offY + r * P.spacing, glow: 0 });
   }
 
-  // ── mouse ──
+  // ── pointer (mouse + touch + pen, one path) ──
   let mx = -999, my = -999, hasInteracted = false;
   const ripples = [];
 
-  canvas.addEventListener('mousemove', e => {
+  function firstInteraction() {
+    if (hasInteracted) return;
+    hasInteracted = true; hint.style.opacity = '0'; startAudio();
+  }
+  canvas.addEventListener('pointermove', e => {
     const r = canvas.getBoundingClientRect();
     mx = e.clientX - r.left; my = e.clientY - r.top;
-    if (!hasInteracted) { hasInteracted = true; hint.style.opacity = '0'; startAudio(); }
+    firstInteraction();
     updateAudio(mx / W, my / H);
   });
-  canvas.addEventListener('mouseleave', () => { mx = -999; my = -999; stopAudio(); });
-  canvas.addEventListener('click', e => {
+  const endPointer = () => { mx = -999; my = -999; stopAudio(); };
+  canvas.addEventListener('pointerup', endPointer);
+  canvas.addEventListener('pointerleave', endPointer);
+  canvas.addEventListener('pointercancel', endPointer);
+  canvas.addEventListener('pointerdown', e => {
     const r = canvas.getBoundingClientRect();
     ripples.push({ x: e.clientX - r.left, y: e.clientY - r.top, t: 0 });
+    firstInteraction();   // on touch there's no move-before-press; pointerdown is a valid gesture to unlock audio
   });
 
   // ── render ──

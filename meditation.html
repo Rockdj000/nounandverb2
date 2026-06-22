@@ -3,6 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://esm.sh; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://esm.sh; object-src 'none'; base-uri 'self'; form-action 'self'">
 <title>Meditation · verbandnoun.io</title>
 <meta name="theme-color" content="#2E3C24">
 <link rel="icon" href="/icon.svg">
@@ -195,7 +197,7 @@
   <div id="toast" class="toast" style="position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--strong);color:var(--bg);font-family:'Space Mono',monospace;font-size:12px;letter-spacing:.5px;padding:12px 20px;border-radius:100px;opacity:0;pointer-events:none;transition:opacity .25s, transform .25s;z-index:200;"></div>
 
 <script type="module">
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.108.2';
 
 /* ===== config (same Supabase project as the Invoice app) ================== */
 const SUPABASE_URL  = 'https://rstrkigjfeuagklnauep.supabase.co';

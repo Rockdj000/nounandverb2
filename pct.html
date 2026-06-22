@@ -3,6 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
 <title>PCT 2027 · Pacific Crest Trail</title>
 <link rel="icon" href="icon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -19,6 +21,7 @@
 
   /* MAP ROWS */
   .maprow-list { display: flex; flex-direction: column; }
+  .maprow-pad { width: 170px; }   /* desktop alignment spacer; collapses on mobile (see @media) */
   .maprow-list:hover .maprow { opacity: .5; }
   .maprow-list .maprow:hover { opacity: 1; }
   .mapbar { transform: scaleY(0); transform-origin: top center; transition: transform .85s cubic-bezier(.2,.7,.2,1), width .4s, filter .4s, box-shadow .4s; }
@@ -28,6 +31,20 @@
   .maprow:hover .mapcard { transform: translateX(5px); box-shadow: 0 8px 24px rgba(90,55,25,.14); border-left-width: 9px !important; }
   .mapdetail { max-height: 0; opacity: 0; overflow: hidden; transition: max-height .55s cubic-bezier(.2,.7,.2,1), opacity .4s, margin-top .4s; margin-top: 0; }
   .maprow:hover .mapdetail { max-height: 150px; opacity: 1; margin-top: 12px; }
+
+  /* HERO STAT BAR — responsive grid; 1px gap over a divider-coloured bg draws clean
+     gridlines in both axes so it reflows from 6 → 3 → 2 columns without overflow. */
+  .statbar { display: grid; grid-template-columns: repeat(6, 1fr); gap: 1px; background: #ddd7cc; border-top: 1px solid #283420; border-bottom: 1px solid #283420; margin-top: 42px; }
+  .statbar > div { padding: 22px 14px; background: #EFEBE6; min-width: 0; }
+  .statbar .statnum { font-family: 'Instrument Serif', serif; font-weight: 600; font-size: 34px; line-height: 1; white-space: pre-line; }
+  .statbar .statnum.small { font-size: 22px; line-height: 1.1; margin-top: 5px; }
+  .statbar .statlbl { font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: #8a8578; margin-top: 6px; }
+  @media (max-width: 640px) {
+    .statbar { grid-template-columns: repeat(3, 1fr); }
+    .statbar .statnum { font-size: 26px; }
+    .statbar .statnum.small { font-size: 17px; }
+  }
+  @media (max-width: 380px) { .statbar { grid-template-columns: repeat(2, 1fr); } }
 
   /* NAV */
   #progress-bar { position: fixed; top: 0; left: 0; right: 0; height: 3px; z-index: 60; }
@@ -82,6 +99,10 @@
   /* FOOTER */
   .site-footer { background: #283420; color: #F6F3ED; }
 
+  /* Two-column section layouts built in JS (class-based so they can reflow on mobile). */
+  .sched-grid { display: grid; grid-template-columns: 1.1fr .9fr; gap: 54px; align-items: start; }
+  .tahoe-stat-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; }
+
   /* MOBILE */
   @media (max-width: 700px) {
     .sec-stat-grid { grid-template-columns: repeat(3,1fr); }
@@ -90,6 +111,9 @@
     .resupply-grid { grid-template-columns: 1fr; }
     h1 { font-size: 56px !important; }
     .scrub-grid { grid-template-columns: repeat(2,1fr) !important; }
+    .sched-grid { grid-template-columns: 1fr; gap: 36px; }
+    .tahoe-stat-grid { grid-template-columns: repeat(2,1fr); }
+    .maprow-pad { width: 0; }
   }
 </style>
 </head>
@@ -259,11 +283,11 @@ function buildStatBar() {
     {num:'32',lbl:'zero days'},{num:'16.8',lbl:'avg mi/day'},
     {num:'Mar 23\nSep 28',lbl:'2027',small:true}
   ];
-  const g = div('', { display:'grid', gridTemplateColumns:'repeat(6,1fr)', marginTop:'42px', borderTop:'1px solid #283420', borderBottom:'1px solid #283420' });
-  stats.forEach((s,i) => {
-    const cell = div('', { padding:'22px 14px', borderRight: i<5 ? '1px solid #ddd7cc' : 'none' });
-    const num = div('', { fontFamily:"'Instrument Serif',serif", fontWeight:'600', fontSize: s.small?'22px':'34px', lineHeight: s.small?'1.1':'1', marginTop: s.small?'5px':'0', whiteSpace:'pre-line' }, s.num);
-    const lbl = div('', { fontFamily:"'Space Mono',monospace", fontSize:'10px', letterSpacing:'1.5px', textTransform:'uppercase', color:'#8a8578', marginTop:'6px' }, s.lbl);
+  const g = div('statbar');
+  stats.forEach((s) => {
+    const cell = div('');
+    const num = div(s.small ? 'statnum small' : 'statnum', null, s.num);
+    const lbl = div('statlbl', null, s.lbl);
     cell.append(num, lbl); g.append(cell);
   });
   return g;
@@ -383,7 +407,7 @@ function buildMapRows() {
       )
     );
     card.append(top, meta, detail);
-    row.append(div('', { width:'170px', flex:'none' }), div('', { width:'34px', display:'flex', justifyContent:'center', flex:'none' }, bar), card);
+    row.append(div('maprow-pad', { flex:'none' }), div('', { width:'34px', display:'flex', justifyContent:'center', flex:'none' }, bar), card);
     list.append(row);
     list.append(div('', { display:'flex', alignItems:'center', gap:'20px' },
       div('', { width:'170px', textAlign:'right', flex:'none' },
@@ -467,7 +491,7 @@ function buildTimeline() {
 function buildSchedule() {
   const sch = D.schedule;
   const wrap = div('rv', { maxWidth:'1180px', margin:'80px auto 0', padding:'0 7vw' });
-  const grid = div('', { display:'grid', gridTemplateColumns:'1.1fr .9fr', gap:'54px', alignItems:'start' });
+  const grid = div('sched-grid');
   const left = div('',null,
     div('', { fontFamily:"'Space Mono',monospace", fontSize:'11px', letterSpacing:'3px', textTransform:'uppercase', color:'#C45F61' }, 'The Schedule'),
     el('h3', { style:{ fontFamily:"'Instrument Serif',serif", fontWeight:'600', fontSize:'34px', lineHeight:'1.08', margin:'12px 0 0' } }, sch.lead),
@@ -785,7 +809,7 @@ function buildTahoe() {
     el('h2', { class:'rv', style:{ fontFamily:"'Instrument Serif',serif", fontWeight:'600', fontSize:'56px', lineHeight:'1.02', letterSpacing:'-1px', margin:'24px 0 0', color:'#F6F3ED' } }, 'The Tahoe Rim Loop'),
     div('rv', { fontFamily:"'Instrument Serif',serif", fontStyle:'italic', fontSize:'22px', color:'#b9c2ad', marginTop:'12px' }, '≈165 miles around the lake. Only if you\'re ahead of schedule.'),
     div('rv', { maxWidth:'760px', fontFamily:"'Instrument Serif',serif", fontSize:'18px', lineHeight:'1.66', color:'#ddd7cc', marginTop:'24px' }, T.intro),
-    div('rv', { display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:'12px', marginTop:'34px' },
+    div('rv tahoe-stat-grid', { marginTop:'34px' },
       ...[{v:T.stat.added,l:T.stat.hiking},{v:T.stat.dist,l:'circuit length'},{v:T.stat.finish,l:'pushes finish to'},{v:T.stat.cost,l:'schedule cost',small:true}].map(s =>
         div('', { border:'1px solid #475438', borderRadius:'3px', padding:'16px' },
           div('', { fontFamily:"'Instrument Serif',serif", fontWeight:'600', fontSize:s.small?'18px':'26px', color:'#9aa48a', lineHeight:s.small?'1.2':'1', marginTop:s.small?'3px':'0' }, s.v),
@@ -880,7 +904,7 @@ function buildCharts() {
     const id = box.dataset.sec, meta = D.sectionMeta[id]; if (!meta) return;
     const accent = meta.accent, rng = D.mileRanges[id];
     if (!rng) return;
-    const W = Math.max(320, box.clientWidth || 800), H = 260, padL = 48, padR = 16, padT = 22, padB = 28;
+    const W = box.clientWidth || 800, H = 260, padL = 48, padR = 16, padT = 22, padB = 28;
     const days = D.sections[id].days.filter(d => d.tag !== 'zero').map(d => { const mi = parseFloat(d.mile); return { mile:mi, day:d.day, date:d.date, seg:d.segment, tag:d.tag, elev:elevAt(mi) }; });
     if (!days.length) return;
     const wpIn = D.waypoints.filter(p => p[0]>=rng[0] && p[0]<=rng[1]);
@@ -944,7 +968,7 @@ function updatePins() {
 function buildStrip() {
   if (!D || !D.waypoints) return;
   const box = document.getElementById('trailstrip'); if (!box || box.querySelector('svg')) return;
-  const W=Math.max(360,box.clientWidth||1000), H=240, padL=44, padR=14, padT=24, padB=34;
+  const W=box.clientWidth||1000, H=240, padL=44, padR=14, padT=24, padB=34;
   const mMin=0, mMax=2658, wps=D.waypoints;
   let eMin=Math.min(...wps.map(p=>p[1])), eMax=Math.max(...wps.map(p=>p[1]));
   const X=m=>padL+(m-mMin)/(mMax-mMin)*(W-padL-padR);
