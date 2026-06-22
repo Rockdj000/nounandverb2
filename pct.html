@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>PCT 2027 — Pacific Crest Trail</title>
+<title>PCT 2027 · Pacific Crest Trail</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -277,7 +277,7 @@ function buildScrubber() {
     div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'11px', letterSpacing:'3px', textTransform:'uppercase', color:'#d8a76e' }, 'Follow Along'),
     div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'11px', letterSpacing:'1px', color:'#b3a890' }, `≈ ${Math.max(0,Math.ceil((new Date(2027,2,23)-new Date())/86400000))} days until Campo · Mar 23, 2027`)
   );
-  const sub = div('', { fontFamily:"'Spectral',serif", fontSize:'15px', color:'#cabfab', marginTop:'8px', fontStyle:'italic' }, 'Drag to walk the calendar — see where the plan puts you on any day.');
+  const sub = div('', { fontFamily:"'Spectral',serif", fontSize:'15px', color:'#cabfab', marginTop:'8px', fontStyle:'italic' }, 'Drag to walk the calendar and see where the plan puts you on any given day.');
   const slider = el('input', { type:'range', min:'0', max:String(ad.length-1), value:'0', style:{ width:'100%', margin:'20px 0 8px' } });
 
   // Stat cells with stable IDs for in-place updates
@@ -782,7 +782,7 @@ function buildTahoe() {
       div('', { flex:'1', height:'1px', background:'#34503a' })
     ),
     el('h2', { class:'rv', style:{ fontFamily:"'Spectral',serif", fontWeight:'600', fontSize:'56px', lineHeight:'1.02', letterSpacing:'-1px', margin:'24px 0 0', color:'#f4efe2' } }, 'The Tahoe Rim Loop'),
-    div('rv', { fontFamily:"'Spectral',serif", fontStyle:'italic', fontSize:'22px', color:'#bcc7b3', marginTop:'12px' }, '≈165 miles around the lake — only if you\'re ahead of schedule.'),
+    div('rv', { fontFamily:"'Spectral',serif", fontStyle:'italic', fontSize:'22px', color:'#bcc7b3', marginTop:'12px' }, '≈165 miles around the lake. Only if you\'re ahead of schedule.'),
     div('rv', { maxWidth:'760px', fontFamily:"'Spectral',serif", fontSize:'18px', lineHeight:'1.66', color:'#d6d2c4', marginTop:'24px' }, T.intro),
     div('rv', { display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:'12px', marginTop:'34px' },
       ...[{v:T.stat.added,l:T.stat.hiking},{v:T.stat.dist,l:'circuit length'},{v:T.stat.finish,l:'pushes finish to'},{v:T.stat.cost,l:'schedule cost',small:true}].map(s =>
@@ -828,10 +828,10 @@ function buildFinish() {
   sec.append(div('', { maxWidth:'900px', margin:'0 auto', padding:'96px 7vw', textAlign:'center' },
     div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'12px', letterSpacing:'5px', textTransform:'uppercase', color:'#c99a6a' }, 'Monument 78 · Northern Terminus'),
     el('h2', { style:{ fontFamily:"'Spectral',serif", fontWeight:'600', fontSize:'64px', lineHeight:'1.02', letterSpacing:'-1px', margin:'22px 0 0' } }, '2,659 miles.', el('br'), el('em', { style:{fontStyle:'italic',color:'#d8a76e'} }, 'You finished the PCT.')),
-    div('', { fontFamily:"'Spectral',serif", fontSize:'19px', lineHeight:'1.66', color:'#cabfab', margin:'24px auto 0', maxWidth:'620px' }, 'From the desert shakedown at Campo to the golden-larch North Cascades, with a full Tahoe Rim Trail loop folded in — the whole set, one season, from the Mexican border to Manning Park, British Columbia.'),
+    div('', { fontFamily:"'Spectral',serif", fontSize:'19px', lineHeight:'1.66', color:'#cabfab', margin:'24px auto 0', maxWidth:'620px' }, 'From the desert shakedown at Campo to the golden-larch North Cascades, with a full Tahoe Rim Trail loop folded in. The whole set, one season, from the Mexican border to Manning Park, British Columbia.'),
     div('', { marginTop:'36px', padding:'20px 24px', background:'#3a2e22', border:'1px dashed #6a5640', borderRadius:'3px', maxWidth:'620px', marginLeft:'auto', marginRight:'auto', textAlign:'left' },
       div('', { fontFamily:"'JetBrains Mono',monospace", fontSize:'10px', letterSpacing:'2px', textTransform:'uppercase', color:'#d8a76e', marginBottom:'8px' }, "Don't forget · the one piece of paper"),
-      div('', { fontFamily:"'Spectral',serif", fontSize:'16px', lineHeight:'1.58', color:'#e6dcc8' }, "You cannot legally finish at Manning Park without the Canadian PCT entry permit. Apply months ahead, back when you secure the start date — without it you turn around at Monument 78 and hike ~30 miles back to Hart's Pass.")
+      div('', { fontFamily:"'Spectral',serif", fontSize:'16px', lineHeight:'1.58', color:'#e6dcc8' }, "You cannot legally finish at Manning Park without the Canadian PCT entry permit. Apply months ahead, back when you secure the start date. Without it you turn around at Monument 78 and hike ~30 miles back to Hart's Pass.")
     ),
     div('', { marginTop:'44px', display:'flex', gap:'14px', justifyContent:'center', flexWrap:'wrap', fontFamily:"'JetBrains Mono',monospace", fontSize:'11px', letterSpacing:'1px', color:'#9a8b76', textTransform:'uppercase' },
       span('Campo → Canada'), span('/', { color:'#6a5640' }), span('Mar 23 – Sep 28, 2027'), span('/', { color:'#6a5640' }), span('190 days')
