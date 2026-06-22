@@ -39,7 +39,7 @@
     cursor: zoom-in; position: relative;
   }
   .ph-masonry-item img {
-    width: 100%; display: block;
+    width: 100%; height: auto; display: block;
     transition: transform .5s cubic-bezier(.2,.7,.2,1);
   }
   .ph-masonry-item:hover img { transform: scale(1.04); }
@@ -130,13 +130,13 @@
     <p style="font-family:'Instrument Serif',serif;font-style:italic;font-size:20px;color:#8a8578;margin-top:20px;">Photographs from the trail and elsewhere.</p>
   </div>
 
-  <!-- masonry -->
+  <!-- masonry (resized JPEG thumbnails; full-res versions load on demand in the lightbox) -->
   <div class="ph-masonry">
-    <div class="ph-masonry-item" data-idx="0"><img src="assets/DSC02280.jpg" alt=""></div>
-    <div class="ph-masonry-item" data-idx="1"><img src="assets/DSC02275.jpg" alt=""></div>
-    <div class="ph-masonry-item" data-idx="2"><img src="assets/DSC02028.jpg" alt=""></div>
-    <div class="ph-masonry-item" data-idx="3"><img src="assets/DSC01698.jpg" alt=""></div>
-    <div class="ph-masonry-item" data-idx="4"><img src="assets/DSC01191.jpg" alt=""></div>
+    <div class="ph-masonry-item" data-idx="0"><img src="assets/opt/DSC02280-thumb.jpg" alt="" width="1400" height="933" loading="eager" fetchpriority="high"></div>
+    <div class="ph-masonry-item" data-idx="1"><img src="assets/opt/DSC02275-thumb.jpg" alt="" width="1400" height="933" loading="lazy"></div>
+    <div class="ph-masonry-item" data-idx="2"><img src="assets/opt/DSC02028-thumb.jpg" alt="" width="1400" height="933" loading="lazy"></div>
+    <div class="ph-masonry-item" data-idx="3"><img src="assets/opt/DSC01698-thumb.jpg" alt="" width="1400" height="933" loading="lazy"></div>
+    <div class="ph-masonry-item" data-idx="4"><img src="assets/opt/DSC01191-thumb.jpg" alt="" width="1400" height="933" loading="lazy"></div>
   </div>
 
   <!-- footer -->
@@ -159,11 +159,11 @@
 <script>
 (function () {
   const PHOTOS = [
-    'assets/DSC02280.jpg',
-    'assets/DSC02275.jpg',
-    'assets/DSC02028.jpg',
-    'assets/DSC01698.jpg',
-    'assets/DSC01191.jpg',
+    'assets/opt/DSC02280-full.jpg',
+    'assets/opt/DSC02275-full.jpg',
+    'assets/opt/DSC02028-full.jpg',
+    'assets/opt/DSC01698-full.jpg',
+    'assets/opt/DSC01191-full.jpg',
   ];
 
   let current = 0;
