@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Noise — verbandnoun.io</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,600;1,400&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #f4eee4; font-family: 'Spectral', serif; color: #2a2018; min-height: 100vh; display: flex; flex-direction: column; }
+  .back-link { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 1px; text-transform: lowercase; color: #9a8b76; text-decoration: none; transition: color .22s; }
+  .back-link:hover { color: #b9683b; }
+  #noise-canvas { display: block; width: 100%; cursor: crosshair; }
+</style>
+</head>
+<body>
+<div style="display:flex;flex-direction:column;min-height:100vh;">
+
+  <!-- top bar -->
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:28px clamp(24px,7vw,84px) 0;border-bottom:1px solid #e0d4bf;padding-bottom:18px;">
+    <a href="index.html" class="back-link">← verbandnoun.io</a>
+    <span style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:1px;color:#9a8b76;text-transform:uppercase;">03 · Noise</span>
+  </div>
+
+  <!-- header -->
+  <div style="padding:56px clamp(24px,7vw,84px) 40px;">
+    <h1 style="font-family:'Spectral',serif;font-weight:300;font-size:clamp(60px,12vw,150px);line-height:.88;letter-spacing:-3px;color:#2a2018;">Noise</h1>
+    <p id="noise-hint" style="font-family:'Spectral',serif;font-style:italic;font-size:18px;color:#9a8b76;margin-top:20px;transition:opacity .4s;">Move the cursor. Listen.</p>
+  </div>
+
+  <!-- canvas -->
+  <div style="flex:1;padding:0 clamp(24px,7vw,84px) 40px;">
+    <div style="border-radius:4px;overflow:hidden;border:1px solid #2a2018;">
+      <canvas id="noise-canvas"></canvas>
+    </div>
+  </div>
+
+  <!-- footer -->
+  <div style="padding:28px clamp(24px,7vw,84px);border-top:1px solid #e0d4bf;display:flex;justify-content:space-between;align-items:baseline;">
+    <a href="index.html" class="back-link">← back to index</a>
+    <span style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:2px;color:#9a8b76;">verbandnoun<span style="color:#b9683b;">.io</span></span>
+  </div>
+
+</div>
+
+<script>
+(function () {
+  const canvas = document.getElementById('noise-canvas');
+  const ctx = canvas.getContext('2d');
+  const hint = document.getElementById('noise-hint');
+
+  // ── layout ──
+  const SPACING = 28;
+  let W, H, cols, rows, dots = [];
+
+  function resize() {
+    const rect = canvas.parentElement.getBoundingClientRect();
+    W = Math.floor(rect.width);
+    H = Math.max(Math.floor(window.innerHeight * 0.55), 320);
+    canvas.width = W;
+    canvas.height = H;
+    buildGrid();
+  }
+
+  function buildGrid() {
+    dots = [];
+    cols = Math.floor(W / SPACING);
+    rows = Math.floor(H / SPACING);
+    const offX = (W - (cols - 1) * SPACING) / 2;
+    const offY = (H - (rows - 1) * SPACING) / 2;
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        dots.push({ x: offX + c * SPACING, y: offY + r * SPACING, glow: 0 });
+      }
+    }
+  }
+
+  // ── mouse ──
+  let mx = -999, my = -999, hasInteracted = false;
+  const RADIUS = 130;
+
+  canvas.addEventListener('mousemove', e => {
+    const r = canvas.getBoundingClientRect();
+    mx = e.clientX - r.left;
+    my = e.clientY - r.top;
+    if (!hasInteracted) {
+      hasInteracted = true;
+      hint.style.opacity = '0';
+      startAudio();
+    }
+    updateAudio(mx / W, my / H);
+  });
+
+  canvas.addEventListener('mouseleave', () => { mx = -999; my = -999; stopAudio(); });
+
+  // ripples
+  const ripples = [];
+  canvas.addEventListener('click', e => {
+    const r = canvas.getBoundingClientRect();
+    ripples.push({ x: e.clientX - r.left, y: e.clientY - r.top, t: 0 });
+  });
+
+  // ── render ──
+  function render() {
+    ctx.fillStyle = '#1a1410';
+    ctx.fillRect(0, 0, W, H);
+
+    // ripple rings
+    for (let i = ripples.length - 1; i >= 0; i--) {
+      const rp = ripples[i];
+      rp.t += 0.018;
+      const rad = rp.t * 220;
+      const alpha = Math.max(0, 1 - rp.t * 1.1);
+      ctx.beginPath();
+      ctx.arc(rp.x, rp.y, rad, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(216,167,110,${alpha * 0.35})`;
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+      if (rp.t > 1) ripples.splice(i, 1);
+    }
+
+    // cursor halo
+    if (mx >= 0 && my >= 0) {
+      const g = ctx.createRadialGradient(mx, my, 0, mx, my, RADIUS * 1.4);
+      g.addColorStop(0, 'rgba(216,167,110,0.13)');
+      g.addColorStop(1, 'rgba(216,167,110,0)');
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.arc(mx, my, RADIUS * 1.4, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // dots
+    for (const d of dots) {
+      const dx = d.x - mx, dy = d.y - my;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      const target = dist < RADIUS ? Math.pow(1 - dist / RADIUS, 1.6) : 0;
+      d.glow += (target - d.glow) * 0.12;
+
+      const g = d.glow;
+      const r = 1.5 + g * 4;
+
+      if (g > 0.01) {
+        // glow halo around dot
+        const halo = ctx.createRadialGradient(d.x, d.y, 0, d.x, d.y, r * 5);
+        const col = g > 0.5 ? `rgba(185,104,59,${g * 0.5})` : `rgba(216,167,110,${g * 0.45})`;
+        halo.addColorStop(0, col);
+        halo.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = halo;
+        ctx.beginPath();
+        ctx.arc(d.x, d.y, r * 5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // dot core
+      const brightness = 0.18 + g * 0.82;
+      const rc = Math.round(26 + g * 190);
+      const gc2 = Math.round(20 + g * 87);
+      const bc = Math.round(16 + g * 15);
+      ctx.fillStyle = `rgba(${rc},${gc2},${bc},${brightness})`;
+      ctx.beginPath();
+      ctx.arc(d.x, d.y, r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    requestAnimationFrame(render);
+  }
+
+  // ── audio (Web Audio API) ──
+  let audioCtx, osc, gainNode, filterNode, started = false;
+
+  // Pentatonic scale: C D E G A across 3 octaves
+  const PENTA = [130.81,146.83,164.81,196,220,261.63,293.66,329.63,392,440,523.25,587.33,659.25,784,880];
+
+  function startAudio() {
+    if (started) return;
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    gainNode = audioCtx.createGain();
+    gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+
+    filterNode = audioCtx.createBiquadFilter();
+    filterNode.type = 'lowpass';
+    filterNode.frequency.value = 1200;
+    filterNode.Q.value = 2;
+
+    osc = audioCtx.createOscillator();
+    osc.type = 'sine';
+    osc.frequency.value = PENTA[0];
+    osc.connect(filterNode);
+    filterNode.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+    osc.start();
+    started = true;
+  }
+
+  function updateAudio(nx, ny) {
+    if (!started || !audioCtx) return;
+    const idx = Math.min(PENTA.length - 1, Math.floor(nx * PENTA.length));
+    const freq = PENTA[idx];
+    const vol = Math.max(0, (1 - ny) * 0.18);
+    const now = audioCtx.currentTime;
+    osc.frequency.setTargetAtTime(freq, now, 0.06);
+    gainNode.gain.setTargetAtTime(vol, now, 0.08);
+  }
+
+  function stopAudio() {
+    if (!started || !gainNode) return;
+    gainNode.gain.setTargetAtTime(0, audioCtx.currentTime, 0.12);
+  }
+
+  // ── init ──
+  window.addEventListener('resize', () => { resize(); });
+  resize();
+  render();
+})();
+</script>
+</body>
+</html>
