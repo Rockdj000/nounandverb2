@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+<title>Illusion of Choice · verbandnoun.io</title>
+<link rel="icon" href="icon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Hanken+Grotesk:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #EFEBE6; font-family: 'Hanken Grotesk', sans-serif; color: #283420; min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+  ::selection { background: #EC8E90; color: #2E3C24; }
+
+  /* game surface — floats on the paper, no border */
+  #stage { position: relative; flex: 1; min-height: 56vh; }
+  #game { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: manipulation; }
+
+  /* ── audio control (reused from Tonys: nearly transparent, in line with the hero) ── */
+  .audio-ctl { position: relative; z-index: 45; display: flex; align-items: center; gap: 10px; flex: none; opacity: .6; transition: opacity .25s; }
+  .audio-ctl:hover { opacity: .98; }
+  .audio-ctl.playing { opacity: .82; }
+  @keyframes audio-ripple { 0% { transform: scale(1); opacity: .6; } 100% { transform: scale(6); opacity: 0; } }
+  .audio-ctl:not(.playing) .audio-btn { position: relative; }
+  .audio-ctl:not(.playing) .audio-btn::before,
+  .audio-ctl:not(.playing) .audio-btn::after {
+    content: ''; position: absolute; inset: 0; border-radius: 50%;
+    border: 1.5px solid #C45F61; pointer-events: none;
+    animation: audio-ripple 2.8s ease-out infinite;
+  }
+  .audio-ctl:not(.playing) .audio-btn::after { border-color: #6F7C2F; animation-delay: 1.4s; }
+  .audio-tip {
+    position: absolute; top: calc(100% + 9px); right: 2px;
+    font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase;
+    color: #C45F61; white-space: nowrap; opacity: 0; transform: translateY(-4px); pointer-events: none;
+    transition: opacity .25s, transform .25s;
+  }
+  .audio-ctl:not(.playing):hover .audio-tip { opacity: 1; transform: translateY(0); }
+  .audio-btn {
+    width: 34px; height: 34px; border-radius: 50%; flex: none;
+    border: 1px solid #8a8578; background: transparent; color: #2E3C24;
+    font-family: 'Space Mono', monospace; font-size: 11px; line-height: 1; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; padding-left: 1px;
+    transition: border-color .2s, color .2s;
+  }
+  .audio-btn:hover { border-color: #C45F61; color: #C45F61; }
+  .audio-vol { -webkit-appearance: none; appearance: none; width: 70px; height: 2px; background: #cfc7bb; border-radius: 1px; outline: none; cursor: pointer; }
+  .audio-vol::-webkit-slider-thumb { -webkit-appearance: none; width: 11px; height: 11px; border-radius: 50%; background: #C45F61; cursor: pointer; }
+  .audio-vol::-moz-range-thumb { width: 11px; height: 11px; border: none; border-radius: 50%; background: #C45F61; cursor: pointer; }
+
+  @media (max-width: 600px) { .audio-vol { display: none; } }
+</style>
+</head>
+<body>
+<div style="display:flex;flex-direction:column;min-height:100vh;">
+
+  <!-- top bar -->
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:18px;padding:26px clamp(24px,7vw,84px);background:#2E3C24;border-bottom:1px solid #44523a;">
+    <a href="index.html" style="font-family:'Instrument Serif',serif;font-size:22px;line-height:1;color:#EFEBE6;text-decoration:none;"><span style="font-style:italic;">Verb</span> <span style="color:#EC8E90;">and</span> Noun</a>
+  </div>
+
+  <!-- header -->
+  <div style="padding:56px clamp(24px,7vw,84px) 8px;display:flex;justify-content:space-between;align-items:flex-start;gap:20px;">
+    <div>
+      <h1 style="font-family:'Instrument Serif',serif;font-weight:400;font-size:clamp(48px,9vw,116px);line-height:.86;letter-spacing:-1px;color:#2E3C24;">Illusion<br>of Choice</h1>
+      <p style="font-family:'Hanken Grotesk',sans-serif;font-weight:400;font-size:20px;color:#C45F61;margin-top:20px;line-height:1.5;">Pick a door.</p>
+    </div>
+    <div class="audio-ctl" id="audio-ctl">
+      <span class="audio-tip">press play</span>
+      <button id="audio-btn" class="audio-btn" type="button" aria-label="play music">&#9658;</button>
+      <input type="range" id="audio-vol" class="audio-vol" min="0" max="100" value="60" aria-label="volume">
+    </div>
+  </div>
+
+  <!-- game surface -->
+  <main id="stage"><canvas id="game"></canvas></main>
+
+  <!-- footer -->
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;padding:22px clamp(24px,7vw,84px);background:#2E3C24;border-top:1px solid #44523a;font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:1.5px;text-transform:uppercase;color:#9aa890;">
+    <span>verbandnoun<span style="color:#EC8E90;">.io</span></span>
+  </div>
+
+</div>
+
+<script>
+(function () {
+  // ════════════════════════ canvas ════════════════════════
+  const stage = document.getElementById('stage');
+  const cv = document.getElementById('game');
+  const ctx = cv.getContext('2d');
+  let W = 0, H = 0;
+
+  function resize() {
+    const r = stage.getBoundingClientRect();
+    W = Math.max(1, Math.floor(r.width));
+    H = Math.max(1, Math.floor(r.height));
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    cv.width = W * dpr; cv.height = H * dpr;
+    cv.style.width = W + 'px'; cv.style.height = H + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  // ── helpers ──
+  const INK = '#272320';
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const easeInOut = p => p < .5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
+  function rnd(s) { const x = Math.sin(s * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); }
+  function jit(s, a) { return (rnd(s) - 0.5) * 2 * a; }
+
+  // a hand-drawn line: slight wobble + curved midpoint (stable per seed)
+  function sLine(x1, y1, x2, y2, seed) {
+    const mx = (x1 + x2) / 2, my = (y1 + y2) / 2;
+    const dx = x2 - x1, dy = y2 - y1, len = Math.hypot(dx, dy) || 1;
+    const nx = -dy / len, ny = dx / len;
+    const off = jit(seed, Math.min(3.5, len * 0.05));
+    ctx.beginPath();
+    ctx.moveTo(x1 + jit(seed + 0.3, 1.1), y1 + jit(seed + 0.6, 1.1));
+    ctx.quadraticCurveTo(mx + nx * off, my + ny * off, x2 + jit(seed + 0.9, 1.1), y2 + jit(seed + 1.2, 1.1));
+    ctx.stroke();
+  }
+  // a hand-drawn circle: jittered radius, slight overshoot
+  function sCircle(cx, cy, r, seed) {
+    ctx.beginPath();
+    const steps = 16;
+    for (let i = 0; i <= steps; i++) {
+      const a = (i / steps) * Math.PI * 2 * 1.05 - 0.3;
+      const rr = r + jit(seed + i * 0.7, r * 0.07);
+      const x = cx + Math.cos(a) * rr, y = cy + Math.sin(a) * rr;
+      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+  }
+
+  // ════════════════════════ world model ════════════════════════
+  // The figure never changes depth — it only slides left/right. All forward
+  // motion (and walking "through" a door) comes from the room scrolling past:
+  // each door's `ahead` shrinks as `travel` advances, so it grows, drifts to
+  // the figure, passes around it, and a fresh row arrives from the distance.
+  // Because one pick advances exactly ROOM_DEPTH and every row is identical,
+  // the loop is seamless.
+  const NEARK = 2.5, AHEAD0 = 2.5, ROOM_DEPTH = 5.0; // depth units
+  const WALK_MS = 3000;
+
+  let phase = 'idle', chosen = -1, hovered = -1, score = 0, hasPicked = false;
+  let travel = 0, t0 = 0, legPhase = 0;
+
+  function metrics() {
+    const HORIZON = H * 0.30, GROUND = H * 0.80;
+    const BASE_DH = clamp(H * 0.44, 160, 340);
+    const LATERAL = Math.min(W * 0.30, BASE_DH * 0.92);
+    const figH = BASE_DH * 0.60;
+    return { HORIZON, GROUND, BASE_DH, LATERAL, figH };
+  }
+  const persp = a => NEARK / (a + NEARK);
+
+  // project a door at lateral slot (-1,0,1) and depth `a` to a screen rect
+  function projectDoor(slot, a) {
+    const m = metrics();
+    const p = persp(a);
+    const dh = m.BASE_DH * p, dw = dh * 0.60;
+    const cx = W / 2 + slot * m.LATERAL * p;
+    const by = m.HORIZON + (m.GROUND - m.HORIZON) * p; // floor (door base) y
+    return { x: cx - dw / 2, y: by - dh, w: dw, h: dh, p, a, slot, cx, by };
+  }
+
+  function pick(i) {
+    if (phase !== 'idle') return;
+    chosen = i; hasPicked = true; hovered = -1;
+    phase = 'walk'; t0 = performance.now(); travel = 0;
+  }
+
+  function update(now) {
+    if (phase === 'walk') {
+      const u = clamp((now - t0) / WALK_MS, 0, 1);
+      travel = u * ROOM_DEPTH;
+      legPhase = now * 0.014;
+      if (u >= 1) {                         // seamless arrival: next row is now the current row
+        phase = 'idle'; travel = 0; chosen = -1; score++;
+      }
+    } else {
+      travel = 0; legPhase = 0;
+    }
+  }
+
+  // figure only ever moves sideways: align to the chosen door, then back to center
+  function figureX() {
+    const m = metrics();
+    if (phase !== 'walk') return W / 2;
+    const u = travel / ROOM_DEPTH;
+    const doorX = W / 2 + (chosen - 1) * m.LATERAL;
+    if (u < 0.12) return lerp(W / 2, doorX, easeInOut(u / 0.12)); // slide to line up
+    if (u < 0.50) return doorX;                                   // hold while the doorway passes around
+    if (u < 0.85) return lerp(doorX, W / 2, easeInOut((u - 0.50) / 0.35)); // slide back to center
+    return W / 2;
+  }
+
+  // ── door: a doorway (3 jambs) + a panel that swings open on the left hinge ──
+  function drawDoor(r, seed, openAmt, hov, lw) {
+    ctx.lineWidth = hov ? lw * 1.7 : lw;
+    const { x, y, w, h } = r;
+    sLine(x, y, x, y + h, seed + 1);          // left jamb (hinge)
+    sLine(x, y, x + w, y, seed + 2);          // lintel
+    sLine(x + w, y, x + w, y + h, seed + 3);  // right jamb
+    const ang = openAmt * (78 * Math.PI / 180);
+    const fxr = x + w * Math.cos(ang);
+    const lift = w * Math.sin(ang) * 0.20;
+    sLine(x, y, fxr, y - lift, seed + 4);
+    sLine(fxr, y - lift, fxr, y + h - lift, seed + 5);
+    sLine(x, y + h, fxr, y + h - lift, seed + 6);
+    if (openAmt < 0.55) {
+      const t = 0.84;
+      const kx = x + w * t * Math.cos(ang);
+      const ky = y + h * 0.52 - w * t * Math.sin(ang) * 0.20;
+      sCircle(kx, ky, Math.max(2.5, w * 0.045), seed + 7);
+    }
+  }
+
+  // ── stick figure, seen from behind — fixed depth/scale; only x moves ──
+  function drawFigure(fxp, lw) {
+    const m = metrics();
+    ctx.save();
+    ctx.globalAlpha = 1; ctx.lineWidth = lw;
+    const feetY = m.GROUND, Hf = m.figH;
+    const rh = Hf * 0.12;
+    const headCy = feetY - Hf + rh;
+    const shoulder = headCy + rh * 1.5 + Hf * 0.03;
+    const hip = feetY - Hf * 0.40;
+    const legLen = feetY - hip, armLen = Hf * 0.32;
+    const swing = phase === 'walk' ? Math.sin(legPhase) : 0; // continuous walk cycle while moving
+
+    sLine(fxp, shoulder, fxp, hip, 7);        // spine
+    sCircle(fxp, headCy, rh, 8);              // head (back)
+    const aS = armLen * 0.20, aA = armLen * 0.55;
+    sLine(fxp, shoulder, fxp - aS - swing * aA, shoulder + armLen, 9);
+    sLine(fxp, shoulder, fxp + aS + swing * aA, shoulder + armLen, 10);
+    const lS = legLen * 0.16, lA = legLen * 0.34;
+    sLine(fxp, hip, fxp - lS + swing * lA, feetY, 11);
+    sLine(fxp, hip, fxp + lS - swing * lA, feetY, 12);
+    ctx.restore();
+  }
+
+  function drawScore() {
+    ctx.save();
+    ctx.globalAlpha = 1; ctx.fillStyle = INK;
+    const pad = clamp(W * 0.035, 16, 54);
+    const fs = clamp(H * 0.026, 11, 18);
+    ctx.textBaseline = 'top'; ctx.textAlign = 'left';
+    ctx.font = `700 ${fs}px 'Space Mono', monospace`;
+    ctx.fillText('ROOMS', pad, pad);
+    ctx.font = `700 ${Math.round(fs * 2.1)}px 'Space Mono', monospace`;
+    ctx.fillText(String(score), pad, pad + fs * 1.25);
+    ctx.restore();
+  }
+
+  function drawPrompt() {
+    ctx.save();
+    ctx.globalAlpha = 0.5; ctx.fillStyle = INK;
+    const fs = clamp(H * 0.02, 11, 15);
+    ctx.font = `400 ${fs}px 'Space Mono', monospace`;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+    ctx.fillText('pick a door', W / 2, H * 0.95);
+    ctx.restore();
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.strokeStyle = INK;
+    const lw = clamp(W * 0.0038, 2, 3.4);
+
+    // two rows of doors: the current one (passing) and the next one (arriving)
+    const inst = [];
+    for (const slot of [-1, 0, 1]) {
+      inst.push({ slot, row: 0, a: AHEAD0 - travel });
+      inst.push({ slot, row: 1, a: AHEAD0 + ROOM_DEPTH - travel });
+    }
+    const vis = inst.filter(it => it.a > -1.3 && it.a < 6.8).sort((A, B) => B.a - A.a); // far → near
+
+    const fx = figureX();
+    let figDrawn = false;
+    for (const it of vis) {
+      if (!figDrawn && it.a < 0) { drawFigure(fx, lw); figDrawn = true; } // figure sits at the a=0 plane
+      const r = projectDoor(it.slot, it.a);
+      const seed = 100 + (it.row * 3 + (it.slot + 1)) * 37;
+      const isChosen = phase === 'walk' && it.row === 0 && it.slot === (chosen - 1);
+      const openAmt = isChosen ? clamp((travel / ROOM_DEPTH) / 0.10, 0, 1) : 0;
+      const hov = phase === 'idle' && it.row === 0 && hovered === (it.slot + 1);
+      let alpha = clamp((6.8 - it.a) / (6.8 - 4.8), 0, 1);   // fade in from the distance
+      alpha *= clamp((it.a + 1.3) / 0.8, 0, 1);              // fade out as it passes behind
+      ctx.globalAlpha = alpha;
+      drawDoor(r, seed, openAmt, hov, lw * clamp(r.p, 0.5, 1.25));
+    }
+    if (!figDrawn) drawFigure(fx, lw);
+    ctx.globalAlpha = 1;
+
+    drawScore();
+    if (phase === 'idle' && !hasPicked) drawPrompt();
+  }
+
+  function frame(now) { requestAnimationFrame(frame); update(now); draw(); }
+
+  // ── input (idle only): hit-test the current row of doors ──
+  function hit(px, py) {
+    if (phase !== 'idle') return -1;
+    for (const slot of [-1, 0, 1]) {
+      const r = projectDoor(slot, AHEAD0);
+      if (px >= r.x && px <= r.x + r.w && py >= r.y && py <= r.y + r.h) return slot + 1;
+    }
+    return -1;
+  }
+  cv.addEventListener('pointermove', e => {
+    const r = cv.getBoundingClientRect();
+    const i = hit(e.clientX - r.left, e.clientY - r.top);
+    hovered = i; cv.style.cursor = i >= 0 ? 'pointer' : 'default';
+  });
+  cv.addEventListener('pointerdown', e => {
+    const r = cv.getBoundingClientRect();
+    const i = hit(e.clientX - r.left, e.clientY - r.top);
+    if (i >= 0) pick(i);
+  });
+  cv.addEventListener('pointerleave', () => { hovered = -1; cv.style.cursor = 'default'; });
+
+  // ════════════════════════ music (procedural, starts OFF/muted) ════════════════════════
+  // an eerie, hypnotic loop in a phrygian-tinged A minor — endless, like the rooms.
+  let actx = null, master = null, playing = false, droneStarted = false, schedId = null;
+  let step = 0, nextNote = 0, targetVol = 0.5;
+  const SCALE = [220.00, 233.08, 261.63, 293.66, 329.63, 349.23, 440.00]; // A Bb C D E F A
+  const PATTERN = [0, 2, 4, 5, 4, 2, 0, 2, 4, 6, 5, 4, 2, 1];
+  const STEP = 0.30; // seconds per step
+
+  function audioInit() {
+    if (actx) return;
+    actx = new (window.AudioContext || window.webkitAudioContext)();
+    master = actx.createGain(); master.gain.value = 0;
+    const delay = actx.createDelay(1.0); delay.delayTime.value = 0.40;
+    const fb = actx.createGain(); fb.gain.value = 0.34;
+    const wet = actx.createGain(); wet.gain.value = 0.5;
+    master.connect(actx.destination);
+    master.connect(delay); delay.connect(fb); fb.connect(delay); delay.connect(wet); wet.connect(actx.destination);
+  }
+  function startDrone() {
+    [110.0, 164.81].forEach((f, i) => {
+      const o = actx.createOscillator(); o.type = 'sine'; o.frequency.value = f;
+      const lfo = actx.createOscillator(); lfo.frequency.value = 0.07 + i * 0.03;
+      const lg = actx.createGain(); lg.gain.value = 2.5; lfo.connect(lg); lg.connect(o.detune);
+      const g = actx.createGain(); g.gain.value = i ? 0.035 : 0.05;
+      o.connect(g); g.connect(master); o.start(); lfo.start();
+    });
+    droneStarted = true;
+  }
+  function playNote(freq, t, oct) {
+    const o = actx.createOscillator(); o.type = 'triangle'; o.frequency.value = freq * (oct || 1);
+    const lp = actx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 1500; lp.Q.value = 1.2;
+    const g = actx.createGain();
+    o.connect(lp); lp.connect(g); g.connect(master);
+    const dur = STEP * 2.4;
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(oct === 2 ? 0.07 : 0.16, t + 0.012);
+    g.gain.exponentialRampToValueAtTime(0.0006, t + dur);
+    o.start(t); o.stop(t + dur + 0.05);
+  }
+  function scheduler() {
+    while (nextNote < actx.currentTime + 0.25) {
+      const idx = PATTERN[step % PATTERN.length];
+      playNote(SCALE[idx], nextNote, 1);
+      if (step % 8 === 0) playNote(SCALE[idx], nextNote + STEP * 0.5, 2);
+      nextNote += STEP; step++;
+    }
+  }
+  function musicPlay() {
+    audioInit();
+    if (actx.state === 'suspended') actx.resume();
+    if (!droneStarted) startDrone();
+    nextNote = actx.currentTime + 0.08;
+    if (schedId) clearInterval(schedId);
+    schedId = setInterval(scheduler, 60);
+    master.gain.cancelScheduledValues(actx.currentTime);
+    master.gain.setValueAtTime(master.gain.value, actx.currentTime);
+    master.gain.linearRampToValueAtTime(targetVol, actx.currentTime + 1.2);
+    playing = true;
+  }
+  function musicStop() {
+    if (schedId) { clearInterval(schedId); schedId = null; }
+    if (master) {
+      master.gain.cancelScheduledValues(actx.currentTime);
+      master.gain.setValueAtTime(master.gain.value, actx.currentTime);
+      master.gain.linearRampToValueAtTime(0, actx.currentTime + 0.5);
+    }
+    playing = false;
+  }
+
+  const aBtn = document.getElementById('audio-btn');
+  const aVol = document.getElementById('audio-vol');
+  const aCtl = document.getElementById('audio-ctl');
+  targetVol = (+aVol.value / 100) * 0.6;
+  aBtn.addEventListener('click', () => {
+    if (!playing) { musicPlay(); aBtn.innerHTML = '&#10074;&#10074;'; aCtl.classList.add('playing'); aBtn.setAttribute('aria-label', 'pause music'); }
+    else { musicStop(); aBtn.innerHTML = '&#9658;'; aCtl.classList.remove('playing'); aBtn.setAttribute('aria-label', 'play music'); }
+  });
+  aVol.addEventListener('input', () => {
+    targetVol = (+aVol.value / 100) * 0.6;
+    if (playing && master) {
+      master.gain.cancelScheduledValues(actx.currentTime);
+      master.gain.setValueAtTime(master.gain.value, actx.currentTime);
+      master.gain.linearRampToValueAtTime(targetVol, actx.currentTime + 0.1);
+    }
+  });
+
+  window.addEventListener('resize', resize);
+  resize();
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
