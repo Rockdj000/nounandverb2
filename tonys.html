@@ -33,11 +33,11 @@
   #ctrl-tab {
     height: 36px; display: flex; align-items: center; justify-content: center;
     gap: 8px; cursor: pointer;
-    font-family: 'Space Mono', monospace; font-size: 10px;
-    letter-spacing: 2px; text-transform: uppercase; color: #8a8578;
+    font-family: 'Space Mono', monospace; font-size: 12.5px; font-weight: 700;
+    letter-spacing: 2.5px; text-transform: uppercase; color: #EC8E90;
     user-select: none; transition: color .2s;
   }
-  #ctrl-tab:hover { color: #EC8E90; }
+  #ctrl-tab:hover { color: #f0a6a8; }
   #ctrl-arrow { transition: transform .38s cubic-bezier(.2,.7,.2,1); display: inline-block; }
   #ctrl-drawer.open #ctrl-arrow { transform: rotate(180deg); }
   #ctrl-body { padding: 16px clamp(20px,5vw,64px) 24px; max-width: 620px; display: flex; flex-direction: column; gap: 22px; }
@@ -110,10 +110,10 @@
   </div>
 
   <!-- header -->
-  <div style="padding:56px clamp(24px,7vw,84px) 8px;display:flex;justify-content:space-between;align-items:flex-start;gap:20px;">
+  <div style="position:relative;z-index:45;padding:56px clamp(24px,7vw,84px) 8px;display:flex;justify-content:space-between;align-items:flex-start;gap:20px;">
     <div>
       <h1 style="font-family:'Instrument Serif',serif;font-weight:400;font-size:clamp(64px,13vw,160px);line-height:.84;letter-spacing:-1px;color:#2E3C24;">Tonys</h1>
-      <p style="font-family:'Instrument Serif',serif;font-style:italic;font-size:20px;color:#8a8578;margin-top:20px;">Night of 1,000 Tonys.</p>
+      <p style="font-family:'Instrument Serif',serif;font-style:italic;font-size:20px;color:#C45F61;margin-top:20px;">Night of 1,000 Tonys.</p>
     </div>
     <div class="audio-ctl" id="audio-ctl">
       <button id="audio-btn" class="audio-btn" type="button" aria-label="play soundtrack">▶</button>
@@ -313,14 +313,40 @@
     picker.appendChild(b);
   });
 
-  // ── audio (soundtrack extracted from the screen recording; starts on click — autoplay is blocked) ──
+  // ── audio: default ON, gently ramping volume 0 → target over 7s. Browsers block sound on
+  //    load until a user gesture, so we attempt autoplay and also start on the first interaction. ──
   const audio = document.getElementById('tony-audio');
   const aCtl = document.getElementById('audio-ctl');
   const aBtn = document.getElementById('audio-btn');
   const aVol = document.getElementById('audio-vol');
-  audio.volume = (+aVol.value) / 100;
-  aBtn.addEventListener('click', () => { if (audio.paused) audio.play().catch(() => {}); else audio.pause(); });
-  aVol.addEventListener('input', () => { audio.volume = (+aVol.value) / 100; });
+  let targetVol = (+aVol.value) / 100;
+  let firstStartDone = false, rampActive = false, rampStart = 0;
+
+  function rampVolume(ts) {
+    if (!rampActive) return;
+    if (!rampStart) rampStart = ts;
+    const k = Math.min(1, (ts - rampStart) / 7000);   // 7-second fade-in
+    audio.volume = targetVol * k;
+    if (k < 1) requestAnimationFrame(rampVolume); else rampActive = false;
+  }
+  function startAudio() {
+    if (!audio.paused) return;
+    audio.volume = firstStartDone ? targetVol : 0;
+    audio.play().then(() => {
+      if (!firstStartDone) { firstStartDone = true; rampActive = true; rampStart = 0; requestAnimationFrame(rampVolume); }
+    }).catch(() => {});
+  }
+  startAudio();                                         // try to autoplay (default on)
+  const onFirstGesture = (e) => {                       // ...and start on the first interaction if blocked
+    if (audio.paused && !aCtl.contains(e.target)) startAudio();
+    window.removeEventListener('pointerdown', onFirstGesture);
+    window.removeEventListener('keydown', onFirstGesture);
+  };
+  window.addEventListener('pointerdown', onFirstGesture);
+  window.addEventListener('keydown', onFirstGesture);
+
+  aBtn.addEventListener('click', () => { if (audio.paused) startAudio(); else audio.pause(); });
+  aVol.addEventListener('input', () => { targetVol = (+aVol.value) / 100; rampActive = false; audio.volume = targetVol; });
   audio.addEventListener('play', () => { aBtn.textContent = '❚❚'; aCtl.classList.add('playing'); });
   audio.addEventListener('pause', () => { aBtn.textContent = '▶'; aCtl.classList.remove('playing'); });
 })();
