@@ -80,7 +80,22 @@
   .pick.on { opacity: 1; border-color: #EC8E90; }
   .pick img { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; }
 
-  @media (max-width: 600px) { .ctrl-label { width: 56px; font-size: 9px; } }
+  /* ── audio control (nearly transparent, upper-right, in line with the hero) ── */
+  .audio-ctl { position: relative; z-index: 45; display: flex; align-items: center; gap: 10px; flex: none; opacity: .4; transition: opacity .25s; }
+  .audio-ctl:hover { opacity: .95; }
+  .audio-ctl.playing { opacity: .85; }
+  .audio-btn {
+    width: 34px; height: 34px; border-radius: 50%; flex: none;
+    border: 1px solid #8a8578; background: transparent; color: #2E3C24;
+    font-family: 'Space Mono', monospace; font-size: 11px; line-height: 1; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; padding-left: 1px;
+    transition: border-color .2s, color .2s;
+  }
+  .audio-btn:hover { border-color: #C45F61; color: #C45F61; }
+  .audio-vol { -webkit-appearance: none; appearance: none; width: 70px; height: 2px; background: #cfc7bb; border-radius: 1px; outline: none; cursor: pointer; }
+  .audio-vol::-webkit-slider-thumb { -webkit-appearance: none; width: 11px; height: 11px; border-radius: 50%; background: #C45F61; cursor: pointer; }
+
+  @media (max-width: 600px) { .ctrl-label { width: 56px; font-size: 9px; } .audio-vol { display: none; } }
 </style>
 </head>
 <body>
@@ -95,10 +110,17 @@
   </div>
 
   <!-- header -->
-  <div style="padding:56px clamp(24px,7vw,84px) 8px;">
-    <h1 style="font-family:'Instrument Serif',serif;font-weight:400;font-size:clamp(64px,13vw,160px);line-height:.84;letter-spacing:-1px;color:#2E3C24;">Tonys</h1>
-    <p style="font-family:'Instrument Serif',serif;font-style:italic;font-size:20px;color:#8a8578;margin-top:20px;">Night of 1,000 Tonys.</p>
+  <div style="padding:56px clamp(24px,7vw,84px) 8px;display:flex;justify-content:space-between;align-items:flex-start;gap:20px;">
+    <div>
+      <h1 style="font-family:'Instrument Serif',serif;font-weight:400;font-size:clamp(64px,13vw,160px);line-height:.84;letter-spacing:-1px;color:#2E3C24;">Tonys</h1>
+      <p style="font-family:'Instrument Serif',serif;font-style:italic;font-size:20px;color:#8a8578;margin-top:20px;">Night of 1,000 Tonys.</p>
+    </div>
+    <div class="audio-ctl" id="audio-ctl">
+      <button id="audio-btn" class="audio-btn" type="button" aria-label="play soundtrack">▶</button>
+      <input type="range" id="audio-vol" class="audio-vol" min="0" max="100" value="70" aria-label="volume">
+    </div>
   </div>
+  <audio id="tony-audio" src="assets/opt/tony-audio.m4a" loop preload="auto"></audio>
 
   <div style="flex:1;"></div>
 
@@ -118,13 +140,13 @@
       <div class="ctrl-group-label">Confetti</div>
       <div class="ctrl-row">
         <span class="ctrl-label">Tonys</span>
-        <input type="range" id="c-count" min="1" max="2000" value="60">
-        <span class="ctrl-val" id="v-count">60</span>
+        <input type="range" id="c-count" min="1" max="2000" value="1050">
+        <span class="ctrl-val" id="v-count">1050</span>
       </div>
       <div class="ctrl-row">
         <span class="ctrl-label">Speed</span>
-        <input type="range" id="c-speed" min="1" max="30" value="10">
-        <span class="ctrl-val" id="v-speed">10</span>
+        <input type="range" id="c-speed" min="1" max="30" value="5">
+        <span class="ctrl-val" id="v-speed">5</span>
       </div>
     </div>
     <div class="ctrl-group">
@@ -153,7 +175,7 @@
   }
 
   // ── state ──
-  const P = { count: 60, speed: 10 };
+  const P = { count: 1050, speed: 5 };
   const GRAVITY = 0.3;
   const tonys = [];
   let fireSide = 0;
@@ -161,7 +183,8 @@
 
   // ── the cast of Tonys (transparent cutouts) ──
   const SRCS = ['tony.png', 'IMG_1777.PNG', 'IMG_1778.PNG', 'IMG_1779.PNG', 'IMG_1780.PNG',
-                'IMG_1781.PNG', 'IMG_1782.PNG', 'IMG_1784.PNG', 'IMG_1785.PNG'];
+                'IMG_1781.PNG', 'IMG_1782.PNG', 'IMG_1784.PNG', 'IMG_1785.PNG',
+                'IMG_1788.PNG', 'IMG_1789.PNG', 'IMG_1790.PNG'];
   const sprites = SRCS.map(src => ({ src, canvas: null, aspect: 1, enabled: true, ready: false }));
   let started = false, readyCount = 0;
 
@@ -289,6 +312,17 @@
     });
     picker.appendChild(b);
   });
+
+  // ── audio (soundtrack extracted from the screen recording; starts on click — autoplay is blocked) ──
+  const audio = document.getElementById('tony-audio');
+  const aCtl = document.getElementById('audio-ctl');
+  const aBtn = document.getElementById('audio-btn');
+  const aVol = document.getElementById('audio-vol');
+  audio.volume = (+aVol.value) / 100;
+  aBtn.addEventListener('click', () => { if (audio.paused) audio.play().catch(() => {}); else audio.pause(); });
+  aVol.addEventListener('input', () => { audio.volume = (+aVol.value) / 100; });
+  audio.addEventListener('play', () => { aBtn.textContent = '❚❚'; aCtl.classList.add('playing'); });
+  audio.addEventListener('pause', () => { aBtn.textContent = '▶'; aCtl.classList.remove('playing'); });
 })();
 </script>
 </body>
