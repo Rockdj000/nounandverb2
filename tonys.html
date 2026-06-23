@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+<title>Tonys · verbandnoun.io</title>
+<link rel="icon" href="icon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Hanken+Grotesk:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #EFEBE6; font-family: 'Hanken Grotesk', sans-serif; color: #283420; min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+  ::selection { background: #EC8E90; color: #2E3C24; }
+  .back-link { font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: 1px; text-transform: lowercase; color: #8a8578; text-decoration: none; transition: color .22s; }
+  .back-link:hover { color: #C45F61; }
+
+  /* transparent full-viewport overlay — the Tonys fly over the whole page */
+  #tony-canvas { position: fixed; inset: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 40; display: block; }
+
+  /* ── controls drawer (reused from noise) ── */
+  #ctrl-drawer {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 50;
+    background: rgba(29,39,24,.92);
+    backdrop-filter: blur(12px);
+    border-top: 1px solid rgba(255,255,255,.08);
+    transform: translateY(calc(100% - 36px));
+    transition: transform .38s cubic-bezier(.2,.7,.2,1);
+  }
+  #ctrl-drawer.open { transform: translateY(0); }
+  #ctrl-tab {
+    height: 36px; display: flex; align-items: center; justify-content: center;
+    gap: 8px; cursor: pointer;
+    font-family: 'Space Mono', monospace; font-size: 10px;
+    letter-spacing: 2px; text-transform: uppercase; color: #8a8578;
+    user-select: none; transition: color .2s;
+  }
+  #ctrl-tab:hover { color: #EC8E90; }
+  #ctrl-arrow { transition: transform .38s cubic-bezier(.2,.7,.2,1); display: inline-block; }
+  #ctrl-drawer.open #ctrl-arrow { transform: rotate(180deg); }
+  #ctrl-body { padding: 16px clamp(20px,5vw,64px) 24px; max-width: 620px; display: flex; flex-direction: column; gap: 22px; }
+  .ctrl-group { display: flex; flex-direction: column; gap: 14px; }
+  .ctrl-group-label {
+    font-family: 'Space Mono', monospace; font-size: 9px;
+    letter-spacing: 3px; text-transform: uppercase; color: #6b7659;
+    padding-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,.06);
+  }
+  .ctrl-row { display: flex; align-items: center; gap: 12px; }
+  .ctrl-label {
+    font-family: 'Space Mono', monospace; font-size: 10px;
+    letter-spacing: 1px; text-transform: uppercase; color: #9aa890;
+    width: 72px; flex: none;
+  }
+  .ctrl-val {
+    font-family: 'Space Mono', monospace; font-size: 10px;
+    color: #EC8E90; width: 44px; text-align: right; flex: none;
+  }
+  input[type=range] {
+    -webkit-appearance: none; appearance: none;
+    flex: 1; height: 2px; background: #475438; border-radius: 1px; outline: none; cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 12px; height: 12px;
+    border-radius: 50%; background: #EC8E90; cursor: pointer;
+    transition: background .2s, transform .15s;
+  }
+  input[type=range]:hover::-webkit-slider-thumb { background: #f0a6a8; transform: scale(1.2); }
+  input[type=range]::-webkit-slider-runnable-track { background: transparent; }
+
+  /* ── image picker (which Tonys are in the mix) ── */
+  .pick-row { display: flex; flex-wrap: wrap; gap: 6px; }
+  .pick {
+    width: 40px; height: 40px; padding: 0; border: 2px solid transparent; border-radius: 5px;
+    background: #475438; overflow: hidden; cursor: pointer; opacity: .32;
+    transition: opacity .18s, border-color .18s, transform .12s;
+  }
+  .pick:hover { transform: scale(1.08); }
+  .pick.on { opacity: 1; border-color: #EC8E90; }
+  .pick img { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; }
+
+  @media (max-width: 600px) { .ctrl-label { width: 56px; font-size: 9px; } }
+</style>
+</head>
+<body>
+<canvas id="tony-canvas"></canvas>
+
+<div style="display:flex;flex-direction:column;min-height:100vh;padding-bottom:36px;">
+
+  <!-- top bar -->
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:28px clamp(24px,7vw,84px) 18px;border-bottom:1px solid #e2dcd4;">
+    <a href="index.html" class="back-link">← verbandnoun.io</a>
+    <span style="font-family:'Space Mono',monospace;font-size:11px;letter-spacing:1px;color:#8a8578;text-transform:uppercase;">06 · Tonys</span>
+  </div>
+
+  <!-- header -->
+  <div style="padding:56px clamp(24px,7vw,84px) 8px;">
+    <h1 style="font-family:'Instrument Serif',serif;font-weight:400;font-size:clamp(64px,13vw,160px);line-height:.84;letter-spacing:-1px;color:#2E3C24;">Tonys</h1>
+    <p style="font-family:'Instrument Serif',serif;font-style:italic;font-size:20px;color:#8a8578;margin-top:20px;">Night of 1,000 Tonys.</p>
+  </div>
+
+  <div style="flex:1;"></div>
+
+  <!-- footer -->
+  <div style="padding:28px clamp(24px,7vw,84px);border-top:1px solid #e2dcd4;display:flex;justify-content:space-between;align-items:baseline;">
+    <a href="index.html" class="back-link">← back to index</a>
+    <span style="font-family:'Space Mono',monospace;font-size:11px;letter-spacing:2px;color:#8a8578;">verbandnoun<span style="color:#C45F61;">.io</span></span>
+  </div>
+
+</div>
+
+<!-- controls -->
+<div id="ctrl-drawer">
+  <div id="ctrl-tab"><span>controls</span><span id="ctrl-arrow">↑</span></div>
+  <div id="ctrl-body">
+    <div class="ctrl-group">
+      <div class="ctrl-group-label">Confetti</div>
+      <div class="ctrl-row">
+        <span class="ctrl-label">Tonys</span>
+        <input type="range" id="c-count" min="1" max="2000" value="60">
+        <span class="ctrl-val" id="v-count">60</span>
+      </div>
+      <div class="ctrl-row">
+        <span class="ctrl-label">Speed</span>
+        <input type="range" id="c-speed" min="1" max="30" value="10">
+        <span class="ctrl-val" id="v-speed">10</span>
+      </div>
+    </div>
+    <div class="ctrl-group">
+      <div class="ctrl-group-label">Which Tonys</div>
+      <div class="pick-row" id="img-picker"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  const canvas = document.getElementById('tony-canvas');
+  const ctx = canvas.getContext('2d');
+  let W = 0, H = 0;
+
+  function resize() {
+    // backing store from the canvas's real rendered size (clientWidth is a reliable layout
+    // property; window.innerWidth can briefly lie). Display size is CSS 100vw/100vh.
+    const dpr = window.devicePixelRatio || 1;
+    const w = canvas.clientWidth, h = canvas.clientHeight;
+    if (w < 2 || h < 2) return;
+    W = w; H = h;
+    canvas.width = Math.round(W * dpr);
+    canvas.height = Math.round(H * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  // ── state ──
+  const P = { count: 60, speed: 10 };
+  const GRAVITY = 0.3;
+  const tonys = [];
+  let fireSide = 0;
+  const rand = (a, b) => a + Math.random() * (b - a);
+
+  // ── the cast of Tonys (transparent cutouts) ──
+  const SRCS = ['tony.png', 'IMG_1777.PNG', 'IMG_1778.PNG', 'IMG_1779.PNG', 'IMG_1780.PNG',
+                'IMG_1781.PNG', 'IMG_1782.PNG', 'IMG_1784.PNG', 'IMG_1785.PNG'];
+  const sprites = SRCS.map(src => ({ src, canvas: null, aspect: 1, enabled: true, ready: false }));
+  let started = false, readyCount = 0;
+
+  function pickSprite() {
+    const e = [];
+    for (let i = 0; i < sprites.length; i++) if (sprites[i].enabled && sprites[i].ready) e.push(i);
+    return e.length ? e[(Math.random() * e.length) | 0] : 0;
+  }
+
+  // load + pre-render each cutout into a small offscreen canvas for fast drawing
+  sprites.forEach((s) => {
+    const im = new Image();
+    im.onload = () => {
+      s.aspect = im.naturalHeight / im.naturalWidth;
+      const max = 176;
+      let cw, ch;
+      if (s.aspect <= 1) { cw = max; ch = Math.max(1, Math.round(max * s.aspect)); }
+      else { ch = max; cw = Math.max(1, Math.round(max / s.aspect)); }
+      const off = document.createElement('canvas'); off.width = cw; off.height = ch;
+      off.getContext('2d').drawImage(im, 0, 0, cw, ch);
+      s.canvas = off; s.ready = true; readyCount++;
+      if (!started) start();
+      if (readyCount === sprites.length) for (const t of tonys) t.si = pickSprite(); // mix once all in
+    };
+    im.src = 'assets/opt/' + s.src;
+  });
+
+  // ── a Tony fired from a side cannon (left = -1, right = +1) ──
+  function fire() {
+    const side = (fireSide++ % 2 === 0) ? -1 : 1;
+    const size = rand(36, 72);
+    const vx = rand(13, 24);                            // strong inward shot, across the page
+    return {
+      size, si: pickSprite(),
+      x: side === -1 ? -size : W + size,
+      y: rand(H * 0.35, H * 0.9),
+      vx: side === -1 ? vx : -vx,
+      vy: -rand(5, 13),                                 // gentle upward arc
+      rot: rand(0, Math.PI * 2),
+      vrot: rand(-0.16, 0.16),
+      rest: 0,
+    };
+  }
+
+  function setCount(n) {
+    n = Math.max(0, Math.round(n));
+    while (tonys.length < n) tonys.push(fire());
+    if (tonys.length > n) tonys.length = n;
+  }
+
+  function step() {
+    const spd = P.speed / 10;
+    for (const t of tonys) {
+      t.vy += GRAVITY * spd;
+      t.x += t.vx * spd;
+      t.y += t.vy * spd;
+      t.rot += t.vrot * spd;
+      const r = t.size / 2;
+      // reflect only when moving INTO a wall, so the fly-in from off-screen isn't snapped back
+      if (t.x < r) { t.x = r; if (t.vx < 0) t.vx = -t.vx * 0.8; }
+      else if (t.x > W - r) { t.x = W - r; if (t.vx > 0) t.vx = -t.vx * 0.8; }
+      if (t.y < r) { t.y = r; if (t.vy < 0) t.vy = -t.vy * 0.7; }
+      if (t.y > H - r) {                                // floor
+        t.y = H - r;
+        if (t.vy > 0) t.vy = -t.vy * 0.7;
+        t.vx *= 0.96; t.vrot *= 0.9;
+      }
+      // recycle a Tony that has settled at the bottom — re-fire (with a fresh random face)
+      if (t.y > H - r - 2 && Math.abs(t.vy) < 1.5 && Math.abs(t.vx) < 0.4) {
+        if (++t.rest > 40) Object.assign(t, fire());
+      } else { t.rest = 0; }
+    }
+  }
+
+  function render() {
+    ctx.clearRect(0, 0, W, H);
+    for (const t of tonys) {
+      const s = sprites[t.si];
+      if (!s || !s.canvas) continue;
+      let dw, dh;                                        // normalise so each cutout fits a size×size box
+      if (s.aspect <= 1) { dw = t.size; dh = t.size * s.aspect; }
+      else { dh = t.size; dw = t.size / s.aspect; }
+      ctx.save();
+      ctx.translate(t.x, t.y);
+      ctx.rotate(t.rot);
+      ctx.drawImage(s.canvas, -dw / 2, -dh / 2, dw, dh);
+      ctx.restore();
+    }
+    step();
+    requestAnimationFrame(render);
+  }
+
+  function start() {
+    if (started) return; started = true;
+    resize();
+    if (W < 50 || H < 50) { W = Math.max(320, document.documentElement.clientWidth || 1200); H = Math.max(320, document.documentElement.clientHeight || 800); }
+    setCount(P.count);
+    render();
+  }
+  window.addEventListener('resize', resize);
+  if (window.ResizeObserver) new ResizeObserver(resize).observe(canvas);
+
+  // ── controls ──
+  const drawer = document.getElementById('ctrl-drawer');
+  document.getElementById('ctrl-tab').addEventListener('click', () => drawer.classList.toggle('open'));
+  function bindSlider(id, valId, onchange) {
+    const el = document.getElementById(id), disp = document.getElementById(valId);
+    el.addEventListener('input', () => { disp.textContent = el.value; onchange(+el.value); });
+  }
+  bindSlider('c-count', 'v-count', v => { P.count = v; setCount(v); });
+  bindSlider('c-speed', 'v-speed', v => { P.speed = v; });
+
+  // image picker — toggle which Tonys are in the mix (all on to start; keep at least one)
+  const picker = document.getElementById('img-picker');
+  sprites.forEach((s, i) => {
+    const b = document.createElement('button');
+    b.className = 'pick on'; b.type = 'button'; b.title = 'toggle this Tony';
+    const im = document.createElement('img'); im.src = 'assets/opt/' + s.src; im.alt = '';
+    b.appendChild(im);
+    b.addEventListener('click', () => {
+      if (s.enabled && sprites.filter(x => x.enabled).length <= 1) return; // never zero
+      s.enabled = !s.enabled;
+      b.classList.toggle('on', s.enabled);
+      if (!s.enabled) for (const t of tonys) if (t.si === i) t.si = pickSprite();
+    });
+    picker.appendChild(b);
+  });
+})();
+</script>
+</body>
+</html>
