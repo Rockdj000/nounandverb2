@@ -22,14 +22,11 @@
 
   /* ── controls drawer (reused from noise) ── */
   #ctrl-drawer {
-    position: fixed; bottom: 0; left: 0; right: 0; z-index: 50;
+    position: relative; z-index: 50;
     background: rgba(29,39,24,.92);
     backdrop-filter: blur(12px);
     border-top: 1px solid rgba(255,255,255,.08);
-    transform: translateY(calc(100% - 36px));
-    transition: transform .38s cubic-bezier(.2,.7,.2,1);
   }
-  #ctrl-drawer.open { transform: translateY(0); }
   #ctrl-tab {
     height: 36px; display: flex; align-items: center; justify-content: center;
     gap: 8px; cursor: pointer;
@@ -40,7 +37,8 @@
   #ctrl-tab:hover { color: #f0a6a8; }
   #ctrl-arrow { transition: transform .38s cubic-bezier(.2,.7,.2,1); display: inline-block; }
   #ctrl-drawer.open #ctrl-arrow { transform: rotate(180deg); }
-  #ctrl-body { padding: 16px clamp(20px,5vw,64px) 24px; max-width: 620px; display: flex; flex-direction: column; gap: 22px; }
+  #ctrl-body { padding: 0 clamp(20px,5vw,64px); max-width: 620px; display: flex; flex-direction: column; gap: 22px; max-height: 0; overflow: hidden; transition: max-height .42s cubic-bezier(.2,.7,.2,1), padding .42s cubic-bezier(.2,.7,.2,1); }
+  #ctrl-drawer.open #ctrl-body { max-height: 80vh; padding: 16px clamp(20px,5vw,64px) 24px; overflow-y: auto; }
   .ctrl-group { display: flex; flex-direction: column; gap: 14px; }
   .ctrl-group-label {
     font-family: 'Space Mono', monospace; font-size: 9px;
@@ -118,7 +116,7 @@
 <body>
 <canvas id="tony-canvas"></canvas>
 
-<div style="display:flex;flex-direction:column;min-height:100vh;padding-bottom:36px;">
+<div style="display:flex;flex-direction:column;min-height:100vh;">
 
   <!-- top bar -->
   <div style="display:flex;align-items:center;justify-content:space-between;gap:18px;padding:26px clamp(24px,7vw,84px);background:#2E3C24;border-bottom:1px solid #44523a;">
@@ -141,35 +139,35 @@
 
   <div style="flex:1;"></div>
 
+  <!-- controls (sits above the footer) -->
+  <div id="ctrl-drawer">
+    <div id="ctrl-tab"><span>controls</span><span id="ctrl-arrow">↑</span></div>
+    <div id="ctrl-body">
+      <div class="ctrl-group">
+        <div class="ctrl-group-label">Confetti</div>
+        <div class="ctrl-row">
+          <span class="ctrl-label">Tonys</span>
+          <input type="range" id="c-count" min="1" max="2000" value="1050">
+          <span class="ctrl-val" id="v-count">1050</span>
+        </div>
+        <div class="ctrl-row">
+          <span class="ctrl-label">Speed</span>
+          <input type="range" id="c-speed" min="1" max="30" value="5">
+          <span class="ctrl-val" id="v-speed">5</span>
+        </div>
+      </div>
+      <div class="ctrl-group">
+        <div class="ctrl-group-label">Which Tonys</div>
+        <div class="pick-row" id="img-picker"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- footer -->
-  <div style="margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;padding:22px clamp(24px,7vw,84px);background:#2E3C24;border-top:1px solid #44523a;font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:1.5px;text-transform:uppercase;color:#9aa890;">
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;padding:22px clamp(24px,7vw,84px);background:#2E3C24;border-top:1px solid #44523a;font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:1.5px;text-transform:uppercase;color:#9aa890;">
     <span>verbandnoun<span style="color:#EC8E90;">.io</span></span>
   </div>
 
-</div>
-
-<!-- controls -->
-<div id="ctrl-drawer">
-  <div id="ctrl-tab"><span>controls</span><span id="ctrl-arrow">↑</span></div>
-  <div id="ctrl-body">
-    <div class="ctrl-group">
-      <div class="ctrl-group-label">Confetti</div>
-      <div class="ctrl-row">
-        <span class="ctrl-label">Tonys</span>
-        <input type="range" id="c-count" min="1" max="2000" value="1050">
-        <span class="ctrl-val" id="v-count">1050</span>
-      </div>
-      <div class="ctrl-row">
-        <span class="ctrl-label">Speed</span>
-        <input type="range" id="c-speed" min="1" max="30" value="5">
-        <span class="ctrl-val" id="v-speed">5</span>
-      </div>
-    </div>
-    <div class="ctrl-group">
-      <div class="ctrl-group-label">Which Tonys</div>
-      <div class="pick-row" id="img-picker"></div>
-    </div>
-  </div>
 </div>
 
 <script>

@@ -16,37 +16,38 @@
   ::selection { background: #EC8E90; color: #2E3C24; }
   .back-link { font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: 1px; text-transform: lowercase; color: #8a8578; text-decoration: none; transition: color .22s; }
   .back-link:hover { color: #C45F61; }
-  #noise-canvas { display: block; width: 100%; cursor: crosshair; touch-action: none; }
+  /* translucent interactive surface — fills the area between header and footer */
+  #noise-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; cursor: crosshair; touch-action: none; }
 
-  /* ── controls drawer ── */
+  /* ── controls drawer (in flow, sits above the footer) ── */
   #ctrl-drawer {
-    position: fixed; bottom: 0; left: 0; right: 0; z-index: 50;
+    position: relative; z-index: 50;
     background: rgba(29,39,24,.92);
     backdrop-filter: blur(12px);
     border-top: 1px solid rgba(255,255,255,.08);
-    transform: translateY(calc(100% - 36px));
-    transition: transform .38s cubic-bezier(.2,.7,.2,1);
   }
-  #ctrl-drawer.open { transform: translateY(0); }
 
+  /* settings bar — matches the Tonys style/size */
   #ctrl-tab {
     height: 36px; display: flex; align-items: center; justify-content: center;
     gap: 8px; cursor: pointer;
-    font-family: 'Space Mono', monospace; font-size: 10px;
-    letter-spacing: 2px; text-transform: uppercase; color: #8a8578;
-    user-select: none;
-    transition: color .2s;
+    font-family: 'Space Mono', monospace; font-size: 12.5px; font-weight: 700;
+    letter-spacing: 2.5px; text-transform: uppercase; color: #EC8E90;
+    user-select: none; transition: color .2s;
   }
-  #ctrl-tab:hover { color: #EC8E90; }
+  #ctrl-tab:hover { color: #f0a6a8; }
   #ctrl-arrow { transition: transform .38s cubic-bezier(.2,.7,.2,1); display: inline-block; }
   #ctrl-drawer.open #ctrl-arrow { transform: rotate(180deg); }
 
   #ctrl-body {
-    padding: 16px clamp(20px,5vw,64px) 24px;
+    padding: 0 clamp(20px,5vw,64px);
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 20px 48px;
+    max-height: 0; overflow: hidden;
+    transition: max-height .42s cubic-bezier(.2,.7,.2,1), padding .42s cubic-bezier(.2,.7,.2,1);
   }
+  #ctrl-drawer.open #ctrl-body { max-height: 80vh; padding: 16px clamp(20px,5vw,64px) 24px; overflow-y: auto; }
 
   .ctrl-group { display: flex; flex-direction: column; gap: 14px; }
   .ctrl-group-label {
@@ -107,105 +108,91 @@
     <a href="index.html" style="font-family:'Instrument Serif',serif;font-size:22px;line-height:1;color:#EFEBE6;text-decoration:none;"><span style="font-style:italic;">Verb</span> <span style="color:#EC8E90;">and</span> Noun</a>
   </div>
 
-  <!-- header -->
-  <div style="padding:56px clamp(24px,7vw,84px) 40px;">
-    <h1 style="font-family:'Instrument Serif',serif;font-weight:400;font-size:clamp(64px,13vw,160px);line-height:.84;letter-spacing:-1px;color:#2E3C24;">Noise</h1>
-    <p id="noise-hint" style="font-family:'Hanken Grotesk',sans-serif;font-weight:400;font-size:20px;color:#8a8578;margin-top:20px;line-height:1.5;transition:opacity .4s;">Move the cursor. Listen.</p>
-  </div>
+  <!-- interactive surface: translucent canvas fills the area; text rides on top -->
+  <main style="position:relative;flex:1;">
+    <canvas id="noise-canvas"></canvas>
+    <div style="position:relative;z-index:2;padding:56px clamp(24px,7vw,84px) 40px;pointer-events:none;">
+      <h1 style="font-family:'Instrument Serif',serif;font-weight:400;font-size:clamp(64px,13vw,160px);line-height:.84;letter-spacing:-1px;color:#2E3C24;">Noise</h1>
+      <p id="noise-hint" style="font-family:'Hanken Grotesk',sans-serif;font-weight:400;font-size:20px;color:#8a8578;margin-top:20px;line-height:1.5;transition:opacity .4s;">Move the cursor. Listen.</p>
+    </div>
+  </main>
 
-  <!-- canvas -->
-  <div style="flex:1;padding:0 clamp(24px,7vw,84px) 40px;">
-    <div style="border-radius:4px;overflow:hidden;border:1px solid #283420;">
-      <canvas id="noise-canvas"></canvas>
+  <!-- controls drawer (sits above the footer) -->
+  <div id="ctrl-drawer">
+    <div id="ctrl-tab">
+      <span>settings</span>
+      <span id="ctrl-arrow">↑</span>
+    </div>
+    <div id="ctrl-body">
+
+      <!-- audio -->
+      <div class="ctrl-group">
+        <div class="ctrl-group-label">Audio</div>
+
+        <div class="ctrl-row">
+          <span class="ctrl-label">Volume</span>
+          <input type="range" id="c-vol" min="0" max="100" value="60">
+          <span class="ctrl-val" id="v-vol">60</span>
+        </div>
+
+        <div class="ctrl-row">
+          <span class="ctrl-label">Reverb</span>
+          <input type="range" id="c-rev" min="0" max="100" value="30">
+          <span class="ctrl-val" id="v-rev">30</span>
+        </div>
+
+        <div class="ctrl-row">
+          <span class="ctrl-label">Wave</span>
+          <div class="ctrl-toggles">
+            <button class="ctrl-btn active" data-group="wave" data-val="sine">sine</button>
+            <button class="ctrl-btn" data-group="wave" data-val="triangle">tri</button>
+            <button class="ctrl-btn" data-group="wave" data-val="sawtooth">saw</button>
+            <button class="ctrl-btn" data-group="wave" data-val="square">sqr</button>
+          </div>
+        </div>
+
+        <div class="ctrl-row">
+          <span class="ctrl-label">Scale</span>
+          <div class="ctrl-toggles">
+            <button class="ctrl-btn active" data-group="scale" data-val="penta">penta</button>
+            <button class="ctrl-btn" data-group="scale" data-val="major">major</button>
+            <button class="ctrl-btn" data-group="scale" data-val="minor">minor</button>
+            <button class="ctrl-btn" data-group="scale" data-val="chrom">chrom</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- visual -->
+      <div class="ctrl-group">
+        <div class="ctrl-group-label">Visual</div>
+
+        <div class="ctrl-row">
+          <span class="ctrl-label">Density</span>
+          <input type="range" id="c-den" min="12" max="48" value="28">
+          <span class="ctrl-val" id="v-den">28</span>
+        </div>
+
+        <div class="ctrl-row">
+          <span class="ctrl-label">Radius</span>
+          <input type="range" id="c-rad" min="40" max="280" value="130">
+          <span class="ctrl-val" id="v-rad">130</span>
+        </div>
+
+        <div class="ctrl-row">
+          <span class="ctrl-label">Speed</span>
+          <input type="range" id="c-spd" min="2" max="30" value="12">
+          <span class="ctrl-val" id="v-spd">12</span>
+        </div>
+      </div>
+
     </div>
   </div>
 
   <!-- footer -->
-  <div style="margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;padding:22px clamp(24px,7vw,84px);background:#2E3C24;border-top:1px solid #44523a;font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:1.5px;text-transform:uppercase;color:#9aa890;">
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;padding:22px clamp(24px,7vw,84px);background:#2E3C24;border-top:1px solid #44523a;font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:1.5px;text-transform:uppercase;color:#9aa890;">
     <span>verbandnoun<span style="color:#EC8E90;">.io</span></span>
   </div>
 
-</div>
-
-<!-- controls drawer -->
-<div id="ctrl-drawer">
-  <div id="ctrl-tab">
-    <span>settings</span>
-    <span id="ctrl-arrow">↑</span>
-  </div>
-  <div id="ctrl-body">
-
-    <!-- audio -->
-    <div class="ctrl-group">
-      <div class="ctrl-group-label">Audio</div>
-
-      <div class="ctrl-row">
-        <span class="ctrl-label">Volume</span>
-        <input type="range" id="c-vol" min="0" max="100" value="60">
-        <span class="ctrl-val" id="v-vol">60</span>
-      </div>
-
-      <div class="ctrl-row">
-        <span class="ctrl-label">Reverb</span>
-        <input type="range" id="c-rev" min="0" max="100" value="30">
-        <span class="ctrl-val" id="v-rev">30</span>
-      </div>
-
-      <div class="ctrl-row">
-        <span class="ctrl-label">Wave</span>
-        <div class="ctrl-toggles">
-          <button class="ctrl-btn active" data-group="wave" data-val="sine">sine</button>
-          <button class="ctrl-btn" data-group="wave" data-val="triangle">tri</button>
-          <button class="ctrl-btn" data-group="wave" data-val="sawtooth">saw</button>
-          <button class="ctrl-btn" data-group="wave" data-val="square">sqr</button>
-        </div>
-      </div>
-
-      <div class="ctrl-row">
-        <span class="ctrl-label">Scale</span>
-        <div class="ctrl-toggles">
-          <button class="ctrl-btn active" data-group="scale" data-val="penta">penta</button>
-          <button class="ctrl-btn" data-group="scale" data-val="major">major</button>
-          <button class="ctrl-btn" data-group="scale" data-val="minor">minor</button>
-          <button class="ctrl-btn" data-group="scale" data-val="chrom">chrom</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- visual -->
-    <div class="ctrl-group">
-      <div class="ctrl-group-label">Visual</div>
-
-      <div class="ctrl-row">
-        <span class="ctrl-label">Density</span>
-        <input type="range" id="c-den" min="12" max="48" value="28">
-        <span class="ctrl-val" id="v-den">28</span>
-      </div>
-
-      <div class="ctrl-row">
-        <span class="ctrl-label">Radius</span>
-        <input type="range" id="c-rad" min="40" max="280" value="130">
-        <span class="ctrl-val" id="v-rad">130</span>
-      </div>
-
-      <div class="ctrl-row">
-        <span class="ctrl-label">Speed</span>
-        <input type="range" id="c-spd" min="2" max="30" value="12">
-        <span class="ctrl-val" id="v-spd">12</span>
-      </div>
-
-      <div class="ctrl-row">
-        <span class="ctrl-label">Color</span>
-        <div class="ctrl-toggles">
-          <button class="ctrl-btn active" data-group="color" data-val="amber">amber</button>
-          <button class="ctrl-btn" data-group="color" data-val="blue">blue</button>
-          <button class="ctrl-btn" data-group="color" data-val="white">white</button>
-          <button class="ctrl-btn" data-group="color" data-val="acid">acid</button>
-        </div>
-      </div>
-    </div>
-
-  </div>
 </div>
 
 <script>
@@ -219,7 +206,6 @@
     spacing: 28,
     radius: 130,
     speed: 0.12,
-    color: 'amber',
   };
 
   const SCALES = {
@@ -229,23 +215,33 @@
     chrom: [130.81,138.59,146.83,155.56,164.81,174.61,185,196,207.65,220,233.08,246.94,261.63,277.18,293.66,311.13,329.63,349.23,369.99,392,415.30,440,466.16,493.88,523.25],
   };
 
-  const COLORS = {
-    amber: { bg:'#1a1410', dotLo:[26,20,16], dotHi:[216,127,60], glowA:'rgba(216,167,110,', glowB:'rgba(185,104,59,' },
-    blue:  { bg:'#0d1420', dotLo:[13,20,32], dotHi:[80,160,255], glowA:'rgba(80,160,255,',  glowB:'rgba(40,100,220,' },
-    white: { bg:'#111111', dotLo:[40,40,40], dotHi:[240,235,225], glowA:'rgba(240,235,225,', glowB:'rgba(200,195,185,' },
-    acid:  { bg:'#0d1a0d', dotLo:[13,26,13], dotHi:[120,255,60], glowA:'rgba(120,255,60,',  glowB:'rgba(60,200,20,' },
-  };
+  // brand-color field — the surface is transparent (page shows through); dots
+  // glow these accents only on interaction, and the active hue shifts across the
+  // palette as the pointer moves around the page.
+  const BRAND = [
+    [236,142,144], // coral
+    [196, 95, 97], // deep coral
+    [111,124, 47], // moss
+    [ 63, 90,115], // storm
+    [ 86, 74, 84], // plum
+  ];
+  function brandAt(t) {
+    const n = BRAND.length;
+    const x = ((((t % 1) + 1) % 1)) * n;
+    const i = Math.floor(x) % n, f = x - Math.floor(x);
+    const a = BRAND[i], b = BRAND[(i + 1) % n];
+    return [a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f, a[2] + (b[2] - a[2]) * f];
+  }
 
   // ── canvas ──
   const canvas = document.getElementById('noise-canvas');
   const ctx = canvas.getContext('2d');
-  const hint = document.getElementById('noise-hint');
   let W, H, dots = [];
 
   function resize() {
     const rect = canvas.parentElement.getBoundingClientRect();
     W = Math.floor(rect.width);
-    H = Math.max(Math.floor(window.innerHeight * 0.55), 320);
+    H = Math.max(Math.floor(rect.height), 240);
     const dpr = window.devicePixelRatio || 1;
     canvas.width = W * dpr; canvas.height = H * dpr;   // backing store at device resolution
     canvas.style.height = H + 'px';                    // CSS height (width stays 100% of parent)
@@ -270,7 +266,7 @@
 
   function firstInteraction() {
     if (hasInteracted) return;
-    hasInteracted = true; hint.style.opacity = '0'; startAudio();
+    hasInteracted = true; startAudio();
   }
   canvas.addEventListener('pointermove', e => {
     const r = canvas.getBoundingClientRect();
@@ -289,26 +285,33 @@
   });
 
   // ── render ──
+  // hue position for a point — its place across the surface, nudged by the
+  // pointer so the whole field shifts brand colors as you move around.
+  function huePos(x, y) {
+    const ct = (mx >= 0 ? mx / W : 0) + (my >= 0 ? my / H : 0) * 0.5;
+    return x / W * 0.55 + y / H * 0.25 + ct * 0.5;
+  }
+
   function render() {
-    const C = COLORS[P.color];
-    ctx.fillStyle = C.bg;
-    ctx.fillRect(0, 0, W, H);
+    ctx.clearRect(0, 0, W, H);  // transparent surface — the page shows through
 
     for (let i = ripples.length - 1; i >= 0; i--) {
       const rp = ripples[i]; rp.t += 0.018;
       const alpha = Math.max(0, 1 - rp.t * 1.1);
+      const [r, g, b] = brandAt(huePos(rp.x, rp.y));
       ctx.beginPath();
       ctx.arc(rp.x, rp.y, rp.t * 220, 0, Math.PI * 2);
-      ctx.strokeStyle = C.glowA + (alpha * 0.35) + ')';
+      ctx.strokeStyle = `rgba(${r|0},${g|0},${b|0},${alpha * 0.4})`;
       ctx.lineWidth = 1.5; ctx.stroke();
       if (rp.t > 1) ripples.splice(i, 1);
     }
 
     if (mx >= 0 && my >= 0) {
-      const g = ctx.createRadialGradient(mx, my, 0, mx, my, P.radius * 1.4);
-      g.addColorStop(0, C.glowA + '0.13)');
-      g.addColorStop(1, C.glowA + '0)');
-      ctx.fillStyle = g;
+      const [r, g, b] = brandAt(huePos(mx, my));
+      const grad = ctx.createRadialGradient(mx, my, 0, mx, my, P.radius * 1.4);
+      grad.addColorStop(0, `rgba(${r|0},${g|0},${b|0},0.16)`);
+      grad.addColorStop(1, `rgba(${r|0},${g|0},${b|0},0)`);
+      ctx.fillStyle = grad;
       ctx.beginPath(); ctx.arc(mx, my, P.radius * 1.4, 0, Math.PI * 2); ctx.fill();
     }
 
@@ -317,21 +320,19 @@
       const dist = Math.sqrt(dx * dx + dy * dy);
       const target = dist < P.radius ? Math.pow(1 - dist / P.radius, 1.6) : 0;
       d.glow += (target - d.glow) * P.speed;
-      const g = d.glow, r = 1.5 + g * 4;
+      const g = d.glow;
+      if (g <= 0.01) continue;  // invisible at rest
 
-      if (g > 0.01) {
-        const halo = ctx.createRadialGradient(d.x, d.y, 0, d.x, d.y, r * 5);
-        const col = g > 0.5 ? C.glowB + (g * 0.5) + ')' : C.glowA + (g * 0.45) + ')';
-        halo.addColorStop(0, col); halo.addColorStop(1, 'rgba(0,0,0,0)');
-        ctx.fillStyle = halo;
-        ctx.beginPath(); ctx.arc(d.x, d.y, r * 5, 0, Math.PI * 2); ctx.fill();
-      }
+      const r = 1.5 + g * 4;
+      const [cr, cg, cb] = brandAt(huePos(d.x, d.y));
 
-      const lo = C.dotLo, hi = C.dotHi;
-      const rc = Math.round(lo[0] + g * (hi[0] - lo[0]));
-      const gc2 = Math.round(lo[1] + g * (hi[1] - lo[1]));
-      const bc = Math.round(lo[2] + g * (hi[2] - lo[2]));
-      ctx.fillStyle = `rgba(${rc},${gc2},${bc},${0.18 + g * 0.82})`;
+      const halo = ctx.createRadialGradient(d.x, d.y, 0, d.x, d.y, r * 5);
+      halo.addColorStop(0, `rgba(${cr|0},${cg|0},${cb|0},${g * 0.5})`);
+      halo.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = halo;
+      ctx.beginPath(); ctx.arc(d.x, d.y, r * 5, 0, Math.PI * 2); ctx.fill();
+
+      ctx.fillStyle = `rgba(${cr|0},${cg|0},${cb|0},${g * 0.95})`;
       ctx.beginPath(); ctx.arc(d.x, d.y, r, 0, Math.PI * 2); ctx.fill();
     }
 
@@ -397,7 +398,7 @@
 
   // ── controls drawer ──
   const drawer = document.getElementById('ctrl-drawer');
-  document.getElementById('ctrl-tab').addEventListener('click', () => drawer.classList.toggle('open'));
+  document.getElementById('ctrl-tab').addEventListener('click', () => { drawer.classList.toggle('open'); resize(); });
 
   function bindSlider(id, valId, onchange) {
     const el = document.getElementById(id);
@@ -421,7 +422,6 @@
       btn.classList.add('active');
       if (group === 'wave') { P.wave = val; if (osc) osc.type = val; }
       if (group === 'scale') { P.scale = val; }
-      if (group === 'color') { P.color = val; }
     });
   });
 
