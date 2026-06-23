@@ -40,7 +40,9 @@
   .back-link:hover { color: var(--accent); }
   .mono { font-family: 'Space Mono', monospace; }
   .label { font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); }
-  .topbar { display:flex; align-items:center; justify-content:space-between; gap:14px; padding:24px clamp(20px,7vw,84px) 16px; border-bottom:1px solid var(--line); }
+  .topbar { display:flex; align-items:center; justify-content:space-between; gap:14px; padding:24px clamp(20px,7vw,84px) 16px; background:#2E3C24; border-bottom:1px solid #44523a; }
+  .topbar .icon-btn { color:#cdd8c4; border-color:#5b6a4f; }
+  .topbar .icon-btn:hover { color:#EC8E90; border-color:#EC8E90; }
   .icon-btn { background:none; border:1px solid var(--field-bd); color:var(--muted); border-radius:4px; padding:5px 10px; cursor:pointer; font-family:'Space Mono',monospace; font-size:11px; letter-spacing:.5px; transition:color .2s, border-color .2s; }
   .icon-btn:hover { color:var(--accent); border-color:var(--accent); }
 
@@ -116,17 +118,17 @@
 </head>
 <body>
   <div class="topbar">
-    <a href="index.html" class="back-link">← verbandnoun.io</a>
+    <a href="index.html" style="font-family:'Instrument Serif',serif;font-size:22px;line-height:1;color:#EFEBE6;text-decoration:none;"><span style="font-style:italic;">Verb</span> <span style="color:#EC8E90;">and</span> Noun</a>
     <div style="display:flex;align-items:center;gap:12px;">
       <button id="theme-btn" class="icon-btn" title="Toggle dark mode">◐</button>
-      <span class="mono" style="font-size:11px;letter-spacing:1px;color:var(--muted);text-transform:uppercase;">04 · Invoice</span>
+      <span class="mono" style="font-size:11px;letter-spacing:1px;color:#9aa890;text-transform:uppercase;">04 · Invoice</span>
     </div>
   </div>
 
   <div id="app" class="wrap"></div>
 
-  <div style="display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;padding:22px clamp(20px,7vw,84px);border-top:1px solid var(--line);font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);">
-    <span>verbandnoun.io</span>
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;padding:22px clamp(20px,7vw,84px);background:#2E3C24;border-top:1px solid #44523a;font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:1.5px;text-transform:uppercase;color:#9aa890;">
+    <span>verbandnoun<span style="color:#EC8E90;">.io</span></span>
     <span id="user-bar"></span>
   </div>
 <div id="toast" class="toast"></div>
