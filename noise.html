@@ -371,6 +371,9 @@
 
   function startAudio() {
     if (started) return;
+    // iOS: opt into the 'playback' audio session so the ringer/mute switch
+    // doesn't silence us, and volume buttons control it (Safari 16.4+).
+    try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) {}
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     if (audioCtx.state === 'suspended' && audioCtx.resume) audioCtx.resume(); // iOS/mobile: unlock within the gesture
 
