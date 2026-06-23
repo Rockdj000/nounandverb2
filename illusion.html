@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="referrer" content="strict-origin-when-cross-origin">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; media-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
 <title>Illusion of Choice · verbandnoun.io</title>
 <link rel="icon" href="icon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -143,10 +143,33 @@
   // Because one pick advances exactly ROOM_DEPTH and every row is identical,
   // the loop is seamless.
   const NEARK = 2.5, AHEAD0 = 2.5, ROOM_DEPTH = 5.0; // depth units
-  const WALK_MS = 3000;
+  const WALK_MS = 3000, CHEER_MS = 1000, ROOMS_PER_LEVEL = 10;
+  const backOut = p => { const c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow(p - 1, 3) + c1 * Math.pow(p - 1, 2); };
 
-  let phase = 'idle', chosen = -1, hovered = -1, score = 0, hasPicked = false;
-  let travel = 0, t0 = 0, legPhase = 0;
+  let phase = 'idle', chosen = -1, hovered = -1, rooms = 0, level = 0, hasPicked = false;
+  let travel = 0, t0 = 0, legPhase = 0, gNow = 0;
+  let cheerStart = 0, cheerIdx = -1, danceStyle = 0;
+
+  // ── reward pop-ups + excited voice clips (ElevenLabs) ──
+  const CHEERS = [
+    { text: 'Yes!',          file: 'assets/sounds/cheer-yes.m4a' },
+    { text: 'You did it!',   file: 'assets/sounds/cheer-you-did-it.m4a' },
+    { text: 'Wow!',          file: 'assets/sounds/cheer-wow.m4a' },
+    { text: 'Amazing!',      file: 'assets/sounds/cheer-amazing.m4a' },
+    { text: 'Incredible!',   file: 'assets/sounds/cheer-incredible.m4a' },
+    { text: 'So good!',      file: 'assets/sounds/cheer-so-good.m4a' },
+    { text: 'Yes yes yes!',  file: 'assets/sounds/cheer-yes-yes-yes.m4a' },
+    { text: 'Brilliant!',    file: 'assets/sounds/cheer-brilliant.m4a' },
+    { text: "You're on fire!", file: 'assets/sounds/cheer-on-fire.m4a' },
+    { text: 'Keep going!',   file: 'assets/sounds/cheer-keep-going.m4a' },
+  ];
+  const cheerAudio = CHEERS.map(c => { const a = new Audio(c.file); a.preload = 'auto'; return a; });
+  function playCheer(i) {
+    const a = cheerAudio[i]; if (!a) return;
+    const v = document.getElementById('audio-vol');
+    a.volume = clamp((+v.value) / 100, 0, 1);
+    a.currentTime = 0; a.play().catch(() => {});
+  }
 
   function metrics() {
     const HORIZON = H * 0.30, GROUND = H * 0.80;
@@ -178,11 +201,28 @@
       const u = clamp((now - t0) / WALK_MS, 0, 1);
       travel = u * ROOM_DEPTH;
       legPhase = now * 0.014;
-      if (u >= 1) {                         // seamless arrival: next row is now the current row
-        phase = 'idle'; travel = 0; chosen = -1; score++;
-      }
+      if (u >= 1) arrive(now);              // seamless arrival: next row is now the current row
+    } else if (phase === 'cheer') {
+      travel = 0;
+      if (now - cheerStart >= CHEER_MS) { phase = 'idle'; cheerIdx = -1; }
     } else {
       travel = 0; legPhase = 0;
+    }
+  }
+
+  function arrive(now) {
+    travel = 0; chosen = -1;
+    rooms++;
+    let leveled = false;
+    if (rooms > ROOMS_PER_LEVEL) { rooms = 0; level++; leveled = true; } // 10 → 0, level up
+    // reward: always on a level-up, otherwise now and then, to keep it lively
+    if (leveled || Math.random() < 0.34) {
+      phase = 'cheer'; cheerStart = now;
+      cheerIdx = (Math.random() * CHEERS.length) | 0;
+      danceStyle = (Math.random() * 3) | 0;
+      playCheer(cheerIdx);
+    } else {
+      phase = 'idle';
     }
   }
 
@@ -219,40 +259,112 @@
     }
   }
 
-  // ── stick figure, seen from behind — fixed depth/scale; only x moves ──
-  function drawFigure(fxp, lw) {
+  // ── stick figure, seen from behind — fixed depth/scale; only x moves.
+  //    mode: 'idle' | 'walk' | 'cheer' (a short victory dance) ──
+  function drawFigure(fxp, lw, mode) {
     const m = metrics();
     ctx.save();
     ctx.globalAlpha = 1; ctx.lineWidth = lw;
-    const feetY = m.GROUND, Hf = m.figH;
-    const rh = Hf * 0.12;
+    const Hf = m.figH, rh = Hf * 0.12;
+    const armLen = Hf * 0.32, legLen = Hf * 0.40;
+
+    let yOff = 0, hipX = 0;
+    let hL, hR, fL, fR; // hand {x,dy from shoulder} and foot x
+
+    if (mode === 'walk') {
+      const sw = Math.sin(legPhase);
+      hL = { x: fxp - armLen * 0.20 - sw * armLen * 0.55, dy: armLen };
+      hR = { x: fxp + armLen * 0.20 + sw * armLen * 0.55, dy: armLen };
+      fL = fxp - legLen * 0.16 + sw * legLen * 0.34;
+      fR = fxp + legLen * 0.16 - sw * legLen * 0.34;
+    } else if (mode === 'cheer') {
+      const dt = (gNow - cheerStart) / 1000;
+      if (danceStyle === 0) {                          // fist pump
+        const pump = Math.abs(Math.sin(dt * 9));
+        yOff = -pump * Hf * 0.05;
+        hL = { x: fxp - armLen * 0.42, dy: -armLen * (0.45 + 0.45 * pump) };
+        hR = { x: fxp + armLen * 0.42, dy: -armLen * (0.45 + 0.45 * pump) };
+        fL = fxp - legLen * 0.18; fR = fxp + legLen * 0.18;
+      } else if (danceStyle === 1) {                   // twerk / wiggle
+        hipX = Math.sin(dt * 8) * Hf * 0.09;
+        yOff = (Math.sin(dt * 16) * 0.5 + 0.5) * Hf * 0.05;
+        hL = { x: fxp - armLen * 0.75, dy: armLen * 0.25 };
+        hR = { x: fxp + armLen * 0.75, dy: armLen * 0.25 };
+        fL = fxp - legLen * 0.24; fR = fxp + legLen * 0.24;
+      } else {                                         // jump cheer (arms up in a V)
+        const hop = Math.max(0, Math.sin(dt * 6));
+        yOff = -hop * Hf * 0.16;
+        hL = { x: fxp - armLen * 0.62, dy: -armLen * 0.78 };
+        hR = { x: fxp + armLen * 0.62, dy: -armLen * 0.78 };
+        fL = fxp - legLen * 0.10; fR = fxp + legLen * 0.10;
+      }
+    } else {                                           // idle
+      hL = { x: fxp - armLen * 0.20, dy: armLen };
+      hR = { x: fxp + armLen * 0.20, dy: armLen };
+      fL = fxp - legLen * 0.16; fR = fxp + legLen * 0.16;
+    }
+
+    const feetY = m.GROUND + yOff;
     const headCy = feetY - Hf + rh;
     const shoulder = headCy + rh * 1.5 + Hf * 0.03;
     const hip = feetY - Hf * 0.40;
-    const legLen = feetY - hip, armLen = Hf * 0.32;
-    const swing = phase === 'walk' ? Math.sin(legPhase) : 0; // continuous walk cycle while moving
+    const bodyX = fxp + hipX;
 
-    sLine(fxp, shoulder, fxp, hip, 7);        // spine
-    sCircle(fxp, headCy, rh, 8);              // head (back)
-    const aS = armLen * 0.20, aA = armLen * 0.55;
-    sLine(fxp, shoulder, fxp - aS - swing * aA, shoulder + armLen, 9);
-    sLine(fxp, shoulder, fxp + aS + swing * aA, shoulder + armLen, 10);
-    const lS = legLen * 0.16, lA = legLen * 0.34;
-    sLine(fxp, hip, fxp - lS + swing * lA, feetY, 11);
-    sLine(fxp, hip, fxp + lS - swing * lA, feetY, 12);
+    sLine(fxp, shoulder, bodyX, hip, 7);                 // spine
+    sCircle(fxp, headCy, rh, 8);                         // head (back)
+    sLine(fxp, shoulder, hL.x, shoulder + hL.dy, 9);     // arms
+    sLine(fxp, shoulder, hR.x, shoulder + hR.dy, 10);
+    sLine(bodyX, hip, fL + hipX, feetY, 11);             // legs
+    sLine(bodyX, hip, fR + hipX, feetY, 12);
     ctx.restore();
   }
 
-  function drawScore() {
+  function drawCounters() {
     ctx.save();
     ctx.globalAlpha = 1; ctx.fillStyle = INK;
-    const pad = clamp(W * 0.035, 16, 54);
-    const fs = clamp(H * 0.026, 11, 18);
+    const padX = clamp(W * 0.07, 24, 84);   // line up with the header / logo
+    const padY = clamp(H * 0.04, 16, 40);
+    const fs = clamp(H * 0.024, 12, 17);
     ctx.textBaseline = 'top'; ctx.textAlign = 'left';
     ctx.font = `700 ${fs}px 'Space Mono', monospace`;
-    ctx.fillText('ROOMS', pad, pad);
-    ctx.font = `700 ${Math.round(fs * 2.1)}px 'Space Mono', monospace`;
-    ctx.fillText(String(score), pad, pad + fs * 1.25);
+    ctx.fillText('LEVEL ' + level, padX, padY);
+    ctx.fillText('ROOMS ' + rooms, padX, padY + fs * 1.5);
+    ctx.restore();
+  }
+
+  // reward pop-up: a hand-drawn shout in the same ink, with little spark lines
+  function drawPopup() {
+    if (phase !== 'cheer' || cheerIdx < 0) return;
+    const t = gNow - cheerStart, dur = CHEER_MS;
+    const inMs = 160, outMs = Math.min(340, dur * 0.4);
+    let scale = 1, alpha = 1, rise = 0;
+    if (t < inMs) { const p = t / inMs; scale = backOut(p); alpha = clamp(p * 1.7, 0, 1); }
+    else if (t > dur - outMs) { const p = (t - (dur - outMs)) / outMs; alpha = 1 - p; rise = p; }
+    const dTop = projectDoor(0, AHEAD0).y;             // top edge of the doors
+    const txt = CHEERS[cheerIdx].text;
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.translate(W / 2, dTop - clamp(H * 0.11, 50, 104) - rise * H * 0.05); // entirely above the doors
+    ctx.scale(scale, scale);
+    ctx.rotate(-0.02);
+    // size the word to sit comfortably across the page
+    let fs = clamp(H * 0.062, 26, 58);
+    ctx.font = `800 ${fs}px 'Hanken Grotesk', sans-serif`;
+    const maxW = W * 0.82;
+    let tw = ctx.measureText(txt).width;
+    if (tw > maxW) { fs *= maxW / tw; ctx.font = `800 ${fs}px 'Hanken Grotesk', sans-serif`; tw = ctx.measureText(txt).width; }
+    // spark marks radiate from just outside the word — they never cross the letters
+    const rx = tw / 2 + fs * 0.55, ry = fs * 0.95;
+    ctx.strokeStyle = INK; ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+    ctx.lineWidth = clamp(W * 0.0042, 1.6, 2.8);
+    for (let i = 0; i < 8; i++) {
+      const a = i / 8 * Math.PI * 2 + 0.4, ex = Math.cos(a), ey = Math.sin(a);
+      sLine(ex * rx, ey * ry, ex * (rx + fs * 0.5), ey * (ry + fs * 0.45), 50 + i);
+    }
+    // solid, legible shout in the same ink
+    ctx.fillStyle = INK;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(txt, 0, 0);
     ctx.restore();
   }
 
@@ -279,10 +391,11 @@
     }
     const vis = inst.filter(it => it.a > -1.3 && it.a < 6.8).sort((A, B) => B.a - A.a); // far → near
 
+    const figMode = phase === 'cheer' ? 'cheer' : (phase === 'walk' ? 'walk' : 'idle');
     const fx = figureX();
     let figDrawn = false;
     for (const it of vis) {
-      if (!figDrawn && it.a < 0) { drawFigure(fx, lw); figDrawn = true; } // figure sits at the a=0 plane
+      if (!figDrawn && it.a < 0) { drawFigure(fx, lw, figMode); figDrawn = true; } // figure sits at the a=0 plane
       const r = projectDoor(it.slot, it.a);
       const seed = 100 + (it.row * 3 + (it.slot + 1)) * 37;
       const isChosen = phase === 'walk' && it.row === 0 && it.slot === (chosen - 1);
@@ -293,14 +406,15 @@
       ctx.globalAlpha = alpha;
       drawDoor(r, seed, openAmt, hov, lw * clamp(r.p, 0.5, 1.25));
     }
-    if (!figDrawn) drawFigure(fx, lw);
+    if (!figDrawn) drawFigure(fx, lw, figMode);
     ctx.globalAlpha = 1;
 
-    drawScore();
+    drawPopup();
+    drawCounters();
     if (phase === 'idle' && !hasPicked) drawPrompt();
   }
 
-  function frame(now) { requestAnimationFrame(frame); update(now); draw(); }
+  function frame(now) { requestAnimationFrame(frame); gNow = now; update(now); draw(); }
 
   // ── input (idle only): hit-test the current row of doors ──
   function hit(px, py) {
