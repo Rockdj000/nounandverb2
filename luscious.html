@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; media-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+<title>Luscious · verbandnoun.io</title>
+<link rel="icon" href="icon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Hanken+Grotesk:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #EFEBE6; font-family: 'Hanken Grotesk', sans-serif; color: #283420; min-height: 100vh; display: flex; flex-direction: column; -webkit-font-smoothing: antialiased; }
+  ::selection { background: #EC8E90; color: #2E3C24; }
+  .back-link { font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: 1px; text-transform: lowercase; color: #8a8578; text-decoration: none; transition: color .22s; }
+  .back-link:hover { color: #C45F61; }
+
+  /* board */
+  .lm-board {
+    display: grid; grid-template-columns: repeat(5, 1fr); gap: clamp(8px, 1.4vw, 14px);
+    max-width: 1180px; width: 100%; margin: 0 auto;
+    padding: 8px clamp(24px,7vw,84px) 0;
+  }
+  .lm-pad {
+    position: relative; aspect-ratio: 1 / 1;
+    display: flex; align-items: center; justify-content: center; text-align: center;
+    padding: 10px; border: 1px solid #e2dcd4; border-radius: 4px;
+    background: #F6F3ED; color: #2E3C24; cursor: pointer;
+    font-family: 'Hanken Grotesk', sans-serif; font-weight: 600;
+    font-size: clamp(10px, 1.25vw, 16px); line-height: 1.2; letter-spacing: .1px;
+    transition: transform .12s cubic-bezier(.2,.7,.2,1), box-shadow .2s, background .2s, border-color .2s;
+    overflow: hidden; -webkit-tap-highlight-color: transparent;
+  }
+  /* accent bar driven by --accent set per pad */
+  .lm-pad::before {
+    content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
+    background: var(--accent, #C45F61); opacity: .85; transition: width .18s, opacity .2s;
+  }
+  .lm-pad:hover { border-color: var(--accent, #C45F61); transform: translateY(-2px); box-shadow: 0 6px 18px rgba(40,52,32,.08); }
+  .lm-pad:hover::before { width: 6px; opacity: 1; }
+  .lm-pad:active { transform: translateY(0) scale(.97); }
+  .lm-pad:focus-visible { outline: 2px solid var(--accent, #C45F61); outline-offset: 2px; }
+  .lm-pad.playing { background: var(--accent, #C45F61); color: #F6F3ED; border-color: var(--accent, #C45F61); }
+  .lm-pad.playing::before { width: 100%; opacity: .18; background: #fff; }
+
+  /* empty / not-yet-supplied pads */
+  .lm-pad.empty {
+    background: transparent; border-style: dashed; border-color: #ddd7cc;
+    color: #b3ab9c; cursor: default; font-family: 'Space Mono', monospace;
+    font-weight: 400; font-size: 18px; letter-spacing: 1px;
+  }
+  .lm-pad.empty::before { display: none; }
+  .lm-pad.empty:hover { transform: none; box-shadow: none; border-color: #ddd7cc; }
+
+  /* missing-audio flag (label present, file 404) */
+  .lm-pad.err { opacity: .55; }
+  .lm-pad.err::after {
+    content: "no clip"; position: absolute; bottom: 6px; left: 0; right: 0;
+    font-family: 'Space Mono', monospace; font-size: 8px; letter-spacing: 1px;
+    text-transform: uppercase; color: #C45F61;
+  }
+
+  /* ── audio controls (volume · layer/solo · stop), in line with the header ── */
+  .audio-ctl { display: flex; align-items: center; gap: 14px; flex: none; }
+  .audio-volwrap { display: flex; align-items: center; gap: 8px; }
+  .audio-ico { font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; color: #8a8578; }
+  .audio-vol { -webkit-appearance: none; appearance: none; width: 84px; height: 2px; background: #cfc7bb; border-radius: 1px; outline: none; cursor: pointer; }
+  .audio-vol::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; border-radius: 50%; background: #C45F61; cursor: pointer; }
+  .audio-vol::-moz-range-thumb { width: 12px; height: 12px; border: none; border-radius: 50%; background: #C45F61; cursor: pointer; }
+  .audio-mode {
+    font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase;
+    color: #8a8578; background: transparent; border: 1px solid #cfc7bb; border-radius: 999px;
+    padding: 6px 12px; cursor: pointer; transition: border-color .2s, color .2s; white-space: nowrap;
+  }
+  .audio-mode:hover { border-color: #C45F61; color: #C45F61; }
+  .audio-mode.solo { border-color: #6F7C2F; color: #6F7C2F; }
+  @media (max-width: 560px) {
+    .vn-title-row { flex-wrap: wrap; }
+    .audio-ico { display: none; }
+    .audio-vol { width: 64px; }
+  }
+</style>
+</head>
+<body>
+<div style="display:flex;flex-direction:column;min-height:100vh;">
+
+  <!-- top bar -->
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:28px clamp(24px,7vw,84px) 18px;border-bottom:1px solid #e2dcd4;">
+    <a href="index.html" class="back-link">← verbandnoun.io</a>
+    <span style="font-family:'Space Mono',monospace;font-size:11px;letter-spacing:1px;color:#8a8578;text-transform:uppercase;">07 · Luscious</span>
+  </div>
+
+  <!-- header -->
+  <div style="padding:56px clamp(24px,7vw,84px) 32px;">
+    <div class="vn-title-row" style="display:flex;justify-content:space-between;align-items:flex-start;gap:24px;">
+      <h1 style="font-family:'Instrument Serif',serif;font-weight:400;font-size:clamp(64px,13vw,160px);line-height:.84;letter-spacing:-1px;color:#2E3C24;">Luscious</h1>
+      <div class="audio-ctl" id="audio-ctl">
+        <button id="lm-mode" class="audio-mode" type="button" aria-pressed="false" title="Layer: taps overlap. Click for Solo (one at a time).">layer</button>
+        <span class="audio-volwrap">
+          <span class="audio-ico">vol</span>
+          <input type="range" id="lm-vol" class="audio-vol" min="0" max="100" value="80" aria-label="volume">
+        </span>
+      </div>
+    </div>
+    <p style="font-family:'Hanken Grotesk',sans-serif;font-weight:400;font-size:20px;color:#C45F61;margin-top:20px;line-height:1.5;">A soundboard for the catch phrases inspired by Luscious Massacr. Tap a pad.</p>
+  </div>
+
+  <!-- 5×5 board -->
+  <div class="lm-board" id="board"></div>
+
+  <!-- footer -->
+  <div style="margin-top:auto;padding:48px clamp(24px,7vw,84px) 28px;border-top:1px solid #e2dcd4;display:flex;justify-content:space-between;align-items:baseline;">
+    <a href="index.html" class="back-link">← back to index</a>
+    <span style="font-family:'Space Mono',monospace;font-size:11px;letter-spacing:2px;color:#8a8578;">verbandnoun<span style="color:#C45F61;">.io</span></span>
+  </div>
+
+</div>
+
+<script>
+(function () {
+  /* ── Catch phrases ─────────────────────────────────────────────────────
+     One entry per pad, in grid order (left→right, top→bottom).
+     To add a clip: drop the audio file in assets/sounds/ and point `file`
+     at it. Leave `file` empty ('') to show an inert pad. Set both label and
+     file to '' for a blank dashed placeholder.
+     Web-friendly formats: .m4a, .mp3, or .ogg.                            */
+  const PHRASES = [
+    { label: 'Nao!',          file: 'assets/sounds/luscious-nao.m4a' },
+    { label: 'Brick!',        file: 'assets/sounds/luscious-brick.m4a' },
+    { label: "Don't do it!",  file: 'assets/sounds/luscious-dont-do-it.m4a' },
+    { label: 'Little girl!',  file: 'assets/sounds/luscious-little-girl.m4a' },
+    { label: 'Transvestigate', file: 'assets/sounds/luscious-transvestigate.m4a' },
+    { label: 'Heeeee!',       file: 'assets/sounds/luscious-heeeee.m4a' },
+    { label: 'Creature!',     file: 'assets/sounds/luscious-creature.m4a' },
+    { label: 'The gentle!',   file: 'assets/sounds/luscious-the-gentle.m4a' },
+    { label: 'F-A-G!',        file: 'assets/sounds/luscious-fag.m4a' },
+    { label: "That's not a doll, that's a dog", file: 'assets/sounds/luscious-thats-not-a-doll-thats-a-dog.m4a' },
+    { label: "Don't you do it", file: 'assets/sounds/luscious-dont-you-do-it.m4a' },
+    { label: 'Shade',         file: 'assets/sounds/luscious-shade.m4a' },
+    { label: 'Woman!',        file: 'assets/sounds/luscious-woman.m4a' },
+    { label: 'Bitter!',       file: 'assets/sounds/luscious-bitter.m4a' },
+    { label: 'Terror!',       file: 'assets/sounds/luscious-terror.m4a' },
+    { label: "Don't do it little girl!", file: 'assets/sounds/luscious-dont-do-it-little-girl.m4a' },
+    { label: 'Booger!',       file: 'assets/sounds/luscious-booger.m4a' },
+    { label: 'Busted brick!', file: 'assets/sounds/luscious-busted-brick.m4a' },
+    { label: 'Crossdresser!', file: 'assets/sounds/luscious-crossdresser.m4a' },
+    { label: 'Rough!',        file: 'assets/sounds/luscious-rough.m4a' },
+    { label: 'D-O-L-L',       file: 'assets/sounds/luscious-doll-spelled.m4a' },
+    { label: 'D-O-G',         file: 'assets/sounds/luscious-dog-spelled.m4a' },
+    { label: 'Busted!',       file: 'assets/sounds/luscious-busted.m4a' },
+    { label: 'Oh honey no',   file: 'assets/sounds/luscious-oh-honey-no.m4a' },
+    { label: 'Shamerica',     file: 'assets/sounds/luscious-shamerica.m4a' },
+  ];
+
+  // brand accent palette, rotated across the filled pads
+  const ACCENTS = ['#C45F61', '#6F7C2F', '#3F5A73', '#EC8E90', '#564A54'];
+
+  const board = document.getElementById('board');
+  const cache = {};               // file -> HTMLAudioElement
+  let accentIdx = 0;
+
+  // ── audio control state ──
+  const volEl  = document.getElementById('lm-vol');
+  const modeEl = document.getElementById('lm-mode');
+  let masterVol = (+volEl.value) / 100;
+  let solo = false;               // false = layer (overlap), true = solo (one at a time)
+
+  function stopAll() {
+    Object.values(cache).forEach(a => { a.pause(); a.currentTime = 0; });
+    document.querySelectorAll('.lm-pad.playing').forEach(p => p.classList.remove('playing'));
+  }
+
+  volEl.addEventListener('input', () => {
+    masterVol = (+volEl.value) / 100;
+    Object.values(cache).forEach(a => { a.volume = masterVol; });
+  });
+  modeEl.addEventListener('click', () => {
+    solo = !solo;
+    modeEl.textContent = solo ? 'solo' : 'layer';
+    modeEl.classList.toggle('solo', solo);
+    modeEl.setAttribute('aria-pressed', String(solo));
+    if (solo) stopAll();
+  });
+
+  PHRASES.slice(0, 25).forEach((p, i) => {
+    const pad = document.createElement('button');
+    pad.type = 'button';
+
+    if (!p.label) {
+      pad.className = 'lm-pad empty';
+      pad.textContent = '+';
+      pad.disabled = true;
+      board.appendChild(pad);
+      return;
+    }
+
+    pad.className = 'lm-pad';
+    pad.style.setProperty('--accent', ACCENTS[accentIdx++ % ACCENTS.length]);
+    pad.innerHTML = '<span class="lm-label"></span>';
+    pad.querySelector('.lm-label').textContent = p.label;
+
+    if (!p.file) { pad.classList.add('err'); pad.disabled = true; }
+    else pad.addEventListener('click', () => play(p.file, pad));
+
+    board.appendChild(pad);
+  });
+
+  function play(file, pad) {
+    if (solo) stopAll();
+    let a = cache[file];
+    if (!a) { a = cache[file] = new Audio(file); }
+    a.currentTime = 0;
+    a.volume = masterVol;
+    pad.classList.remove('err');
+    a.play().then(() => {
+      pad.classList.add('playing');
+    }).catch(() => {
+      // file missing or blocked — flag it, don't throw
+      pad.classList.add('err');
+      pad.classList.remove('playing');
+    });
+    a.onended = () => pad.classList.remove('playing');
+  }
+})();
+</script>
+</body>
+</html>
