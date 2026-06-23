@@ -98,14 +98,26 @@
     #ctrl-body { grid-template-columns: 1fr; }
     .ctrl-label { width: 56px; font-size: 9px; }
   }
+
+  /* hamburger menu */
+  .vn-burger { display:flex; flex-direction:column; justify-content:center; gap:5px; width:32px; height:32px; padding:6px 4px; margin-left:-4px; background:none; border:none; cursor:pointer; flex:none; }
+  .vn-burger span { display:block; height:2px; width:100%; background:#EFEBE6; border-radius:2px; transition:transform .25s, opacity .2s, background .2s; }
+  .vn-burger:hover span { background:#EC8E90; }
+  .vn-burger.open span:nth-child(1) { transform:translateY(7px) rotate(45deg); }
+  .vn-burger.open span:nth-child(2) { opacity:0; }
+  .vn-burger.open span:nth-child(3) { transform:translateY(-7px) rotate(-45deg); }
+  .vn-menu { position:absolute; top:calc(100% + 8px); left:clamp(24px,7vw,84px); z-index:200; min-width:230px; background:#F6F3ED; border:1px solid #e2dcd4; border-radius:8px; box-shadow:0 16px 44px rgba(40,52,32,.18); padding:8px; display:flex; flex-direction:column; }
+  .vn-menu[hidden] { display:none; }
+  .vn-menu a { font-family:'Instrument Serif',serif; font-size:21px; line-height:1.1; color:#2E3C24; text-decoration:none; padding:9px 16px; border-radius:6px; transition:background .18s, color .18s; }
+  .vn-menu a:hover { background:#EFEBE6; color:#C45F61; }
 </style>
 </head>
 <body>
 <div style="display:flex;flex-direction:column;min-height:100vh;padding-bottom:36px;">
 
   <!-- top bar -->
-  <div style="display:flex;align-items:center;justify-content:space-between;gap:18px;padding:26px clamp(24px,7vw,84px);background:#2E3C24;border-bottom:1px solid #44523a;">
-    <a href="index.html" style="font-family:'Instrument Serif',serif;font-size:22px;line-height:1;color:#EFEBE6;text-decoration:none;"><span style="font-style:italic;">Verb</span> <span style="color:#EC8E90;">and</span> Noun</a>
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:18px;padding:26px clamp(24px,7vw,84px);background:#2E3C24;border-bottom:1px solid #44523a;position:relative;">
+    <div style="display:flex;align-items:center;gap:16px;"><button class="vn-burger" type="button" aria-label="Menu" aria-controls="vn-menu" aria-expanded="false"><span></span><span></span><span></span></button><a href="index.html" style="font-family:'Instrument Serif',serif;font-size:33px;line-height:1;color:#EFEBE6;text-decoration:none;"><span style="font-style:italic;">Verb</span> <span style="color:#EC8E90;">and</span> Noun</a></div><nav id="vn-menu" class="vn-menu" hidden><a href="pct.html">PCT &rsquo;27</a><a href="photo.html">Photo</a><a href="noise.html">Noise</a><a href="invoice.html">Invoices</a><a href="meditation.html">Meditation</a><a href="tonys.html">Tonys</a><a href="luscious.html">Luscious</a><a href="illusion.html">Illusion of Choice</a></nav>
   </div>
 
   <!-- interactive surface: translucent canvas fills the area; text rides on top -->
@@ -280,8 +292,11 @@
   canvas.addEventListener('pointercancel', endPointer);
   canvas.addEventListener('pointerdown', e => {
     const r = canvas.getBoundingClientRect();
-    ripples.push({ x: e.clientX - r.left, y: e.clientY - r.top, t: 0 });
+    mx = e.clientX - r.left; my = e.clientY - r.top;
+    ripples.push({ x: mx, y: my, t: 0 });
     firstInteraction();   // on touch there's no move-before-press; pointerdown is a valid gesture to unlock audio
+    if (audioCtx && audioCtx.state === 'suspended' && audioCtx.resume) audioCtx.resume(); // re-unlock if it was suspended
+    updateAudio(mx / W, my / H);   // a touch should sound at once, not only while dragging
   });
 
   // ── render ──
@@ -357,6 +372,7 @@
   function startAudio() {
     if (started) return;
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended' && audioCtx.resume) audioCtx.resume(); // iOS/mobile: unlock within the gesture
 
     osc = audioCtx.createOscillator();
     osc.type = P.wave;
@@ -428,6 +444,16 @@
   window.addEventListener('resize', resize);
   resize();
   render();
+})();
+</script>
+<script>
+(function () {
+  var b = document.querySelector('.vn-burger'), m = document.getElementById('vn-menu');
+  if (!b || !m) return;
+  function set(open) { m.hidden = !open; b.classList.toggle('open', open); b.setAttribute('aria-expanded', String(open)); }
+  b.addEventListener('click', function (e) { e.stopPropagation(); set(m.hidden); });
+  document.addEventListener('click', function (e) { if (!m.hidden && !b.contains(e.target) && !m.contains(e.target)) set(false); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') set(false); });
 })();
 </script>
 </body>

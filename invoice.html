@@ -40,7 +40,7 @@
   .back-link:hover { color: var(--accent); }
   .mono { font-family: 'Space Mono', monospace; }
   .label { font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); }
-  .topbar { display:flex; align-items:center; justify-content:space-between; gap:14px; padding:24px clamp(20px,7vw,84px) 16px; background:#2E3C24; border-bottom:1px solid #44523a; }
+  .topbar { display:flex; align-items:center; justify-content:space-between; gap:14px; padding:24px clamp(20px,7vw,84px) 16px; background:#2E3C24; border-bottom:1px solid #44523a; position:relative; }
   .topbar .icon-btn { color:#cdd8c4; border-color:#5b6a4f; }
   .topbar .icon-btn:hover { color:#EC8E90; border-color:#EC8E90; }
   .icon-btn { background:none; border:1px solid var(--field-bd); color:var(--muted); border-radius:4px; padding:5px 10px; cursor:pointer; font-family:'Space Mono',monospace; font-size:11px; letter-spacing:.5px; transition:color .2s, border-color .2s; }
@@ -114,14 +114,25 @@
   .banner { background:var(--warn-bg); border:1px solid var(--warn-bd); border-radius:4px; padding:16px 18px; margin-bottom:24px; font-size:14px; color:var(--warn-t); }
   .banner code { font-family:'Space Mono',monospace; font-size:12.5px; background:rgba(0,0,0,.07); padding:1px 5px; border-radius:3px; }
   @media (max-width:640px){ th.hide-sm, td.hide-sm { display:none; } }
+
+  /* hamburger menu */
+  .vn-burger { display:flex; flex-direction:column; justify-content:center; gap:5px; width:32px; height:32px; padding:6px 4px; margin-left:-4px; background:none; border:none; cursor:pointer; flex:none; }
+  .vn-burger span { display:block; height:2px; width:100%; background:#EFEBE6; border-radius:2px; transition:transform .25s, opacity .2s, background .2s; }
+  .vn-burger:hover span { background:#EC8E90; }
+  .vn-burger.open span:nth-child(1) { transform:translateY(7px) rotate(45deg); }
+  .vn-burger.open span:nth-child(2) { opacity:0; }
+  .vn-burger.open span:nth-child(3) { transform:translateY(-7px) rotate(-45deg); }
+  .vn-menu { position:absolute; top:calc(100% + 8px); left:clamp(24px,7vw,84px); z-index:200; min-width:230px; background:#F6F3ED; border:1px solid #e2dcd4; border-radius:8px; box-shadow:0 16px 44px rgba(40,52,32,.18); padding:8px; display:flex; flex-direction:column; }
+  .vn-menu[hidden] { display:none; }
+  .vn-menu a { font-family:'Instrument Serif',serif; font-size:21px; line-height:1.1; color:#2E3C24; text-decoration:none; padding:9px 16px; border-radius:6px; transition:background .18s, color .18s; }
+  .vn-menu a:hover { background:#EFEBE6; color:#C45F61; }
 </style>
 </head>
 <body>
   <div class="topbar">
-    <a href="index.html" style="font-family:'Instrument Serif',serif;font-size:22px;line-height:1;color:#EFEBE6;text-decoration:none;"><span style="font-style:italic;">Verb</span> <span style="color:#EC8E90;">and</span> Noun</a>
+    <div style="display:flex;align-items:center;gap:16px;"><button class="vn-burger" type="button" aria-label="Menu" aria-controls="vn-menu" aria-expanded="false"><span></span><span></span><span></span></button><a href="index.html" style="font-family:'Instrument Serif',serif;font-size:33px;line-height:1;color:#EFEBE6;text-decoration:none;"><span style="font-style:italic;">Verb</span> <span style="color:#EC8E90;">and</span> Noun</a></div><nav id="vn-menu" class="vn-menu" hidden><a href="pct.html">PCT &rsquo;27</a><a href="photo.html">Photo</a><a href="noise.html">Noise</a><a href="invoice.html">Invoices</a><a href="meditation.html">Meditation</a><a href="tonys.html">Tonys</a><a href="luscious.html">Luscious</a><a href="illusion.html">Illusion of Choice</a></nav>
     <div style="display:flex;align-items:center;gap:12px;">
       <button id="theme-btn" class="icon-btn" title="Toggle dark mode">◐</button>
-      <span class="mono" style="font-size:11px;letter-spacing:1px;color:#9aa890;text-transform:uppercase;">04 · Invoice</span>
     </div>
   </div>
 
@@ -1037,6 +1048,16 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
   navigator.serviceWorker.register('/sw.js').catch(() => {});
 }
 initAuth();
+</script>
+<script>
+(function () {
+  var b = document.querySelector('.vn-burger'), m = document.getElementById('vn-menu');
+  if (!b || !m) return;
+  function set(open) { m.hidden = !open; b.classList.toggle('open', open); b.setAttribute('aria-expanded', String(open)); }
+  b.addEventListener('click', function (e) { e.stopPropagation(); set(m.hidden); });
+  document.addEventListener('click', function (e) { if (!m.hidden && !b.contains(e.target) && !m.contains(e.target)) set(false); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') set(false); });
+})();
 </script>
 </body>
 </html>

@@ -55,7 +55,7 @@
   .navlink.active { color: #283420; border-bottom-color: #C45F61; }
 
   /* CHAPBAR */
-  #chapbar { position: fixed; top: 55px; left: 0; right: 0; z-index: 45; background: rgba(239,235,230,.93); backdrop-filter: blur(8px); border-bottom: 1px solid #e2dcd4; transform: translateY(-120%); transition: transform .3s cubic-bezier(.2,.7,.2,1); }
+  #chapbar { position: fixed; top: 3px; left: 0; right: 0; z-index: 45; background: rgba(239,235,230,.93); backdrop-filter: blur(8px); border-bottom: 1px solid #e2dcd4; transform: translateY(-120%); transition: transform .3s cubic-bezier(.2,.7,.2,1); }
   #chapbar .inner { max-width: 1280px; margin: 0 auto; padding: 8px 26px; display: flex; align-items: center; justify-content: space-between; gap: 14px; }
   #chapbar-prog { height: 2px; width: 0%; transition: width .2s; }
 
@@ -115,18 +115,27 @@
     .tahoe-stat-grid { grid-template-columns: repeat(2,1fr); }
     .maprow-pad { width: 0; }
   }
+
+  /* hamburger menu */
+  .vn-burger { display:flex; flex-direction:column; justify-content:center; gap:5px; width:32px; height:32px; padding:6px 4px; margin-left:-4px; background:none; border:none; cursor:pointer; flex:none; }
+  .vn-burger span { display:block; height:2px; width:100%; background:#EFEBE6; border-radius:2px; transition:transform .25s, opacity .2s, background .2s; }
+  .vn-burger:hover span { background:#EC8E90; }
+  .vn-burger.open span:nth-child(1) { transform:translateY(7px) rotate(45deg); }
+  .vn-burger.open span:nth-child(2) { opacity:0; }
+  .vn-burger.open span:nth-child(3) { transform:translateY(-7px) rotate(-45deg); }
+  .vn-menu { position:absolute; top:calc(100% + 8px); left:clamp(24px,7vw,84px); z-index:200; min-width:230px; background:#F6F3ED; border:1px solid #e2dcd4; border-radius:8px; box-shadow:0 16px 44px rgba(40,52,32,.18); padding:8px; display:flex; flex-direction:column; }
+  .vn-menu[hidden] { display:none; }
+  .vn-menu a { font-family:'Instrument Serif',serif; font-size:21px; line-height:1.1; color:#2E3C24; text-decoration:none; padding:9px 16px; border-radius:6px; transition:background .18s, color .18s; }
+  .vn-menu a:hover { background:#EFEBE6; color:#C45F61; }
 </style>
 </head>
 <body>
 
 <div id="progress-bar"><div id="progress-fill"></div></div>
 
-<nav id="site-nav">
-  <div class="inner">
-    <a href="index.html" style="font-family:'Space Mono',monospace;font-size:11px;letter-spacing:1px;text-transform:lowercase;color:#8a8578;text-decoration:none;">← verbandnoun.io</a>
-    <a href="#top" style="font-family:'Space Mono',monospace;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#283420;text-decoration:none;font-weight:700;">PCT · 2027</a>
-  </div>
-</nav>
+<div style="display:flex;align-items:center;justify-content:space-between;gap:18px;padding:26px clamp(24px,7vw,84px);background:#2E3C24;border-bottom:1px solid #44523a;position:relative;">
+  <div style="display:flex;align-items:center;gap:16px;"><button class="vn-burger" type="button" aria-label="Menu" aria-controls="vn-menu" aria-expanded="false"><span></span><span></span><span></span></button><a href="index.html" style="font-family:'Instrument Serif',serif;font-size:33px;line-height:1;color:#EFEBE6;text-decoration:none;"><span style="font-style:italic;">Verb</span> <span style="color:#EC8E90;">and</span> Noun</a></div><nav id="vn-menu" class="vn-menu" hidden><a href="pct.html">PCT &rsquo;27</a><a href="photo.html">Photo</a><a href="noise.html">Noise</a><a href="invoice.html">Invoices</a><a href="meditation.html">Meditation</a><a href="tonys.html">Tonys</a><a href="luscious.html">Luscious</a><a href="illusion.html">Illusion of Choice</a></nav>
+</div>
 
 <div id="chapbar">
   <div class="inner">
@@ -254,7 +263,7 @@ const navItems = [
 
 /* ─── HERO ─── */
 function buildHero() {
-  const wrap = div('', { id:'top', maxWidth:'1180px', margin:'0 auto', padding:'128px 7vw 0' });
+  const wrap = div('', { id:'top', maxWidth:'1180px', margin:'0 auto', padding:'56px 7vw 0' });
   wrap.append(
     div('', { display:'flex', justifyContent:'space-between', alignItems:'baseline', fontFamily:"'Space Mono',monospace", fontSize:'12px', letterSpacing:'3px', textTransform:'uppercase', color:'#C45F61', borderBottom:'1px solid #283420', paddingBottom:'14px' },
       span('A Northbound Thru-Hike')
@@ -1093,6 +1102,16 @@ window.addEventListener('resize', () => {
 onScroll(); observeReveals(); buildCharts(); buildStrip(); drawSpine();
 [120,600,1400,2800].forEach(t => setTimeout(() => { observeReveals(); buildCharts(); buildStrip(); drawSpine(); onScroll(); }, t));
 
+})();
+</script>
+<script>
+(function () {
+  var b = document.querySelector('.vn-burger'), m = document.getElementById('vn-menu');
+  if (!b || !m) return;
+  function set(open) { m.hidden = !open; b.classList.toggle('open', open); b.setAttribute('aria-expanded', String(open)); }
+  b.addEventListener('click', function (e) { e.stopPropagation(); set(m.hidden); });
+  document.addEventListener('click', function (e) { if (!m.hidden && !b.contains(e.target) && !m.contains(e.target)) set(false); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') set(false); });
 })();
 </script>
 </body>
